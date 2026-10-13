@@ -24,7 +24,7 @@ Aperçu local : `python3 build.py && python3 -m http.server` puis http://localho
 - **Typographie** : Outfit (titres en 200–300, texte en 400), IBM Plex Mono pour libellés et données. Noms scientifiques toujours en italique.
 - **Le voronoï est le système** : cellule = espèce, veine = relation, graine = donnée, jonction = connexion.
 - **Échelles par densité** : macro (40–120 cellules), méso (8–20), micro (3–12, signature d'espèce), nano (1–3, composant).
-- **Divisions** : 2 et 3 cellules en coupes **droites** et parallèles ; 6 et plus en voronoï avec **une cellule dominante** qui porte le texte (espace typographique).
+- **Divisions** : 2 et 3 cellules en coupes **droites** et parallèles ; 6 et plus en voronoï avec **une cellule dominante** qui porte le texte (espace typographique). Exception : les cartes Faune / Flore de l'accueil sont un voronoï de 3 cellules (titre, moyenne, petite case pour la flèche).
 - **Arrondis adaptatifs** : rayon ≤ 35 % du rayon intérieur de la cellule ; jamais de pointe, jamais de cercle.
 - **Règnes** : Faune = angles vifs, cobalt, étiquettes parallélogramme ; Flore = galets, lagon, étiquettes pilule.
 - **Mouvement** : anticipation, élan, dépassement, retour amorti (ressorts). Les cellules réagissent au curseur (cartes, en-têtes, carte des espèces). Respecter `prefers-reduced-motion`.
