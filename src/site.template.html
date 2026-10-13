@@ -3,7 +3,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: système voronoï BANBIOM — aplats, divisions (2/3 coupes droites, n cellules avec cellule dominante), carte des espèces en accueil (veines) */
+/* Layout: système voronoï BANBIOM — aplats, divisions (2/3 coupes droites, n cellules avec cellule dominante), carte des espèces en accueil (verre dépoli sur dégradé) */
 :root{
   --paper:#e8f1ee;--surface:#f7fbf9;--surface-2:#dceae6;--line:#c3d8d3;--ink:#0a2a32;--muted:#48676d;
   --abyss:#0a2f3b;--abyss-2:#124858;--block-deep:#0a2f3b;--cobalt:#2f5bd8;--cobalt-2:#1c3c9e;--mist:#b4c8f8;
@@ -71,18 +71,42 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (max-width:640px){.dock-logo span{display:none}.dock-links a{padding:9px 10px;font-size:13.5px}}
 
 /* carte des espèces (accueil) : veines sur aplat */
-.relief{position:relative;height:100vh;height:100svh;overflow:hidden;color:var(--on-dark);background:#052430}
+.relief{position:relative;height:100vh;height:100svh;overflow:hidden;color:var(--on-dark);background:#06222c}
+/* fond : dégradé vif et lent ; verre : le même dégradé, plus diffus et plus clair, découpé aux cellules */
+.aq{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.aq i{position:absolute;inset:-12%;display:block;animation:aq-drift 38s ease-in-out infinite alternate}
+.aq-bg i{background:
+  radial-gradient(ellipse 22% 30% at 30% 20%,#04161d 0%,rgba(4,22,29,0) 100%),
+  radial-gradient(ellipse 26% 22% at 80% 22%,#4d7cff 0%,rgba(47,91,216,0) 100%),
+  radial-gradient(ellipse 14% 26% at 94% 48%,#b4c8f8 0%,rgba(180,200,248,0) 100%),
+  radial-gradient(ellipse 24% 20% at 66% 72%,#2ee0c9 0%,rgba(23,179,163,0) 100%),
+  radial-gradient(ellipse 12% 16% at 84% 80%,#d6fff7 0%,rgba(163,232,222,0) 100%),
+  radial-gradient(ellipse 30% 26% at 46% 50%,#2a4fc0 0%,rgba(28,60,158,0) 100%),
+  radial-gradient(ellipse 34% 30% at 14% 86%,#0e8078 0%,rgba(11,107,102,0) 100%),
+  linear-gradient(115deg,#04161d 0%,#0a3442 42%,#1d4f7a 100%)}
+.aq-glass{clip-path:url(#mapClip)}
+.aq-glass i{background:
+  linear-gradient(rgba(232,241,238,0.09),rgba(232,241,238,0.09)),
+  radial-gradient(ellipse 35% 48% at 30% 20%,#04161d 0%,rgba(4,22,29,0) 100%),
+  radial-gradient(ellipse 42% 35% at 80% 22%,#4d7cff 0%,rgba(47,91,216,0) 100%),
+  radial-gradient(ellipse 22% 42% at 94% 48%,#b4c8f8 0%,rgba(180,200,248,0) 100%),
+  radial-gradient(ellipse 38% 32% at 66% 72%,#2ee0c9 0%,rgba(23,179,163,0) 100%),
+  radial-gradient(ellipse 19% 26% at 84% 80%,#d6fff7 0%,rgba(163,232,222,0) 100%),
+  radial-gradient(ellipse 48% 42% at 46% 50%,#2a4fc0 0%,rgba(28,60,158,0) 100%),
+  radial-gradient(ellipse 54% 48% at 14% 86%,#0e8078 0%,rgba(11,107,102,0) 100%),
+  linear-gradient(115deg,#04161d 0%,#0a3442 42%,#1d4f7a 100%)}
+@keyframes aq-drift{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-3%,2%,0) scale(1.05)}100%{transform:translate3d(2%,-2%,0) scale(1.02)}}
+.relief::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.16;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 .relief #reliefSvg{position:absolute;inset:0;width:100%;height:100%;display:block}
-.relief #reliefSvg{-webkit-mask-image:radial-gradient(ellipse 48% 42% at 30% 22%,transparent 35%,#000 100%);mask-image:radial-gradient(ellipse 48% 42% at 30% 22%,transparent 35%,#000 100%)}
-.relief .vein{fill:none;stroke:rgba(163,232,222,.22);stroke-width:1;vector-effect:non-scaling-stroke}
-.relief .seed circle{fill:var(--foam)}
+.relief .vein{fill:none;stroke:rgba(232,241,238,.5);stroke-width:1;vector-effect:non-scaling-stroke}
+.relief .hov path{opacity:.55}
+.relief .seed circle{fill:var(--on-dark)}
 .map-labels{position:absolute;inset:0;pointer-events:none;z-index:1}
 .map-lab{position:absolute;left:0;top:0;display:grid;justify-items:center;gap:6px;text-align:center;white-space:nowrap;color:var(--on-dark)}
 .map-lab b{font:500 13px/1 var(--font-mono);letter-spacing:.06em}
 .map-lab em{font:400 15px/1.1 var(--font-display);font-style:italic;letter-spacing:-.005em;opacity:.82}
 .map-lab.on em{opacity:1}
-.relief .map-lab b{color:var(--foam)}
-.relief .map-lab.on b{color:var(--on-dark)}
 @media (max-width:760px){.map-lab em{display:none}}
 .relief .head,.relief .foot{z-index:2;pointer-events:none}.relief .legend{pointer-events:none}
 .relief .head{position:absolute;left:0;right:0;top:0;pointer-events:none}
@@ -276,7 +300,7 @@ footer{padding-block:28px 110px;color:var(--muted);font-size:13px;display:flex;f
 <!-- ============ ACCUEIL ============ -->
 <div class="view" id="view-catalogue">
   <section class="relief" id="relief" aria-label="La carte des espèces : chaque cellule numérotée est une espèce">
-    <svg id="reliefSvg" aria-hidden="true"></svg><div class="map-labels" id="reliefLabels" aria-hidden="true"></div>
+    <div class="aq aq-bg" aria-hidden="true"><i></i></div><div class="aq aq-glass" aria-hidden="true"><i></i></div><svg id="reliefSvg" aria-hidden="true"></svg><div class="map-labels" id="reliefLabels" aria-hidden="true"></div>
     <div class="head"><div class="wrap">
       <span class="label">BANBIOM · Banque de biodiversité marine</span>
       <h1 class="split">La base, <em>cellule</em> par <em>cellule.</em></h1>
@@ -599,7 +623,7 @@ function sphereLogo(svg,n){
   svg.innerHTML=`<defs><clipPath id="${id}"><circle cx="50" cy="50" r="49"/></clipPath></defs><g clip-path="url(#${id})" fill="currentColor">${d}</g>`;
 }
 let R3=null;
-/* carte des espèces : peu de grandes cellules, lignes seules (veines) sur aplat abysse ; chaque cellule numérotée est une fiche */
+/* carte des espèces : peu de grandes cellules en verre dépoli sur un fond en dégradé ; chaque cellule numérotée est une fiche */
 function initMap(){
   const host=$("#relief"), svg=$("#reliefSvg"), labs=$("#reliefLabels"), peek=$("#peek");
   let pts=[], hovered=-1, m=null, raf=0, W=0, H=0, visible=true;
@@ -611,7 +635,7 @@ function initMap(){
     pts=[];
     sorted.forEach(sp=>{ let best=null; for(let t=0;t<600;t++){ const x=x0+r()*(x1-x0), y=y0+r()*(y1-y0); if(pts.every(p=>Math.hypot(p.hx-x,p.hy-y)>dist)){best=[x,y];break;} if(!best) best=[x,y]; }
       pts.push({hx:best[0],hy:best[1],x:best[0],y:best[1],vx:0,vy:0,w:(dist*.32)**2,sp}); });
-    const fd=narrow?Math.max(110,W*.3):Math.max(170,Math.min(W,H)*.24); let tries=0;
+    const fd=narrow?Math.max(150,W*.42):Math.max(240,Math.min(W,H)*.32); let tries=0;
     while(tries++<6000){ const x=-40+r()*(W+80), y=-40+r()*(H+80); if(pts.every(p=>Math.hypot(p.hx-x,p.hy-y)>(p.sp?dist*.75:fd))) pts.push({hx:x,hy:y,x,y,vx:0,vy:0,w:0}); }
     let k=0; pts.forEach(p=>{ if(p.sp) p.idx=++k; });
     labs.innerHTML=pts.filter(p=>p.sp).map(p=>`<span class="map-lab" data-regne="${p.sp.regne==="Animal"?"Animal":"Végétal"}"><b>${String(p.idx).padStart(2,"0")}</b><em>${esc(shortName(p.sp.nom_scientifique))}</em></span>`).join("");
@@ -626,12 +650,11 @@ function initMap(){
     pts.forEach((p,i)=>{ if(!p.el) return; p.el.style.transform=`translate(${p.x.toFixed(1)}px,${p.y.toFixed(1)}px) translate(-50%,-50%)`; p.el.classList.toggle("on",i===hovered); });
   }
   function drawVeins(){
-    const cs=B._cells(pts,W,H,()=>0,0); let d="", f="", g="";
-    cs.forEach((poly,i)=>{ if(poly.length<3) return; d+="M"+poly.map(v=>v[0].toFixed(1)+" "+v[1].toFixed(1)).join("L")+"Z"; });
-    if(hovered>=0){ const p=pts[hovered], A=p.sp.regne==="Animal", poly=B._cells([p,...pts.filter((q,j)=>j!==hovered)],W,H,()=>10,0)[0], path=B._traceSVG(poly,A?2:24);
-      if(path) f=`<path d="${path}" fill="${A?"var(--cobalt)":"var(--lagoon)"}"/>`; }
+    const cs=B._cells(pts,W,H,()=>16,0); let d="", f="", g="";
+    cs.forEach((poly,i)=>{ const p=pts[i], path=B._traceSVG(poly,p.sp?(p.sp.regne==="Animal"?6:30):26); if(!path) return; d+=path;
+      if(i===hovered) f=`<path d="${path}" fill="${p.sp.regne==="Animal"?"var(--cobalt)":"var(--lagoon)"}"/>`; });
     pts.forEach((p,i)=>{ if(p.sp&&i!==hovered) g+=`<circle cx="${p.x.toFixed(1)}" cy="${(p.y-22).toFixed(1)}" r="2.5"/>`; });
-    svg.innerHTML=`${f}<path class="vein" d="${d}"/><g class="seed">${g}</g>`;
+    svg.innerHTML=`<defs><clipPath id="mapClip" clipPathUnits="userSpaceOnUse"><path d="${d}"/></clipPath></defs><g class="hov">${f}</g><path class="vein" d="${d}"/><g class="seed">${g}</g>`;
   }
   function step(){
     let e=0; const R=Math.max(180,Math.min(W,H)*.3);

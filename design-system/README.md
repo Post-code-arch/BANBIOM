@@ -107,7 +107,9 @@ Tout mouvement s'arrête si l'utilisateur a demandé moins d'animation (`prefers
 
 ## Accueil : la carte des espèces
 
-Rendu linéaire, volontairement léger : seulement les lignes du diagramme (les veines), 1 px écume à 22 %, sur un aplat abysse. Une trentaine de grandes cellules ; une graine (point) marque chaque espèce, qui porte son numéro et son nom scientifique abrégé (italique, 15 px). La cellule survolée se remplit en aplat de son règne (Faune cobalt à angles vifs, Flore lagon en galet). Pas de grain, pas de vignettage, pas de numéros sur les cellules de remplissage ; sous le titre, les lignes s'effacent pour garder le texte lisible.
+Le hero fait toute la hauteur d'écran. Fond : un dégradé vif qui dérive lentement (cobalt, mist, lagon, écume sur abysse), avec un grain léger. Une trentaine de grandes cellules en **verre dépoli** : chaque cellule laisse voir une version plus diffuse et plus claire du même dégradé, bordée d'un liseré clair de 1 px (38 %). C'est la seule exception aux aplats du site, réservée à ce hero.
+
+Les cellules restent arrondies (rayon 26 px, galets pour la Flore, 6 px pour la Faune). Une graine (point) marque chaque espèce, qui porte son numéro et son nom scientifique abrégé (italique, 15 px) ; au survol, la cellule se teinte de son règne. Pas de numéros sur les cellules de remplissage. Rendu en CSS et SVG seulement (pas de WebGL) pour rester léger.
 
 ## À faire, à éviter
 
