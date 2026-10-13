@@ -109,9 +109,13 @@ Tout mouvement s'arrête si l'utilisateur a demandé moins d'animation (`prefers
 
 Le hero fait toute la hauteur d'écran. Fond : un dégradé vif qui dérive lentement (cobalt, mist, lagon, écume sur abysse), avec un grain léger. Une trentaine de grandes cellules en **verre dépoli** : chaque cellule laisse voir une version plus diffuse et plus claire du même dégradé, bordée d'un liseré clair de 1 px (38 %). C'est la seule exception aux aplats du site, réservée à ce hero.
 
-Le titre est porté par une **cellule dominante** fixe (elle ne bouge pas, le curseur ne la survole pas), taillée sur le titre : un galet organique (super-ellipse déformée par quelques ondulations lentes, tracé continu, sans angle), agrandi juste assez pour contenir le titre. Un **cadre** de 1 px la suit à 14 px de distance (9 px sur mobile), comme un second contour ; les autres cellules restent hors du cadre.
+Le titre est porté par une **cellule dominante** fixe : quelques graines alignées sous le titre, dont les cellules réunies forment une seule cellule anguleuse. Ses bords sont de vraies lignes de partage avec les voisines, donc l'écart reste constant ; aucune graine ne peut entamer le titre, et les voisines directes sont figées pour qu'elle ne bouge pas. Un **cadre** de 1 px la suit à 10 px (8 px sur mobile).
 
 Les cellules restent arrondies (rayon 26 px, galets pour la Flore, 6 px pour la Faune). Une graine (point) marque chaque espèce, qui porte son numéro et son nom scientifique abrégé (italique, 15 px) ; au survol, la cellule se teinte de son règne. Pas de numéros sur les cellules de remplissage. Rendu en CSS et SVG seulement (pas de WebGL) pour rester léger.
+
+## Accueil : deuxième section
+
+Pleine hauteur d'écran : Faune et Flore côte à côte à 50/50 (empilées sur mobile), chacune en division de 2 cellules à coupe droite (Faune cobalt à angles vifs, Flore lagon arrondie). En bas, la base en chiffres : espèces, faune, flore, habitats, espèces menacées.
 
 ## À faire, à éviter
 
