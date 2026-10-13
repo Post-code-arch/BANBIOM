@@ -71,7 +71,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (max-width:640px){.dock-logo span{display:none}.dock-links a{padding:9px 10px;font-size:13.5px}}
 
 /* carte des espèces (accueil) : veines sur aplat */
-.relief{position:relative;height:clamp(600px,90vh,920px);overflow:hidden;color:var(--on-dark);background:#052430}
+.relief{position:relative;height:100vh;height:100svh;overflow:hidden;color:var(--on-dark);background:#052430}
 .relief #reliefSvg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .relief #reliefSvg{-webkit-mask-image:radial-gradient(ellipse 48% 42% at 30% 22%,transparent 35%,#000 100%);mask-image:radial-gradient(ellipse 48% 42% at 30% 22%,transparent 35%,#000 100%)}
 .relief .vein{fill:none;stroke:rgba(163,232,222,.22);stroke-width:1;vector-effect:non-scaling-stroke}
@@ -123,11 +123,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .stat b{font:200 40px/1 var(--font-display);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .stat span{font-size:13px;color:var(--muted)}
 
-.band{height:clamp(380px,56vh,520px);border-radius:0 0 var(--radius-tile) var(--radius-tile);background:var(--paper)}
+.band{height:100vh;height:100svh;border-radius:0 0 var(--radius-tile) var(--radius-tile);background:var(--paper)}
 .band h1{font-size:clamp(52px,8.5vw,118px);line-height:.9;letter-spacing:-.05em}
 .band .lede{font-size:16.5px;max-width:40ch;opacity:.85}
 .band.branche{background:var(--lagoon)}
-.lab-band{height:280px}
 .lab-band h1{font-size:clamp(40px,6vw,80px);letter-spacing:-.04em}
 
 main{padding-bottom:80px}
@@ -255,7 +254,7 @@ td.st-ok{color:var(--iucn-lc);font-weight:500}td.st-err{color:var(--iucn-cr);whi
 progress{width:100%;accent-color:var(--lagoon)}
 
 footer{padding-block:28px 110px;color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
-@media (max-width:820px){.doors,.codes,.two{grid-template-columns:1fr}.band{height:auto;min-height:440px}}
+@media (max-width:820px){.doors,.codes,.two{grid-template-columns:1fr}.band{height:100vh;height:100svh}}
 @media (max-width:560px){.relief .lede{display:none}.eco{grid-template-columns:1fr}.gauge svg{width:100%;max-width:260px}dl.kv{grid-template-columns:1fr}dl.kv dt{border-bottom:0;padding-bottom:0}.peek{width:240px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
