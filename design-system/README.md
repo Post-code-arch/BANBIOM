@@ -105,6 +105,15 @@ Les principes de l'animation s'appliquent à chaque échelle :
 
 Tout mouvement s'arrête si l'utilisateur a demandé moins d'animation (`prefers-reduced-motion`).
 
+## Accueil : la carte des espèces (prototype)
+
+Deux rendus sont à l'essai, au choix par le sélecteur du hero (ou `?hero=verre` / `?hero=veines`) :
+
+- **Verre** : peu de grandes cellules (une trentaine), en verre dépoli (shader WebGL) qui réfracte un fond en dégradé lent (cobalt, lagon, écume sur abysse). Faune teintée cobalt à angles vifs, Flore teintée lagon en galets. Seconde exception aux aplats, après le fond abyssal.
+- **Veines** : seulement les lignes du diagramme, 1 px écume à 22 %, sur un aplat abysse. Une graine (point) marque chaque espèce ; la cellule survolée se remplit en aplat de son règne.
+
+Dans les deux cas : plus de grain ni de vignettage, pas de numéros sur les cellules de remplissage, et les cellules d'espèce portent leur numéro et leur nom scientifique abrégé (italique, 15 px). Sous le titre, le verre s'aplatit et les veines s'effacent pour garder le texte lisible.
+
 ## À faire, à éviter
 
 - Faire : un seul style de cellule par zone ; le règne lisible sans légende ; des valeurs mesurées en `data`.

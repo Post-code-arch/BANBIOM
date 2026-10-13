@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: système voronoï BANBIOM — aplats, divisions (2/3 coupes droites, n cellules avec cellule dominante), relief 3D de la base en accueil */
+/* Layout: système voronoï BANBIOM — aplats, divisions (2/3 coupes droites, n cellules avec cellule dominante), carte des espèces en accueil (rendus verre / veines) */
 :root{
   --paper:#e8f1ee;--surface:#f7fbf9;--surface-2:#dceae6;--line:#c3d8d3;--ink:#0a2a32;--muted:#48676d;
   --abyss:#0a2f3b;--abyss-2:#124858;--block-deep:#0a2f3b;--cobalt:#2f5bd8;--cobalt-2:#1c3c9e;--mist:#b4c8f8;
@@ -78,26 +78,31 @@ button,input,select,textarea{font:inherit;color:inherit}
 .dock:active{transform:translateX(-50%) scale(.98)}
 @media (max-width:640px){.dock-logo span{display:none}.dock-links a{padding:9px 10px;font-size:13.5px}}
 
-/* relief 3D */
-.relief{position:relative;height:clamp(600px,90vh,920px);overflow:hidden;color:var(--on-dark);background:#03141a;
-  background-image:radial-gradient(ellipse 55% 60% at 70% 48%,#145564 0%,rgba(13,63,76,.55) 32%,rgba(4,24,32,0) 70%),radial-gradient(ellipse 120% 80% at 50% -10%,#0b3340 0%,rgba(3,20,26,0) 60%),linear-gradient(180deg,#05202a 0%,#020c10 100%)}
-.relief::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.22;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
-.relief::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse 85% 75% at 55% 50%,rgba(0,0,0,0) 55%,rgba(1,8,11,.65) 100%)}
-.relief #reliefSvg{position:absolute;inset:0;width:100%;height:100%;display:block}
-.relief .nums text{font:400 10.5px var(--font-mono);fill:rgba(232,241,238,.32);text-anchor:middle;pointer-events:none}
-.relief .nums text.sp{fill:rgba(232,241,238,.85);font-size:12px}
-.relief .nums text.on{fill:#fff;font-size:13px;font-weight:500}
+/* carte des espèces (accueil) : rendus « verre » et « veines » */
+.relief{position:relative;height:clamp(600px,90vh,920px);overflow:hidden;color:var(--on-dark);background:#03141a}
+.relief[data-mode="veines"]{background:#052430}
+.relief #reliefSvg,.relief #reliefGl{position:absolute;inset:0;width:100%;height:100%;display:block}
+.relief[data-mode="verre"] #reliefSvg,.relief[data-mode="veines"] #reliefGl{display:none}
+.relief[data-mode="veines"] #reliefSvg{-webkit-mask-image:radial-gradient(ellipse 48% 42% at 30% 22%,transparent 35%,#000 100%);mask-image:radial-gradient(ellipse 48% 42% at 30% 22%,transparent 35%,#000 100%)}
+.relief .vein{fill:none;stroke:rgba(163,232,222,.22);stroke-width:1;vector-effect:non-scaling-stroke}
+.relief .seed circle{fill:var(--foam)}
+.map-labels{position:absolute;inset:0;pointer-events:none;z-index:1}
+.map-lab{position:absolute;left:0;top:0;display:grid;justify-items:center;gap:6px;text-align:center;white-space:nowrap;color:var(--on-dark)}
+.map-lab b{font:500 13px/1 var(--font-mono);letter-spacing:.06em}
+.map-lab em{font:400 15px/1.1 var(--font-display);font-style:italic;letter-spacing:-.005em;opacity:.82}
+.map-lab.on em{opacity:1}
+.relief[data-mode="veines"] .map-lab b{color:var(--foam)}
+.relief[data-mode="veines"] .map-lab.on b{color:var(--on-dark)}
+@media (max-width:760px){.map-lab em{display:none}}
+.hero-mode{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:rgba(232,241,238,.08);pointer-events:auto}
+.hero-mode button{font:500 11px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb,var(--on-dark) 70%,transparent);background:none;border:0;border-radius:999px;padding:8px 12px;cursor:pointer}
+.hero-mode button[aria-pressed="true"]{background:var(--on-dark);color:var(--on-light)}
 .relief .head,.relief .foot{z-index:2;pointer-events:none}.relief .legend{pointer-events:none}
 .relief .head{position:absolute;left:0;right:0;top:0;pointer-events:none}
 .relief .head .wrap{padding-top:clamp(28px,5vw,56px);display:grid;gap:14px}
 .relief h1{font-size:clamp(52px,9.5vw,136px);line-height:.9;letter-spacing:-.05em;max-width:9ch}
 .relief h1 em{font-style:normal;color:var(--foam)}
 .relief .label{color:color-mix(in srgb,var(--on-dark) 65%,transparent)}
-.fl-labels{position:absolute;inset:0;pointer-events:none}
-.fl-lab{position:absolute;left:0;top:0;font:400 10.5px/1 var(--font-mono);color:color-mix(in srgb,var(--on-dark) 45%,transparent);letter-spacing:.04em;transition:color .2s}
-.fl-lab.sp{color:var(--on-dark);font-size:11.5px}
-.fl-lab.on{color:#fff;font-weight:500}
 .relief .foot{position:absolute;left:0;right:0;bottom:0;pointer-events:none}
 .relief .foot .wrap{display:flex;justify-content:space-between;align-items:end;gap:16px;padding-bottom:24px;flex-wrap:wrap}
 .relief .lede{max-width:36ch;color:color-mix(in srgb,var(--on-dark) 75%,transparent);font-size:16px}
@@ -112,7 +117,6 @@ button,input,select,textarea{font:inherit;color:inherit}
 .peek .row{display:flex;justify-content:space-between;gap:8px;align-items:center}
 .peek .ft{display:flex;justify-content:space-between;font:12.5px var(--font-mono);color:var(--muted);border-top:1px solid var(--line);padding-top:8px;margin-top:6px}
 .peek .go{font:500 11px var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:4px}
-.relief.no3d{display:grid;place-items:center}
 
 /* divisions & compositions */
 .div{position:relative;overflow:hidden}
@@ -286,7 +290,7 @@ footer{padding-block:28px 110px;color:var(--muted);font-size:13px;display:flex;f
 <!-- ============ ACCUEIL ============ -->
 <div class="view" id="view-catalogue">
   <section class="relief" id="relief" aria-label="La carte des espèces : chaque cellule numérotée est une espèce">
-    <svg id="reliefSvg" aria-hidden="true"></svg>
+    <canvas id="reliefGl" aria-hidden="true"></canvas><svg id="reliefSvg" aria-hidden="true"></svg><div class="map-labels" id="reliefLabels" aria-hidden="true"></div>
     <div class="head"><div class="wrap">
       <span class="label">BANBIOM · Banque de biodiversité marine</span>
       <h1 class="split">La base, <em>cellule</em> par <em>cellule.</em></h1>
@@ -294,6 +298,7 @@ footer{padding-block:28px 110px;color:var(--muted);font-size:13px;display:flex;f
     <div class="foot"><div class="wrap">
       <p class="lede">Chaque cellule numérotée est une fiche. Survolez une cellule pour prévisualiser l'espèce, cliquez pour ouvrir sa fiche.</p>
       <div class="legend"><span><i class="fa"></i>Faune</span><span><i class="fl"></i>Flore</span><span id="reliefCount" class="mono"></span></div>
+      <div class="hero-mode" id="heroMode" role="group" aria-label="Rendu de la carte (prototype)"><button type="button" data-mode="verre">Verre</button><button type="button" data-mode="veines">Veines</button></div>
     </div></div>
     <div class="peek" id="peek" aria-hidden="true"></div>
   </section>
@@ -873,50 +878,134 @@ function sphereLogo(svg,n){
   svg.innerHTML=`<defs><clipPath id="${id}"><circle cx="50" cy="50" r="49"/></clipPath></defs><g clip-path="url(#${id})" fill="currentColor">${d}</g>`;
 }
 let R3=null;
-/* carte des espèces : champ voronoï à plat, chaque cellule numérotée est une fiche */
+/* carte des espèces : peu de grandes cellules, chaque cellule numérotée est une fiche.
+   Deux rendus à l'essai : « verre » (shader WebGL, cellules de verre sur un dégradé) et « veines » (lignes seules sur aplat). */
+const MAP_MODES=["verre","veines"];
+function mapMode(){
+  const q=new URLSearchParams(location.search).get("hero"); if(MAP_MODES.includes(q)) return q;
+  try{ const s=localStorage.getItem("banbiom-hero"); if(MAP_MODES.includes(s)) return s; }catch(e){}
+  return "verre";
+}
+const GLASS_MAX=48;
+const GLASS_VS=`#version 300 es
+in vec2 a;void main(){gl_Position=vec4(a,0.,1.);}`;
+const GLASS_FS=`#version 300 es
+precision highp float;
+uniform vec2 uRes;uniform float uDpr,uT;uniform int uN,uHov;uniform vec4 uCalm;uniform vec4 uS[${GLASS_MAX}];
+out vec4 o;
+const vec3 ABYSS=vec3(.012,.075,.095),COBALT=vec3(.184,.357,.847),LAGOON=vec3(.09,.70,.64),FOAM=vec3(.64,.91,.87),DEEP=vec3(.043,.42,.40);
+float blob(vec2 uv,vec2 c,float r){vec2 d=(uv-c)*vec2(uRes.x/uRes.y,1.);return exp(-dot(d,d)/(r*r));}
+vec3 bg(vec2 p){
+  vec2 uv=p/uRes;float t=uT*.05;
+  vec3 c=mix(ABYSS,vec3(.02,.13,.16),uv.x*.8);
+  c=mix(c,COBALT*.85,.85*blob(uv,vec2(.80+.06*sin(t*1.3),.30+.08*cos(t)),.30));
+  c=mix(c,LAGOON*.8,.75*blob(uv,vec2(.62+.08*cos(t*.9),.78+.05*sin(t*1.7)),.26));
+  c=mix(c,DEEP,.6*blob(uv,vec2(.98,.85+.04*sin(t*1.1)),.30));
+  c=mix(c,FOAM*.7,.35*blob(uv,vec2(.70+.05*sin(t*1.9),.55+.06*cos(t*1.4)),.12));
+  c=mix(c,ABYSS,.55*blob(uv,vec2(.12,.25),.45));
+  return c;
+}
+void main(){
+  vec2 p=vec2(gl_FragCoord.x,uRes.y*uDpr-gl_FragCoord.y)/uDpr;
+  int i0=0;float best=1e12;
+  for(int i=0;i<${GLASS_MAX};i++){if(i>=uN)break;vec2 d=p-uS[i].xy;float v=dot(d,d)-uS[i].z;if(v<best){best=v;i0=i;}}
+  vec4 s=uS[i0];float kind=s.w;
+  float k=kind>1.5?11.:(kind>.5?1.2:7.);
+  float acc=0.;
+  for(int j=0;j<${GLASS_MAX};j++){if(j>=uN)break;if(j==i0)continue;
+    vec2 e=uS[j].xy-s.xy;float L=length(e);vec2 n=e/L;
+    float db=(L*L+s.z-uS[j].z)/(2.*L)-dot(p-s.xy,n);acc+=exp(-db/k);}
+  float edge=-k*log(acc+1e-6);
+  float gap=1.5;float inside=edge-gap;
+  vec2 gr=vec2(dFdx(inside),dFdy(inside));vec2 nrm=length(gr)>1e-4?-normalize(gr):vec2(0.);
+  vec2 cq=max(uCalm.xy-p,p-uCalm.zw);float calm=1.-.8*(1.-smoothstep(0.,160.,max(cq.x,cq.y)));
+  if(inside<0.){o=vec4(mix(bg(p),bg(p)*.45,calm),1.);return;}
+  float B=26.*calm+2.,h=clamp(inside/B,0.,1.),slope=1.-sqrt(1.-(1.-h)*(1.-h));
+  vec2 off=(nrm*slope*30.+(p-s.xy)*.07)*calm;
+  vec3 c=vec3(0.);
+  for(int a=0;a<5;a++){float an=float(a)*1.2566;c+=bg(p+off+vec2(cos(an),sin(an))*7.);}
+  c/=5.;
+  bool hov=i0==uHov;
+  vec3 tint=kind>1.5?LAGOON:(kind>.5?COBALT:vec3(.6,.8,.8));
+  float ta=kind>.5?(hov?.62:.28):.06;
+  c=mix(c,tint,ta);
+  c+=hov?.05:0.;
+  vec2 Ld=normalize(vec2(-.6,-.8));
+  c+=vec3(1.)*.32*pow(max(dot(nrm,Ld),0.),2.)*slope*calm;
+  c-=.10*max(dot(nrm,-Ld),0.)*slope*calm;
+  c+=.10*calm*(1.-smoothstep(0.,1.4,inside));
+  o=vec4(c,1.);
+}`;
+function initGlass(canvas){
+  const gl=canvas.getContext("webgl2",{antialias:false,premultipliedAlpha:false}); if(!gl) return null;
+  const sh=(t,src)=>{ const s=gl.createShader(t); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){ console.warn(gl.getShaderInfoLog(s)); return null; } return s; };
+  const vs=sh(gl.VERTEX_SHADER,GLASS_VS), fs=sh(gl.FRAGMENT_SHADER,GLASS_FS); if(!vs||!fs) return null;
+  const pr=gl.createProgram(); gl.attachShader(pr,vs); gl.attachShader(pr,fs); gl.linkProgram(pr); if(!gl.getProgramParameter(pr,gl.LINK_STATUS)) return null;
+  gl.useProgram(pr); gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  const al=gl.getAttribLocation(pr,"a"); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al,2,gl.FLOAT,false,0,0);
+  const u=n=>gl.getUniformLocation(pr,n), U={calm:u("uCalm"),res:u("uRes"),dpr:u("uDpr"),t:u("uT"),n:u("uN"),hov:u("uHov"),s:u("uS")}, buf=new Float32Array(GLASS_MAX*4);
+  return {draw(pts,W,H,hov,t,calm){
+    const dpr=Math.min(devicePixelRatio||1,1.5), cw=Math.round(W*dpr), ch=Math.round(H*dpr);
+    if(canvas.width!==cw||canvas.height!==ch){ canvas.width=cw; canvas.height=ch; }
+    gl.viewport(0,0,cw,ch); const n=Math.min(pts.length,GLASS_MAX);
+    for(let i=0;i<n;i++){ const p=pts[i]; buf.set([p.x,p.y,p.w,p.sp?(p.sp.regne==="Animal"?1:2):0],i*4); }
+    gl.uniform4f(U.calm,...(calm||[0,0,0,0])); gl.uniform2f(U.res,W,H); gl.uniform1f(U.dpr,dpr); gl.uniform1f(U.t,t); gl.uniform1i(U.n,n); gl.uniform1i(U.hov,hov); gl.uniform4fv(U.s,buf);
+    gl.drawArrays(gl.TRIANGLES,0,3);
+  }};
+}
 function initMap(){
-  const host=$("#relief"), svg=$("#reliefSvg"), peek=$("#peek");
-  let pts=[], hovered=-1, m=null, raf=0, W=0, H=0;
+  const host=$("#relief"), svg=$("#reliefSvg"), cv=$("#reliefGl"), labs=$("#reliefLabels"), peek=$("#peek");
+  let pts=[], hovered=-1, m=null, raf=0, W=0, H=0, mode=mapMode(), glass=null, visible=true, t0=performance.now();
+  function setMode(md){
+    mode=md; if(mode==="verre"&&!glass) glass=initGlass(cv); if(mode==="verre"&&!glass) mode="veines";
+    host.dataset.mode=mode; $$("#heroMode button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===mode));
+    svg.innerHTML=""; draw(); kick();
+  }
   function layout(list){
     W=host.clientWidth; H=host.clientHeight; svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
-    const narrow=W<760, x0=narrow?W*.04:W*.46, x1=W*.97, y0=narrow?H*.36:H*.08, y1=narrow?H*.86:H*.9;
-    const r=B._rng(B._hash("carte")), n=list.length, area=(x1-x0)*(y1-y0), dist=Math.sqrt(area/Math.max(1,n)/2.2);
-    const sorted=list.slice().sort((a,b)=>String(a.nom_scientifique).localeCompare(String(b.nom_scientifique)));
+    const narrow=W<760, x0=narrow?W*.08:W*.5, x1=narrow?W*.92:W*.95, y0=narrow?H*.40:H*.12, y1=narrow?H*.80:H*.86;
+    const r=B._rng(B._hash("carte")), n=Math.min(list.length,GLASS_MAX-8), area=(x1-x0)*(y1-y0), dist=Math.sqrt(area/Math.max(1,n)/1.6);
+    const sorted=list.slice().sort((a,b)=>String(a.nom_scientifique).localeCompare(String(b.nom_scientifique))).slice(0,n);
     pts=[];
-    sorted.forEach((sp,k)=>{ let best=null; for(let t=0;t<500;t++){ const x=x0+r()*(x1-x0), y=y0+r()*(y1-y0); if(pts.every(p=>Math.hypot(p.hx-x,p.hy-y)>dist)){best=[x,y];break;} if(!best) best=[x,y]; }
-      pts.push({hx:best[0],hy:best[1],x:best[0],y:best[1],vx:0,vy:0,w:(dist*.38)**2,sp,g:0}); });
-    let tries=0; const fill=Math.round(W*H/(narrow?5200:4200));
-    while(pts.length<n+fill&&tries++<8000){ const x=r()*W, y=r()*H; if(pts.every(p=>Math.hypot(p.hx-x,p.hy-y)>(p.sp?dist*.62:34))) pts.push({hx:x,hy:y,x,y,vx:0,vy:0,w:0,g:0}); }
+    sorted.forEach(sp=>{ let best=null; for(let t=0;t<600;t++){ const x=x0+r()*(x1-x0), y=y0+r()*(y1-y0); if(pts.every(p=>Math.hypot(p.hx-x,p.hy-y)>dist)){best=[x,y];break;} if(!best) best=[x,y]; }
+      pts.push({hx:best[0],hy:best[1],x:best[0],y:best[1],vx:0,vy:0,w:(dist*.32)**2,sp}); });
+    const fd=narrow?Math.max(110,W*.3):Math.max(170,Math.min(W,H)*.24); let tries=0;
+    while(pts.length<GLASS_MAX&&tries++<6000){ const x=-40+r()*(W+80), y=-40+r()*(H+80); if(pts.every(p=>Math.hypot(p.hx-x,p.hy-y)>(p.sp?dist*.75:fd))) pts.push({hx:x,hy:y,x,y,vx:0,vy:0,w:0}); }
     let k=0; pts.forEach(p=>{ if(p.sp) p.idx=++k; });
-    pts.filter(p=>!p.sp).forEach(p=>p.idx=++k);
+    labs.innerHTML=pts.filter(p=>p.sp).map(p=>`<span class="map-lab" data-regne="${p.sp.regne==="Animal"?"Animal":"Végétal"}"><b>${String(p.idx).padStart(2,"0")}</b><em>${esc(shortName(p.sp.nom_scientifique))}</em></span>`).join("");
+    const els=$$(".map-lab",labs); pts.filter(p=>p.sp).forEach((p,j)=>p.el=els[j]);
+    $("#reliefCount").textContent=`${n} espèce${n>1?"s":""}`;
     draw();
-    $("#reliefCount").textContent=`${n} espèce${n>1?"s":""} · ${pts.length} cellules`;
   }
+  function calmRect(){ const hb=host.getBoundingClientRect(), r=$(".relief h1").getBoundingClientRect(); return [r.left-hb.left-20,r.top-hb.top-20,r.left-hb.left+r.width*.82,r.bottom-hb.top+10]; }
+  function shortName(s){ const w=String(s||"").split(/\s+/); return w.length>1?`${w[0][0]}. ${w.slice(1).join(" ")}`:w[0]; }
   function draw(){
-    const cs=B._cells(pts,W,H,p=>3+p.g,0); let d="", t="";
-    cs.forEach((poly,i)=>{ const p=pts[i], path=B._traceSVG(poly,p.sp?(p.sp.regne==="Animal"?2:22):10); if(!path) return;
-      let fill;
-      if(p.sp){ const A=p.sp.regne==="Animal"; fill=i===hovered?(A?"var(--cobalt)":"var(--lagoon)"):(A?"#123c63":"#0e4a4a"); }
-      else fill=((p.idx*7)%5===0)?"#0c3540":"#082a33";
-      d+=`<path d="${path}" fill="${fill}" data-i="${i}"/>`;
-      if(p.sp){ const sp=p.sp; t+=`<text x="${p.x.toFixed(1)}" y="${(p.y+4).toFixed(1)}" class="${i===hovered?"on":"sp"}">${String(p.idx).padStart(2,"0")}</text>`; }
-      else if(W>760&&p.idx%7===0&&p.x>W*.45) t+=`<text x="${p.x.toFixed(1)}" y="${(p.y+4).toFixed(1)}">${String(p.idx).padStart(2,"0")}</text>`;
-    });
-    svg.innerHTML=`<g>${d}</g><g class="nums">${t}</g>`;
+    if(!W) return;
+    if(mode==="verre") glass.draw(pts,W,H,hovered,(performance.now()-t0)/1000,calmRect());
+    else drawVeins();
+    pts.forEach((p,i)=>{ if(!p.el) return; p.el.style.transform=`translate(${p.x.toFixed(1)}px,${p.y.toFixed(1)}px) translate(-50%,-50%)`; p.el.classList.toggle("on",i===hovered); });
+  }
+  function drawVeins(){
+    const cs=B._cells(pts,W,H,()=>0,0); let d="", f="", g="";
+    cs.forEach((poly,i)=>{ if(poly.length<3) return; d+="M"+poly.map(v=>v[0].toFixed(1)+" "+v[1].toFixed(1)).join("L")+"Z"; });
+    if(hovered>=0){ const p=pts[hovered], A=p.sp.regne==="Animal", poly=B._cells([p,...pts.filter((q,j)=>j!==hovered)],W,H,()=>10,0)[0], path=B._traceSVG(poly,A?2:24);
+      if(path) f=`<path d="${path}" fill="${A?"var(--cobalt)":"var(--lagoon)"}"/>`; }
+    pts.forEach((p,i)=>{ if(p.sp&&i!==hovered) g+=`<circle cx="${p.x.toFixed(1)}" cy="${(p.y-22).toFixed(1)}" r="2.5"/>`; });
+    svg.innerHTML=`${f}<path class="vein" d="${d}"/><g class="seed">${g}</g>`;
   }
   function step(){
-    let e=0; const R=Math.max(160,Math.min(W,H)*.32);
+    let e=0; const R=Math.max(180,Math.min(W,H)*.3);
     pts.forEach((p,i)=>{
-      let ax=(p.hx-p.x)*.06, ay=(p.hy-p.y)*.06, tg=0;
-      if(m&&i!==hovered){ const dx=p.x-m.x, dy=p.y-m.y, dd=Math.hypot(dx,dy)||1; if(dd<R){ const f=Math.pow(1-dd/R,2)*7; ax+=dx/dd*f; ay+=dy/dd*f; tg=10*Math.pow(1-dd/R,2); } }
-      if(i===hovered){ ax+=(m?(m.x-p.x)*.02:0); ay+=(m?(m.y-p.y)*.02:0); }
-      p.vx=(p.vx+ax)*.8; p.vy=(p.vy+ay)*.8; p.x+=p.vx; p.y+=p.vy; p.g+=(tg-p.g)*.15;
-      e+=Math.abs(p.vx)+Math.abs(p.vy)+Math.abs(tg-p.g)*.1; });
-    draw(); movePeek(); return e>.05||m||peekOn;
+      let ax=(p.hx-p.x)*.05, ay=(p.hy-p.y)*.05;
+      if(m&&i!==hovered){ const dx=p.x-m.x, dy=p.y-m.y, dd=Math.hypot(dx,dy)||1; if(dd<R){ const f=Math.pow(1-dd/R,2)*4; ax+=dx/dd*f; ay+=dy/dd*f; } }
+      if(i===hovered&&m){ ax+=(m.x-p.x)*.015; ay+=(m.y-p.y)*.015; }
+      p.vx=(p.vx+ax)*.8; p.vy=(p.vy+ay)*.8; p.x+=p.vx; p.y+=p.vy; e+=Math.abs(p.vx)+Math.abs(p.vy); });
+    draw(); movePeek();
+    return visible&&(e>.05||m||peekOn||(mode==="verre"&&!reduce.matches));
   }
-  function kick(){ if(raf) return; const loop=()=>{ raf=step()?requestAnimationFrame(loop):0; }; raf=requestAnimationFrame(loop); }
+  function kick(){ if(raf||!W) return; if(reduce.matches){ draw(); return; } const loop=()=>{ raf=step()?requestAnimationFrame(loop):0; }; raf=requestAnimationFrame(loop); }
   function pickAt(x,y){ let bi=-1,bd=1e12; pts.forEach((p,i)=>{ const d=(p.x-x)**2+(p.y-y)**2-p.w; if(d<bd){bd=d;bi=i;} }); return bi; }
-  function setHover(i){ if(i>=0&&!pts[i].sp) i=-1; if(i===hovered) return; hovered=i; host.style.cursor=i>=0?"pointer":"default"; if(i>=0) showPeek(pts[i].sp,pts[i].idx); else hidePeek(); kick(); }
+  function setHover(i){ if(i>=0&&!pts[i].sp) i=-1; if(i===hovered) return; hovered=i; host.style.cursor=i>=0?"pointer":"default"; if(i>=0) showPeek(pts[i].sp,pts[i].idx); else hidePeek(); draw(); kick(); }
   let peekOn=false,px=0,py=0,pvx=0,pvy=0,gx=0,gy=0;
   function showPeek(sp,idx){
     const st=sp.statut_uicn||"NE", A=sp.regne==="Animal"; peek.dataset.regne=A?"Animal":"Végétal";
@@ -930,12 +1019,15 @@ function initMap(){
   function movePeek(){ if(!peekOn) return; const pw=peek.offsetWidth,ph=peek.offsetHeight;
     let tx=gx+24,ty=gy+24; if(tx+pw>W-12) tx=gx-pw-24; if(ty+ph>H-12) ty=H-ph-12; if(ty<12) ty=12; if(tx<12) tx=12;
     pvx=(pvx+(tx-px)*.18)*.68; pvy=(pvy+(ty-py)*.18)*.68; px+=pvx; py+=pvy; peek.style.transform=`translate(${px}px,${py}px)`; }
-  host.addEventListener("pointermove",e=>{ if(e.pointerType==="touch") return; const b=host.getBoundingClientRect(); gx=e.clientX-b.left; gy=e.clientY-b.top; m={x:gx,y:gy}; setHover(pickAt(gx,gy)); kick(); });
+  host.addEventListener("pointermove",e=>{ if(e.pointerType==="touch"||e.target.closest("#heroMode")) return; const b=host.getBoundingClientRect(); gx=e.clientX-b.left; gy=e.clientY-b.top; m={x:gx,y:gy}; setHover(pickAt(gx,gy)); kick(); });
   host.addEventListener("pointerleave",()=>{ m=null; setHover(-1); kick(); });
-  host.addEventListener("click",e=>{ const b=host.getBoundingClientRect(); gx=e.clientX-b.left; gy=e.clientY-b.top; const i=pickAt(gx,gy); if(i<0||!pts[i].sp) return;
+  host.addEventListener("click",e=>{ if(e.target.closest("#heroMode")) return; const b=host.getBoundingClientRect(); gx=e.clientX-b.left; gy=e.clientY-b.top; const i=pickAt(gx,gy); if(i<0||!pts[i].sp) return;
     if(matchMedia("(hover: none)").matches&&hovered!==i){ setHover(i); return; } openFiche(pts[i].sp._id); });
-  let last=[]; new ResizeObserver(()=>layout(last)).observe(host);
-  return {build:list=>{ last=list; layout(list); }, recolor:()=>draw()};
+  $$("#heroMode button").forEach(b=>b.addEventListener("click",()=>{ try{ localStorage.setItem("banbiom-hero",b.dataset.mode); }catch(e){} setMode(b.dataset.mode); }));
+  new IntersectionObserver(es=>{ visible=es[0].isIntersecting; if(visible) kick(); }).observe(host);
+  let last=[]; new ResizeObserver(()=>{ layout(last); kick(); }).observe(host);
+  setMode(mode);
+  return {build:list=>{ last=list; layout(list); kick(); }, recolor:()=>draw()};
 }
 let relTimer=0;
 function updateRelief(){ if(!R3) return; clearTimeout(relTimer); relTimer=setTimeout(()=>R3.build(S.species),120); }
