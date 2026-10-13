@@ -101,6 +101,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .relief #reliefSvg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .relief .vein{fill:none;stroke:rgba(232,241,238,.5);stroke-width:1;vector-effect:non-scaling-stroke}
 .relief .hov path{opacity:.55}
+.relief .frame{fill:none;stroke:rgba(232,241,238,.5);stroke-width:1;vector-effect:non-scaling-stroke}
 .relief .seed circle{fill:var(--on-dark)}
 .map-labels{position:absolute;inset:0;pointer-events:none;z-index:1}
 .map-lab{position:absolute;left:0;top:0;display:grid;justify-items:center;gap:6px;text-align:center;white-space:nowrap;color:var(--on-dark)}
@@ -111,6 +112,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .relief .head,.relief .foot{z-index:2;pointer-events:none}.relief .legend{pointer-events:none}
 .relief .head{position:absolute;left:0;right:0;top:0;pointer-events:none}
 .relief .head .wrap{padding-top:clamp(28px,5vw,56px);display:grid;gap:14px}
+@media (max-width:760px){.relief .head .wrap{padding:52px 40px 0}}
 .relief h1{font-size:clamp(52px,9.5vw,136px);line-height:.9;letter-spacing:-.05em;max-width:9ch}
 .relief h1 em{font-style:normal;color:var(--foam)}
 .relief .label{color:color-mix(in srgb,var(--on-dark) 65%,transparent)}
@@ -626,23 +628,46 @@ let R3=null;
 /* carte des espèces : peu de grandes cellules en verre dépoli sur un fond en dégradé ; chaque cellule numérotée est une fiche */
 function initMap(){
   const host=$("#relief"), svg=$("#reliefSvg"), labs=$("#reliefLabels"), peek=$("#peek");
-  let pts=[], hovered=-1, m=null, raf=0, W=0, H=0, visible=true;
+  let pts=[], hovered=-1, m=null, raf=0, W=0, H=0, visible=true, dom=null;
   function layout(list){
     W=host.clientWidth; H=host.clientHeight; svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
     const narrow=W<760, x0=narrow?W*.08:W*.5, x1=narrow?W*.92:W*.95, y0=narrow?H*.40:H*.12, y1=narrow?H*.80:H*.86;
+    dom=dominant(narrow);
+    const free=(x,y,mg)=>!dom||outside(dom.keep,x,y)>mg;
     const r=B._rng(B._hash("carte")), n=list.length, area=(x1-x0)*(y1-y0), dist=Math.sqrt(area/Math.max(1,n)/1.6);
     const sorted=list.slice().sort((a,b)=>String(a.nom_scientifique).localeCompare(String(b.nom_scientifique))).slice(0,n);
     pts=[];
-    sorted.forEach(sp=>{ let best=null; for(let t=0;t<600;t++){ const x=x0+r()*(x1-x0), y=y0+r()*(y1-y0); if(pts.every(p=>Math.hypot(p.hx-x,p.hy-y)>dist)){best=[x,y];break;} if(!best) best=[x,y]; }
+    sorted.forEach(sp=>{ let best=null; for(let t=0;t<900;t++){ const x=x0+r()*(x1-x0), y=y0+r()*(y1-y0); if(!free(x,y,dist*.45)) continue; if(pts.every(p=>Math.hypot(p.hx-x,p.hy-y)>dist)){best=[x,y];break;} if(!best) best=[x,y]; }
+      if(!best) best=[x0+r()*(x1-x0),y1];
       pts.push({hx:best[0],hy:best[1],x:best[0],y:best[1],vx:0,vy:0,w:(dist*.32)**2,sp}); });
     const fd=narrow?Math.max(150,W*.42):Math.max(240,Math.min(W,H)*.32); let tries=0;
-    while(tries++<6000){ const x=-40+r()*(W+80), y=-40+r()*(H+80); if(pts.every(p=>Math.hypot(p.hx-x,p.hy-y)>(p.sp?dist*.75:fd))) pts.push({hx:x,hy:y,x,y,vx:0,vy:0,w:0}); }
+    while(tries++<6000){ const x=-40+r()*(W+80), y=-40+r()*(H+80); if(free(x,y,fd*.4)&&pts.every(p=>Math.hypot(p.hx-x,p.hy-y)>(p.sp?dist*.75:fd))) pts.push({hx:x,hy:y,x,y,vx:0,vy:0,w:0}); }
     let k=0; pts.forEach(p=>{ if(p.sp) p.idx=++k; });
     labs.innerHTML=pts.filter(p=>p.sp).map(p=>`<span class="map-lab" data-regne="${p.sp.regne==="Animal"?"Animal":"Végétal"}"><b>${String(p.idx).padStart(2,"0")}</b><em>${esc(shortName(p.sp.nom_scientifique))}</em></span>`).join("");
     const els=$$(".map-lab",labs); pts.filter(p=>p.sp).forEach((p,j)=>p.el=els[j]);
     $("#reliefCount").textContent=`${n} espèce${n>1?"s":""}`;
     draw();
   }
+  /* cellule dominante : fixe, elle porte le titre ; un cadre la suit à distance */
+  function dominant(narrow){
+    const hb=host.getBoundingClientRect(), box=el=>{ const rg=document.createRange(); rg.selectNodeContents(el); return rg.getBoundingClientRect(); }, t=box($(".relief h1")), l=box($(".relief .head .label"));
+    const L=Math.min(l.left,t.left)-hb.left, R=Math.max(l.right,t.left+t.width)-hb.left, T=l.top-hb.top, Bt=t.bottom-hb.top;
+    const px=Math.min(narrow?20:56,L-14), pt=Math.min(narrow?20:44,T-14), pb=narrow?28:52;
+    const x0=L-px, x1=R+(narrow?Math.min(20,W-R-14):72), y0=T-pt, y1=Bt+pb, cw=x1-x0, ch=y1-y0, c=Math.min(cw,ch);
+    const poly=[[x0+c*.10,y0],[x1-c*.22,y0+c*.02],[x1,y0+c*.20],[x1-c*.06,y1-c*.12],[x1-c*.30,y1],[x0+c*.08,y1-c*.03],[x0,y1-c*.24],[x0+c*.02,y0+c*.12]];
+    const fr=narrow?9:14, frame=offsetPoly(poly,fr);
+    return {poly,frame,keep:offsetPoly(poly,fr+(narrow?9:14)),path:B._traceSVG(poly,narrow?22:34),framePath:B._traceSVG(frame,(narrow?22:34)+fr)};
+  }
+  function edges(poly){ const cx=poly.reduce((a,v)=>a+v[0],0)/poly.length, cy=poly.reduce((a,v)=>a+v[1],0)/poly.length;
+    return poly.map((a,i)=>{ const b=poly[(i+1)%poly.length]; let nx=b[1]-a[1], ny=a[0]-b[0]; const l=Math.hypot(nx,ny)||1; nx/=l; ny/=l; if((a[0]-cx)*nx+(a[1]-cy)*ny<0){nx=-nx;ny=-ny;} return {a,nx,ny}; }); }
+  function offsetPoly(poly,f){ const es=edges(poly).map(e=>({a:[e.a[0]+e.nx*f,e.a[1]+e.ny*f],nx:e.nx,ny:e.ny}));
+    return es.map((e,i)=>{ const q=es[(i+es.length-1)%es.length], det=q.nx*e.ny-q.ny*e.nx, c1=q.nx*q.a[0]+q.ny*q.a[1], c2=e.nx*e.a[0]+e.ny*e.a[1]; return [(c1*e.ny-c2*q.ny)/det,(q.nx*c2-e.nx*c1)/det]; }); }
+  /* distance signée au polygone convexe (positive dehors) et arête la plus séparatrice */
+  function outside(poly,x,y){ let best=-1e9; edges(poly).forEach(e=>{ best=Math.max(best,(x-e.a[0])*e.nx+(y-e.a[1])*e.ny); }); return best; }
+  function cutOut(cell,poly,p){ let be=null,bd=-1e9; edges(poly).forEach(e=>{ const d=(p.x-e.a[0])*e.nx+(p.y-e.a[1])*e.ny; if(d>bd){bd=d;be=e;} });
+    const side=v=>-((v[0]-be.a[0])*be.nx+(v[1]-be.a[1])*be.ny), out=[];
+    for(let i=0;i<cell.length;i++){ const a=cell[i], b=cell[(i+1)%cell.length], sa=side(a), sb=side(b); if(sa<=0) out.push(a); if((sa<=0)!==(sb<=0)){ const t=sa/(sa-sb); out.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]); } }
+    return out; }
   function shortName(s){ const w=String(s||"").split(/\s+/); return w.length>1?`${w[0][0]}. ${w.slice(1).join(" ")}`:w[0]; }
   function draw(){
     if(!W) return;
@@ -650,11 +675,11 @@ function initMap(){
     pts.forEach((p,i)=>{ if(!p.el) return; p.el.style.transform=`translate(${p.x.toFixed(1)}px,${p.y.toFixed(1)}px) translate(-50%,-50%)`; p.el.classList.toggle("on",i===hovered); });
   }
   function drawVeins(){
-    const cs=B._cells(pts,W,H,()=>16,0); let d="", f="", g="";
-    cs.forEach((poly,i)=>{ const p=pts[i], path=B._traceSVG(poly,p.sp?(p.sp.regne==="Animal"?6:30):26); if(!path) return; d+=path;
+    const cs=B._cells(pts,W,H,()=>16,0).map((c,i)=>dom?cutOut(c,dom.keep,pts[i]):c); let d=dom?dom.path:"", f="", g="";
+    cs.forEach((poly,i)=>{ if(poly.length<3) return; const p=pts[i], path=B._traceSVG(poly,p.sp?(p.sp.regne==="Animal"?6:30):26); if(!path) return; d+=path;
       if(i===hovered) f=`<path d="${path}" fill="${p.sp.regne==="Animal"?"var(--cobalt)":"var(--lagoon)"}"/>`; });
     pts.forEach((p,i)=>{ if(p.sp&&i!==hovered) g+=`<circle cx="${p.x.toFixed(1)}" cy="${(p.y-22).toFixed(1)}" r="2.5"/>`; });
-    svg.innerHTML=`<defs><clipPath id="mapClip" clipPathUnits="userSpaceOnUse"><path d="${d}"/></clipPath></defs><g class="hov">${f}</g><path class="vein" d="${d}"/><g class="seed">${g}</g>`;
+    svg.innerHTML=`<defs><clipPath id="mapClip" clipPathUnits="userSpaceOnUse"><path d="${d}"/></clipPath></defs><g class="hov">${f}</g><path class="vein" d="${d}"/>${dom?`<path class="frame" d="${dom.framePath}"/>`:""}<g class="seed">${g}</g>`;
   }
   function step(){
     let e=0; const R=Math.max(180,Math.min(W,H)*.3);
@@ -667,7 +692,7 @@ function initMap(){
     return visible&&(e>.05||m||peekOn);
   }
   function kick(){ if(raf||!W) return; if(reduce.matches){ draw(); return; } const loop=()=>{ raf=step()?requestAnimationFrame(loop):0; }; raf=requestAnimationFrame(loop); }
-  function pickAt(x,y){ let bi=-1,bd=1e12; pts.forEach((p,i)=>{ const d=(p.x-x)**2+(p.y-y)**2-p.w; if(d<bd){bd=d;bi=i;} }); return bi; }
+  function pickAt(x,y){ if(dom&&outside(dom.keep,x,y)<0) return -1; let bi=-1,bd=1e12; pts.forEach((p,i)=>{ const d=(p.x-x)**2+(p.y-y)**2-p.w; if(d<bd){bd=d;bi=i;} }); return bi; }
   function setHover(i){ if(i>=0&&!pts[i].sp) i=-1; if(i===hovered) return; hovered=i; host.style.cursor=i>=0?"pointer":"default"; if(i>=0) showPeek(pts[i].sp,pts[i].idx); else hidePeek(); draw(); kick(); }
   let peekOn=false,px=0,py=0,pvx=0,pvy=0,gx=0,gy=0;
   function showPeek(sp,idx){
@@ -688,6 +713,7 @@ function initMap(){
     if(matchMedia("(hover: none)").matches&&hovered!==i){ setHover(i); return; } openFiche(pts[i].sp._id); });
   new IntersectionObserver(es=>{ visible=es[0].isIntersecting; if(visible) kick(); }).observe(host);
   let last=[]; new ResizeObserver(()=>{ layout(last); kick(); }).observe(host);
+  if(document.fonts) document.fonts.ready.then(()=>{ if(last.length) layout(last); });
   return {build:list=>{ last=list; layout(list); kick(); }, recolor:()=>draw()};
 }
 let relTimer=0;
