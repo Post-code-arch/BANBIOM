@@ -146,6 +146,31 @@ button,input,select,textarea{font:inherit;color:inherit}
 .div .txt{position:absolute;display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:0}
 .on-dark{color:var(--on-dark)}.on-light{color:var(--on-light)}
 .doors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:20px}
+/* troisième section (mosaïque) : une cellule de texte coupée en diagonale, une image vue à travers trois cellules */
+.mosaic{--mosaic-img:none;position:relative;height:clamp(560px,82vh,780px);margin:10px;background:transparent}
+.mosaic-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.mosaic-svg .txtcell{fill:var(--surface)}
+.mosaic-svg .imgcell{fill:none;stroke:rgba(232,241,238,.35);stroke-width:1;vector-effect:non-scaling-stroke}
+.mosaic-clip{position:absolute;inset:0;clip-path:url(#mosaicClip)}
+.mosaic-img{position:absolute;inset:0;
+  background:var(--mosaic-img) center/cover no-repeat,
+    radial-gradient(ellipse 30% 40% at 72% 18%,rgba(214,255,247,.85) 0%,rgba(163,232,222,0) 100%),
+    radial-gradient(ellipse 24% 60% at 84% 10%,rgba(232,241,238,.45) 0%,rgba(232,241,238,0) 100%),
+    radial-gradient(ellipse 40% 34% at 52% 78%,#17b3a3 0%,rgba(23,179,163,0) 100%),
+    radial-gradient(ellipse 36% 40% at 90% 70%,#2f5bd8 0%,rgba(47,91,216,0) 100%),
+    radial-gradient(ellipse 30% 26% at 62% 46%,#4d7cff 0%,rgba(77,124,255,0) 100%),
+    linear-gradient(170deg,#0d3f55 0%,#0b6b66 55%,#062a34 100%);
+  transform:translate3d(var(--mx,0),var(--my,0),0) scale(1.06);transition:transform .9s var(--out,ease)}
+.mosaic-img::after{content:"";position:absolute;inset:0;opacity:.18;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.mosaic-txt{position:absolute;left:0;top:0;bottom:0;width:44%;padding:clamp(28px,4vw,56px);display:flex;flex-direction:column;justify-content:space-between;gap:24px}
+.mosaic-txt h2{font:300 clamp(36px,4.4vw,64px)/1.02 var(--font-display);letter-spacing:-.035em;max-width:11ch;margin-top:12px}
+.mosaic-foot{display:grid;gap:18px;max-width:34ch}
+.mosaic-foot p{color:var(--muted);font-size:15.5px}
+.mosaic-cta{display:flex;gap:8px;align-items:center}
+.btn.sq{padding:12px 16px;border:1px solid var(--line)}
+.mosaic-chip{position:absolute;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font:200 26px/1 var(--font-display);color:var(--on-dark);background:rgba(232,241,238,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);pointer-events:none}
+@media (max-width:760px){.mosaic{height:auto;display:flex;flex-direction:column}.mosaic-txt{position:relative;width:auto;background:var(--surface);border-radius:var(--radius-tile)}.mosaic::after{content:"";display:block;height:452px}}
 /* deuxième section (duo) : pleine hauteur, Faune | Flore à 50/50, chiffres en bas */
 .duo{height:100vh;height:100svh;display:grid;grid-template-rows:minmax(0,1fr) auto;background:var(--paper)}
 .duo .doors{margin:0;gap:10px;padding:10px 10px 0;min-height:0}
@@ -341,6 +366,19 @@ footer{padding-block:28px 110px;color:var(--muted);font-size:13px;display:flex;f
         <span class="arrow on-light" data-small-text>→</span></a>
     </div>
     <div class="stats" id="stats"></div>
+  </section>
+  <section class="mosaic" id="mosaic" aria-labelledby="mosaicTitle">
+    <svg class="mosaic-svg" aria-hidden="true"></svg>
+    <div class="mosaic-clip" aria-hidden="true"><div class="mosaic-img"></div></div>
+    <div class="mosaic-txt">
+      <span class="label">Espace chercheurs</span>
+      <h2 id="mosaicTitle">Faites grandir la base, une fiche à la fois</h2>
+      <div class="mosaic-foot">
+        <p>Biologistes, gestionnaires d'aires marines, plongeurs scientifiques : saisissez une espèce ou importez vos relevés en CSV, TSV ou JSON. Chaque fiche devient une cellule.</p>
+        <div class="mosaic-cta"><a class="btn primary" href="#chercheurs">Ajouter une espèce</a><a class="btn sq" href="#apropos" aria-label="En savoir plus sur la base">→</a></div>
+      </div>
+    </div>
+    <span class="mosaic-chip" aria-hidden="true">+</span>
   </section>
   <main class="wrap">
     <div class="notice" data-notice hidden></div>
@@ -912,6 +950,30 @@ function sphereLogo(svg,n){
   svg.innerHTML=`<defs><clipPath id="${id}"><circle cx="50" cy="50" r="49"/></clipPath></defs><g clip-path="url(#${id})" fill="currentColor">${d}</g>`;
 }
 let R3=null;
+/* mosaïque : coupes droites et parallèles (charte : 3 cellules), une seule image découpée par les cellules */
+function polyCut(P,nx,ny,c){ const out=[]; for(let i=0;i<P.length;i++){ const a=P[i], b=P[(i+1)%P.length], sa=a[0]*nx+a[1]*ny-c, sb=b[0]*nx+b[1]*ny-c; if(sa<=0) out.push(a); if((sa<=0)!==(sb<=0)){ const t=sa/(sa-sb); out.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]); } } return out; }
+function initMosaic(){
+  const el=$("#mosaic"); if(!el) return; const svg=$(".mosaic-svg",el), img=$(".mosaic-img",el), chip=$(".mosaic-chip",el);
+  function fit(){
+    const narrow=innerWidth<=760, W=el.clientWidth, H=narrow?440:el.clientHeight, oy=narrow?el.clientHeight-440:0, g=12, R=narrow?20:28;
+    svg.setAttribute("viewBox",`0 0 ${W} ${el.clientHeight}`);
+    const rect=[[0,oy],[W,oy],[W,oy+H],[0,oy+H]], a=narrow?W*.42:W*.52, sl=narrow?W*.22:W*.24;
+    /* diagonale de (a,0) à (a-sl,H) : normale (H,sl) */
+    const L=Math.hypot(H,sl), nx=H/L, ny=sl/L, v0=(a*H)/L+oy*ny, c=narrow?W*.70:W*.82, h1=oy+H*.55;
+    const T=narrow?null:polyCut(rect,nx,ny,v0-g/2);
+    const Rg=polyCut(rect,-nx,-ny,-(v0+g/2)), left=narrow?rect:Rg;
+    const B=polyCut(polyCut(narrow?polyCut(rect,nx,ny,v0+W*.0):left,1,0,c-g/2),0,1,h1-g/2);
+    const C=polyCut(polyCut(narrow?rect:left,1,0,c-g/2),0,-1,-(h1+g/2));
+    const D=polyCut(rect,-1,0,-(c+g/2));
+    const cells=(narrow?[polyCut(polyCut(rect,1,0,c-g/2),0,1,h1-g/2),C,D]:[B,C,D]).map(q=>B_trace(q,R)).filter(Boolean);
+    svg.innerHTML=`<defs><clipPath id="mosaicClip" clipPathUnits="userSpaceOnUse"><path d="${cells.join("")}"/></clipPath></defs>${T?`<path class="txtcell" d="${B_trace(T,R)}"/>`:""}<path class="imgcell" d="${cells.join("")}"/>`;
+    if(chip){ chip.style.left=(W-g-24-52)+"px"; chip.style.top=(oy+H-24-52)+"px"; }
+  }
+  const B_trace=(q,r)=>q.length>2?B._traceSVG(q,r):"";
+  el.addEventListener("pointermove",e=>{ if(reduce.matches) return; const b=el.getBoundingClientRect(); img.style.setProperty("--mx",((e.clientX-b.left)/b.width-.5)*-22+"px"); img.style.setProperty("--my",((e.clientY-b.top)/b.height-.5)*-16+"px"); });
+  el.addEventListener("pointerleave",()=>{ img.style.setProperty("--mx","0px"); img.style.setProperty("--my","0px"); });
+  new ResizeObserver(fit).observe(el); fit();
+}
 /* carte des espèces : peu de grandes cellules en verre dépoli sur un fond en dégradé ; chaque cellule numérotée est une fiche */
 function initMap(){
   const host=$("#relief"), svg=$("#reliefSvg"), labs=$("#reliefLabels"), peek=$("#peek");
@@ -1265,7 +1327,7 @@ async function connect(){
 
 sphereLogo($("#logo"),9);
 initDock();
-R3=initMap();
+R3=initMap(); initMosaic();
 ["catalogue","faune","flore"].forEach(buildFilters);
 render(); route(); connect();
 })();

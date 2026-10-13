@@ -119,6 +119,10 @@ Les cellules restent arrondies (rayon 26 px, galets pour la Flore, 6 px pour la 
 
 Pleine hauteur d'écran : Faune et Flore côte à côte à 50/50 (empilées sur mobile). Exception voulue à la règle des coupes droites : chacune est un petit voronoï de 3 cellules à graines placées à la main, une grande cellule dominante qui porte le titre, une moyenne, et une petite case claire pour la flèche (qui suit sa cellule). Faune : cobalt, cobalt foncé, mist, angles vifs ; Flore : profond, lagon, écume, arrondie. Les cellules réagissent au curseur. En bas, la base en chiffres : espèces, faune, flore, habitats, espèces menacées.
 
+## Accueil : troisième section (mosaïque)
+
+Entre Faune / Flore et le catalogue. Une grande cellule claire porte le texte (libellé, titre, paragraphe, bouton principal et bouton flèche), coupée en diagonale. À droite, une seule image vue à travers trois cellules (deux empilées le long de la diagonale, une haute colonne à droite), en coupes droites et parallèles, coins arrondis 28 px, veines de 12 px. L'image glisse légèrement sous le curseur (parallaxe). En attendant une photo, l'image est une scène sous-marine en dégradé avec grain ; une photo se branche via la variable CSS `--mosaic-img` (`.mosaic{--mosaic-img:url(...)}`).
+
 ## À faire, à éviter
 
 - Faire : un seul style de cellule par zone ; le règne lisible sans légende ; des valeurs mesurées en `data`.
