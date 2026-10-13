@@ -109,13 +109,13 @@ Tout mouvement s'arrête si l'utilisateur a demandé moins d'animation (`prefers
 
 Le hero fait toute la hauteur d'écran. Fond : un dégradé vif qui dérive lentement (cobalt, mist, lagon, écume sur abysse), avec un grain léger. Une trentaine de grandes cellules en **verre dépoli** : chaque cellule laisse voir une version plus diffuse et plus claire du même dégradé, bordée d'un liseré clair de 1 px (38 %). C'est la seule exception aux aplats du site, réservée à ce hero.
 
-Le titre est porté par une **cellule dominante** fixe : quelques graines alignées sous le titre, dont les cellules réunies forment une seule cellule anguleuse. Ses bords sont de vraies lignes de partage avec les voisines, donc l'écart reste constant ; aucune graine ne peut entamer le titre, et les voisines directes sont figées pour qu'elle ne bouge pas. Un **cadre** de 1 px la suit à 10 px (8 px sur mobile).
+Le hero est entouré d'un **cadre** de 1 px, à 18 px des bords (10 px sur mobile) ; les cellules restent dedans, séparées par de larges veines (24 px, 14 px sur mobile), aux angles vifs (rayon 8 px, 3 px pour la Faune, 16 px pour la Flore). Le titre est porté par une **cellule dominante** fixe : un pentagone aux angles ouverts (5 côtés au plus, aucun angle aigu), en retrait, avec une colonne de petites cellules à sa gauche. Ses voisines sont placées en miroir de part et d'autre de chaque côté, et toute cellule est découpée par le côté qui lui fait face : l'écart reste le même partout.
 
 Les cellules restent arrondies (rayon 26 px, galets pour la Flore, 6 px pour la Faune). Une graine (point) marque chaque espèce, qui porte son numéro et son nom scientifique abrégé (italique, 15 px) ; au survol, la cellule se teinte de son règne. Pas de numéros sur les cellules de remplissage. Rendu en CSS et SVG seulement (pas de WebGL) pour rester léger.
 
 ## Accueil : deuxième section
 
-Pleine hauteur d'écran : Faune et Flore côte à côte à 50/50 (empilées sur mobile), chacune en division de 2 cellules à coupe droite (Faune cobalt à angles vifs, Flore lagon arrondie). En bas, la base en chiffres : espèces, faune, flore, habitats, espèces menacées.
+Pleine hauteur d'écran : Faune et Flore côte à côte à 50/50 (empilées sur mobile), chacune en division de 3 cellules à coupes droites et parallèles : une grande qui porte le titre, une moyenne, et une petite case claire pour la flèche (Faune : cobalt, cobalt foncé, mist, angles vifs ; Flore : profond, lagon, écume, arrondie). En bas, la base en chiffres : espèces, faune, flore, habitats, espèces menacées.
 
 ## À faire, à éviter
 
