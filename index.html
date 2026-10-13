@@ -909,7 +909,7 @@ function initMap(){
     const r=B._rng(B._hash("carte")), n=list.length, area=(x1-x0)*(y1-y0), dist=Math.sqrt(area/Math.max(1,n)/1.6);
     const sorted=list.slice().sort((a,b)=>String(a.nom_scientifique).localeCompare(String(b.nom_scientifique))).slice(0,n);
     pts=[];
-    sorted.forEach(sp=>{ let best=null; for(let t=0;t<900;t++){ const x=x0+r()*(x1-x0), y=y0+r()*(y1-y0); if(!free(x,y,dist*.45)) continue; if(pts.every(p=>Math.hypot(p.hx-x,p.hy-y)>dist)){best=[x,y];break;} if(!best) best=[x,y]; }
+    sorted.forEach(sp=>{ let best=null; for(let t=0,dd=dist;t<2400&&!best;t++){ if(t&&t%400===0) dd*=.88; const x=x0+r()*(x1-x0), y=y0+r()*(y1-y0); if(!free(x,y,dd*.45)) continue; if(pts.every(p=>Math.hypot(p.hx-x,p.hy-y)>dd)) best=[x,y]; }
       if(!best) best=[x0+r()*(x1-x0),y1];
       pts.push({hx:best[0],hy:best[1],x:best[0],y:best[1],vx:0,vy:0,w:(dist*.32)**2,sp}); });
     const fd=narrow?Math.max(150,W*.42):Math.max(240,Math.min(W,H)*.32); let tries=0;
@@ -924,12 +924,20 @@ function initMap(){
   function dominant(narrow){
     const hb=host.getBoundingClientRect(), box=el=>{ const rg=document.createRange(); rg.selectNodeContents(el); return rg.getBoundingClientRect(); }, t=box($(".relief h1")), l=box($(".relief .head .label"));
     const L=Math.min(l.left,t.left)-hb.left, R=Math.max(l.right,t.left+t.width)-hb.left, T=l.top-hb.top, Bt=t.bottom-hb.top;
-    const px=Math.min(narrow?20:56,L-14), pt=Math.min(narrow?20:44,T-14), pb=narrow?28:52;
-    const x0=L-px, x1=R+(narrow?Math.min(20,W-R-14):72), y0=T-pt, y1=Bt+pb, cw=x1-x0, ch=y1-y0, c=Math.min(cw,ch);
-    const poly=[[x0+c*.10,y0],[x1-c*.22,y0+c*.02],[x1,y0+c*.20],[x1-c*.06,y1-c*.12],[x1-c*.30,y1],[x0+c*.08,y1-c*.03],[x0,y1-c*.24],[x0+c*.02,y0+c*.12]];
-    const fr=narrow?9:14, frame=offsetPoly(poly,fr);
-    return {poly,frame,keep:offsetPoly(poly,fr+(narrow?9:14)),path:B._traceSVG(poly,narrow?22:34),framePath:B._traceSVG(frame,(narrow?22:34)+fr)};
+    const px=narrow?10:18, pt=narrow?10:16, pb=narrow?14:22;
+    const x0=L-px, x1=R+px, y0=T-pt, y1=Bt+pb;
+    /* galet : super-ellipse déformée par quelques ondulations lentes, agrandie jusqu'à contenir le titre */
+    const cx=(x0+x1)/2, cy=(y0+y1)/2, a=(x1-x0)/2, b=(y1-y0)/2, rr=B._rng(B._hash("titre")), ph=[0,0,0,0].map(()=>rr()*6.283);
+    const shape=k=>{ const pts=[]; for(let i=0;i<72;i++){ const t=i/72*6.283, c=Math.cos(t), s=Math.sin(t), e=Math.pow(Math.pow(Math.abs(c),4)+Math.pow(Math.abs(s),4),-1/4);
+      const w=1+.04*Math.sin(2*t+ph[0])+.03*Math.sin(3*t+ph[1])+.018*Math.sin(5*t+ph[2])+.01*Math.sin(7*t+ph[3]); pts.push([cx+a*k*w*e*c,cy+b*k*w*e*s]); } return hull(pts); };
+    let k=.9, poly=shape(k); while(k<1.6&&[[x0,y0],[x1,y0],[x1,y1],[x0,y1]].some(v=>outside(poly,v[0],v[1])>-2)){ k+=.02; poly=shape(k); }
+    const fr=narrow?9:14, frame=offsetPoly(poly,fr), d=v=>"M"+v.map(q=>q[0].toFixed(1)+" "+q[1].toFixed(1)).join("L")+"Z";
+    return {poly,frame,keep:offsetPoly(poly,fr+(narrow?9:14)),path:d(poly),framePath:d(frame)};
   }
+  function hull(P){ P=P.slice().sort((p,q)=>p[0]-q[0]||p[1]-q[1]); const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]), lo=[], up=[];
+    for(const p of P){ while(lo.length>1&&cr(lo[lo.length-2],lo[lo.length-1],p)<=0) lo.pop(); lo.push(p); }
+    for(const p of P.reverse()){ while(up.length>1&&cr(up[up.length-2],up[up.length-1],p)<=0) up.pop(); up.push(p); }
+    return lo.slice(0,-1).concat(up.slice(0,-1)); }
   function edges(poly){ const cx=poly.reduce((a,v)=>a+v[0],0)/poly.length, cy=poly.reduce((a,v)=>a+v[1],0)/poly.length;
     return poly.map((a,i)=>{ const b=poly[(i+1)%poly.length]; let nx=b[1]-a[1], ny=a[0]-b[0]; const l=Math.hypot(nx,ny)||1; nx/=l; ny/=l; if((a[0]-cx)*nx+(a[1]-cy)*ny<0){nx=-nx;ny=-ny;} return {a,nx,ny}; }); }
   function offsetPoly(poly,f){ const es=edges(poly).map(e=>({a:[e.a[0]+e.nx*f,e.a[1]+e.ny*f],nx:e.nx,ny:e.ny}));
