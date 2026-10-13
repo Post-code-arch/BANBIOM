@@ -1,0 +1,16 @@
+<!-- @dsCard group="Éléments" height=260 subtitle="Le plein : une cellule seule, à l'échelle nano" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..700&family=IBM+Plex+Mono:wght@400;500&display=swap"><style>
+*{box-sizing:border-box}html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body)}
+.lbl{font:500 11px/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cv{display:block;width:100%;height:100%}
+</style><style>.row{display:flex;flex-wrap:wrap;gap:28px;padding:22px;align-items:end}
+.c{display:grid;gap:10px;justify-items:start}</style></head><body><div class="row">
+ <div class="c"><svg width="150" height="120" viewBox="0 0 150 120"><path id="a" fill="var(--cobalt)"/></svg><span class="lbl">Faune · rayon 0</span></div>
+ <div class="c"><svg width="150" height="120" viewBox="0 0 150 120"><path id="b" fill="var(--lagoon)"/></svg><span class="lbl">Flore · rayon 26</span></div>
+ <div class="c"><svg width="150" height="120" viewBox="0 0 150 120"><path id="c" fill="var(--block-deep)"/></svg><span class="lbl">Marque · rayon 40</span></div>
+ <div class="c"><svg width="150" height="120" viewBox="0 0 150 120"><path id="d" fill="none" stroke="var(--ink)" stroke-width="1.5"/></svg><span class="lbl">Contour · vein-hair</span></div>
+</div><script>var P=Banbiom.cellPath;
+document.getElementById("a").setAttribute("d",P("cell-a",150,120,{radius:0,inset:2}));
+document.getElementById("b").setAttribute("d",P("cell-b",150,120,{radius:26,inset:2}));
+document.getElementById("c").setAttribute("d",P("cell-c",150,120,{radius:40,inset:2}));
+document.getElementById("d").setAttribute("d",P("cell-d",150,120,{radius:14,inset:3}));</script></body></html>

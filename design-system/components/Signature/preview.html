@@ -1,0 +1,15 @@
+<!-- @dsCard group="Composants" height=360 subtitle="Les données de l'espèce placent les graines" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..700&family=IBM+Plex+Mono:wght@400;500&display=swap"><style>
+*{box-sizing:border-box}html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body)}
+.lbl{font:500 11px/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cv{display:block;width:100%;height:100%}
+</style><style>.row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px}
+.s{display:grid;gap:8px}.f{aspect-ratio:1;border-radius:var(--radius-s);overflow:hidden;max-width:100%}
+.s h4{margin:0;font:italic 350 16px/1.2 var(--font-display)}.s span{font:12px var(--font-mono);color:var(--muted)}</style></head><body><div class="row" id="r"></div><script>var sp=[
+{nom_scientifique:"Posidonia oceanica",regne:"Végétal",temperature_min:10,temperature_max:28,profondeur_min:0.5,profondeur_max:40,taille_max_cm:150},
+{nom_scientifique:"Cymodocea nodosa",regne:"Végétal",temperature_min:10,temperature_max:30,profondeur_min:0,profondeur_max:30,taille_max_cm:40},
+{nom_scientifique:"Pinna nobilis",regne:"Animal",temperature_min:12,temperature_max:28,profondeur_min:0.5,profondeur_max:60,taille_max_cm:120},
+{nom_scientifique:"Corallium rubrum",regne:"Animal",temperature_min:10,temperature_max:23,profondeur_min:7,profondeur_max:800,taille_max_cm:50}];
+var r=document.getElementById("r");
+sp.forEach(function(s){var d=document.createElement("div");d.className="s";d.innerHTML='<div class="f"><canvas class="cv"></canvas></div><h4></h4><span></span>';d.querySelector("h4").textContent=s.nom_scientifique;d.querySelector("span").textContent=s.temperature_min+"–"+s.temperature_max+" °C · "+s.profondeur_min+"–"+s.profondeur_max+" m";r.appendChild(d);
+Banbiom.field(d.querySelector("canvas"),{kind:s.regne==="Animal"?"faune":"flore",seeds:Banbiom.seedsFromSpecies(s),interactive:true,host:d});});</script></body></html>

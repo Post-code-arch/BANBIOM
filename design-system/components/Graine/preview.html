@@ -1,0 +1,19 @@
+<!-- @dsCard group="Éléments" height=330 subtitle="La graine porte la donnée ; la jonction, la connexion" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..700&family=IBM+Plex+Mono:wght@400;500&display=swap"><style>
+*{box-sizing:border-box}html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body)}
+.lbl{font:500 11px/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cv{display:block;width:100%;height:100%}
+</style><style>.row{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;padding:18px}
+.f{height:240px;border-radius:var(--radius-tile);overflow:hidden}.lg{display:grid;gap:8px;align-content:start}
+.k{display:flex;gap:10px;align-items:center;font-size:14px}.k i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.j{display:flex;gap:16px;align-items:center;margin-top:12px}</style></head><body><div class="row">
+ <div class="f"><canvas class="cv" id="a"></canvas></div>
+ <div class="lg"><span class="lbl">Couleur de graine = statut UICN</span>
+  <div class="k"><i style="background:var(--iucn-cr)"></i>CR · en danger critique</div>
+  <div class="k"><i style="background:var(--iucn-en)"></i>EN · en danger</div>
+  <div class="k"><i style="background:var(--iucn-vu)"></i>VU · vulnérable</div>
+  <div class="k"><i style="background:var(--iucn-lc)"></i>LC · préoccupation mineure</div>
+  <div class="j"><svg width="64" height="64" viewBox="0 0 64 64" aria-label="Jonction"><g stroke="var(--lagoon)" stroke-width="7" stroke-linecap="round" fill="none"><path d="M32 34 L32 6"/><path d="M32 34 L8 52"/><path d="M32 34 L57 50"/></g><circle cx="32" cy="34" r="6" fill="var(--abyss)"/></svg><span class="lbl">Jonction · icône</span></div>
+ </div>
+</div><script>var cs=getComputedStyle(document.documentElement),cols=["--iucn-cr","--iucn-en","--iucn-vu","--iucn-lc","--iucn-lc","--iucn-lc","--iucn-dd"];
+Banbiom.field(document.getElementById("a"),{kind:"faune",seed:"graine",cells:18,nuclei:true,nucleusSize:4.5,nucleusColor:function(p,i){return getComputedStyle(document.documentElement).getPropertyValue(cols[i%cols.length]);},interactive:true});</script></body></html>

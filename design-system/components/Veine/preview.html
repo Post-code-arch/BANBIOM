@@ -1,0 +1,13 @@
+<!-- @dsCard group="Éléments" height=420 subtitle="Le vide : cinq largeurs, du trait à la rivière" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..700&family=IBM+Plex+Mono:wght@400;500&display=swap"><style>
+*{box-sizing:border-box}html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body)}
+.lbl{font:500 11px/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cv{display:block;width:100%;height:100%}
+</style><style>.col{display:grid;gap:10px;padding:18px}.r{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center}
+.s{height:64px;border-radius:var(--radius-s);overflow:hidden}.r b{font:500 13px var(--font-mono)}</style></head><body><div class="col">
+ <div class="r"><span><b>vein-hair</b><br><span class="lbl">1,5 px · faune, macro</span></span><div class="s"><canvas class="cv" data-g="1.5"></canvas></div></div>
+ <div class="r"><span><b>vein-fine</b><br><span class="lbl">4 px · interface</span></span><div class="s"><canvas class="cv" data-g="4"></canvas></div></div>
+ <div class="r"><span><b>vein-medium</b><br><span class="lbl">10 px · flore</span></span><div class="s"><canvas class="cv" data-g="10"></canvas></div></div>
+ <div class="r"><span><b>vein-branch</b><br><span class="lbl">18 px · marque</span></span><div class="s"><canvas class="cv" data-g="18"></canvas></div></div>
+ <div class="r"><span><b>vein-river</b><br><span class="lbl">32 px · frontière</span></span><div class="s"><canvas class="cv" data-g="32"></canvas></div></div>
+</div><script>document.querySelectorAll("canvas[data-g]").forEach(function(c){Banbiom.field(c,{kind:"branche",seed:"veine",cells:16,gap:+c.dataset.g,radius:+c.dataset.g>6?14:4,interactive:true});});</script></body></html>

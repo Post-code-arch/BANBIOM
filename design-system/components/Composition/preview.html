@@ -1,0 +1,31 @@
+<!-- @dsCard group="Échelles" height=760 subtitle="La cellule dominante comme espace typographique" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..700&family=IBM+Plex+Mono:wght@400;500&display=swap"><style>
+*{box-sizing:border-box}html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body)}
+.lbl{font:500 11px/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+</style><style>.wrap{display:grid;gap:16px;padding:18px}
+.t{position:relative;border-radius:var(--radius-tile);overflow:hidden}
+.t svg{position:absolute;inset:0;width:100%;height:100%}
+.txt{position:absolute;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:6px}
+.big{height:380px;background:var(--paper)}
+.big h2{margin:0;font:200 68px/.92 var(--font-display);letter-spacing:-.04em;color:var(--on-dark)}
+.big p{margin:0;font:400 15px/1.45 var(--font-body);color:var(--on-dark);opacity:.8;max-width:36ch}
+.row{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+.two{height:240px;background:var(--paper)}
+.two h3{margin:0;font:200 44px/.95 var(--font-display);letter-spacing:-.03em;color:var(--on-dark)}
+.three{height:240px;background:var(--paper)}
+.three b{font:200 64px/1 var(--font-display);color:var(--on-light);letter-spacing:-.03em}
+.three span{font:400 14px var(--font-body);color:var(--on-light)}
+.lbl2{font:500 11px/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;opacity:.8}</style></head><body><div class="wrap">
+ <div class="t big"><svg id="a"></svg><div class="txt" id="ta"><span class="lbl2" style="color:var(--on-dark)">Catalogue · Faune</span><h2>Faune marine</h2><p>Vertébrés et invertébrés, de l'estran aux fonds bathyaux.</p></div></div>
+ <div class="row">
+  <div class="t two"><svg id="b"></svg><div class="txt" id="tb"><span class="lbl2" style="color:var(--on-dark)">Espace chercheurs</span><h3>Ajouter une espèce</h3></div></div>
+  <div class="t three"><svg id="c"></svg><div class="txt" id="tc"><b>214</b><span>espèces documentées</span></div></div>
+ </div>
+</div><script>function fit(svgId,txtId,opts){var s=document.getElementById(svgId),box=s.parentElement,W=box.clientWidth,H=box.clientHeight;
+ s.setAttribute("viewBox","0 0 "+W+" "+H);var cells=Banbiom.division(s,opts),f=cells.filter(function(c){return c.focus;})[0],t=document.getElementById(txtId);
+ if(f&&f.text){var pad=8;t.style.left=(f.text.x+pad)+"px";t.style.top=(f.text.y+pad)+"px";t.style.width=(f.text.w-2*pad)+"px";t.style.height=(f.text.h-2*pad)+"px";}}
+function all(){
+ fit("a","ta",{n:9,seed:"compo-faune",gap:6,radius:14,focus:{x:.27,y:.5,size:.62},aspect:1.5,colors:["var(--cobalt)","var(--cobalt-2)","var(--mist)","var(--cobalt)"],focusColor:"var(--abyss)"});
+ fit("b","tb",{n:2,sizes:[2.2,1],angle:14,gap:10,radius:18,aspect:1.7,colors:["var(--abyss)","var(--lagoon)"]});
+ fit("c","tc",{n:3,sizes:[.7,2,.7],angle:-10,gap:10,radius:18,aspect:1.1,colors:["var(--deep)","var(--foam)","var(--lagoon)"]});}
+all();new ResizeObserver(all).observe(document.body);</script></body></html>

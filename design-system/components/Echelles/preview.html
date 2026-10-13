@@ -1,0 +1,17 @@
+<!-- @dsCard group="Échelles" height=380 subtitle="Le même champ, de la page au composant" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..700&family=IBM+Plex+Mono:wght@400;500&display=swap"><style>
+*{box-sizing:border-box}html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body)}
+.lbl{font:500 11px/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cv{display:block;width:100%;height:100%}
+</style><style>.row{display:grid;grid-template-columns:2.2fr 1.4fr 1fr .7fr;gap:14px;padding:18px;align-items:end}
+.p{display:grid;gap:8px}.box{border-radius:var(--radius-card);overflow:hidden;position:relative}
+.nano{display:grid;place-items:center;background:var(--surface);border-radius:var(--radius-card)}</style></head><body><div class="row">
+ <div class="p"><div class="box" style="height:300px"><canvas class="cv" id="a"></canvas></div><span class="lbl">Macro · 40–120 · matière</span></div>
+ <div class="p"><div class="box" style="height:220px"><canvas class="cv" id="b"></canvas></div><span class="lbl">Méso · 8–20 · formes</span></div>
+ <div class="p"><div class="box" style="height:150px"><canvas class="cv" id="c"></canvas></div><span class="lbl">Micro · 3–12 · signature</span></div>
+ <div class="p"><div class="nano" style="height:100px"><svg id="d" width="72" height="56" viewBox="0 0 72 56"><path fill="var(--block-deep)"/></svg></div><span class="lbl">Nano · 1 · composant</span></div>
+</div><script>var B=Banbiom;
+B.field(document.getElementById("a"),{kind:"reseau",seed:"echelle",cells:90,live:true,interactive:true});
+B.field(document.getElementById("b"),{kind:"reseau",seed:"echelle",cells:14,radius:14,gap:4,interactive:true});
+B.field(document.getElementById("c"),{kind:"reseau",seed:"echelle",cells:6,radius:14,gap:4,interactive:true});
+document.querySelector("#d path").setAttribute("d",B.cellPath("echelle",72,56,{radius:14,inset:2}));</script></body></html>

@@ -1,0 +1,20 @@
+<!-- @dsCard group="Composants" height=200 subtitle="Étiquettes-mots : parallélogramme Faune, pilule Flore, paire" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..700&family=IBM+Plex+Mono:wght@400;500&display=swap"><style>
+*{box-sizing:border-box}html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body)}
+.lbl{font:500 11px/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cv{display:block;width:100%;height:100%}
+</style><style>.row{display:flex;flex-wrap:wrap;gap:12px;padding:22px;align-items:center}
+.tag{display:inline-flex;align-items:center;gap:8px;font:400 16px/1 var(--font-display);padding:11px 18px;border:1.5px solid currentColor;text-decoration:none;color:var(--ink);transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.tag:active{transform:scale(.94)}
+.slant{border-radius:var(--radius-xs);transform:skewX(-14deg)}.slant>*{display:inline-block;transform:skewX(14deg)}
+.slant:active{transform:skewX(-14deg) scale(.94)}
+.pill{border-radius:var(--radius-pill)}
+.fa{background:var(--cobalt);border-color:var(--cobalt);color:var(--on-dark)}.fl{background:var(--lagoon);border-color:var(--lagoon);color:var(--on-light)}
+.pair{display:inline-flex;gap:4px}</style></head><body><div class="row">
+ <a class="tag slant fa" href="#"><span>Faune</span></a>
+ <a class="tag pill fl" href="#">Flore</a>
+ <a class="tag slant" href="#"><span>Mollusca · 12</span></a>
+ <a class="tag pill" href="#">Tracheophyta · 4</a>
+ <span class="pair"><a class="tag slant fa" href="#"><span>Explorer</span></a><a class="tag slant fa" href="#"><span>→</span></a></span>
+ <span class="pair"><a class="tag pill fl" href="#">Ajouter</a><a class="tag pill fl" href="#">+</a></span>
+</div><script>document.querySelectorAll("a").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();});});</script></body></html>

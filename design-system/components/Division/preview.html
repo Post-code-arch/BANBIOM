@@ -1,0 +1,18 @@
+<!-- @dsCard group="Échelles" height=470 subtitle="Diviser un cadre en 2, 3, 6, 12, 24 cellules" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..700&family=IBM+Plex+Mono:wght@400;500&display=swap"><style>
+*{box-sizing:border-box}html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body)}
+.lbl{font:500 11px/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+</style><style>.g{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:18px}
+.c{display:grid;gap:8px}.f{background:var(--paper);border-radius:var(--radius-tile);overflow:hidden;aspect-ratio:3/2}
+.f svg{display:block;width:100%;height:100%}</style></head><body><div class="g">
+ <div class="c"><div class="f"><svg viewBox="0 0 300 200" data-n="2" data-sizes="2,1"></svg></div><span class="lbl">2 · coupe droite · 2:1</span></div>
+ <div class="c"><div class="f"><svg viewBox="0 0 300 200" data-n="3" data-sizes="1,2.2,1"></svg></div><span class="lbl">3 · coupes droites · 1:2:1</span></div>
+ <div class="c"><div class="f"><svg viewBox="0 0 300 200" data-n="6" data-focus="0.32,0.42,0.36"></svg></div><span class="lbl">6 · voronoï · cellule dominante</span></div>
+ <div class="c"><div class="f"><svg viewBox="0 0 300 200" data-n="12" data-focus="0.3,0.45,0.3"></svg></div><span class="lbl">12 · voronoï · cellule dominante</span></div>
+ <div class="c"><div class="f"><svg viewBox="0 0 300 200" data-n="24" data-focus="0.28,0.42,0.24"></svg></div><span class="lbl">24 · voronoï · cellule dominante</span></div>
+ <div class="c"><div class="f"><svg viewBox="0 0 300 200" data-n="24"></svg></div><span class="lbl">24 · voronoï · sans dominante</span></div>
+</div><script>document.querySelectorAll("svg[data-n]").forEach(function(s,i){var n=+s.dataset.n,o={n:n,seed:"div-"+n+"-"+i,gap:n<=3?10:6,radius:n<=3?18:12,
+ colors:n<=3?["var(--abyss)","var(--cobalt)","var(--lagoon)"]:["var(--cobalt)","var(--lagoon)","var(--abyss)","var(--foam)","var(--cobalt-2)","var(--deep)"],focusColor:"var(--abyss)"};
+ if(s.dataset.sizes)o.sizes=s.dataset.sizes.split(",").map(Number);
+ if(s.dataset.focus){var f=s.dataset.focus.split(",").map(Number);o.focus={x:f[0],y:f[1],size:f[2]};}
+ Banbiom.division(s,o);});</script></body></html>

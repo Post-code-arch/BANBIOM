@@ -1,0 +1,22 @@
+<!-- @dsCard group="Composants" height=420 subtitle="Carte du catalogue, Faune et Flore" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..700&family=IBM+Plex+Mono:wght@400;500&display=swap"><style>
+*{box-sizing:border-box}html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--font-body)}
+.lbl{font:500 11px/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cv{display:block;width:100%;height:100%}
+</style><style>.row{display:grid;grid-template-columns:repeat(2,260px);gap:16px;padding:18px}
+.card{background:var(--surface);border-radius:var(--radius-card);padding:10px;display:grid;gap:0}
+.th{position:relative;aspect-ratio:4/3;border-radius:var(--radius-s);overflow:hidden}
+.tl{position:absolute;inset:10px 10px auto 10px;display:flex;justify-content:space-between}
+.k{font:400 13px/1 var(--font-display);padding:7px 11px;background:var(--paper)}
+.k.fa{color:var(--fa);border-radius:var(--radius-xs);transform:skewX(-12deg)}.k.fa i{display:inline-block;transform:skewX(12deg);font-style:normal}
+.k.fl{color:var(--fl);border-radius:var(--radius-pill)}
+.u{font:500 11px/1 var(--font-mono);padding:6px 8px;border-radius:var(--radius-xs);color:#fff}
+.bd{padding:14px 8px 6px;display:grid;gap:5px}.bd h3{margin:0;font:italic 350 23px/1.1 var(--font-display)}
+.cm{color:var(--muted)}.ft{display:flex;justify-content:space-between;font:12.5px var(--font-mono);color:var(--muted);border-top:1px solid var(--line);padding-top:10px;margin-top:4px}</style></head><body><div class="row">
+ <div class="card"><div class="th"><canvas class="cv" id="a"></canvas><div class="tl"><span class="k fa"><i>Faune</i></span><span class="u" style="background:var(--iucn-en)">EN</span></div></div>
+  <div class="bd"><span class="lbl">Coralliidae · Coralligène</span><h3>Corallium rubrum</h3><span class="cm">Corail rouge</span><div class="ft"><span>7–800 m</span><span>10–23 °C</span></div></div></div>
+ <div class="card"><div class="th"><canvas class="cv" id="b"></canvas><div class="tl"><span class="k fl">Flore</span><span class="u" style="background:var(--iucn-lc)">LC</span></div></div>
+  <div class="bd"><span class="lbl">Posidoniaceae · Herbier</span><h3>Posidonia oceanica</h3><span class="cm">Posidonie</span><div class="ft"><span>0,5–40 m</span><span>10–28 °C</span></div></div></div>
+</div><script>var B=Banbiom;
+B.field(document.getElementById("a"),{kind:"faune",seeds:B.seedsFromSpecies({nom_scientifique:"Corallium rubrum",temperature_min:10,temperature_max:23,profondeur_min:7,profondeur_max:800,taille_max_cm:50}),interactive:true,host:document.querySelectorAll(".card")[0]});
+B.field(document.getElementById("b"),{kind:"flore",seeds:B.seedsFromSpecies({nom_scientifique:"Posidonia oceanica",temperature_min:10,temperature_max:28,profondeur_min:0.5,profondeur_max:40,taille_max_cm:150}),interactive:true,host:document.querySelectorAll(".card")[1]});</script></body></html>

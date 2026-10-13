@@ -1,0 +1,1179 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>BANBIOM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: système voronoï BANBIOM — aplats, divisions (2/3 coupes droites, n cellules avec cellule dominante), relief 3D de la base en accueil */
+:root{
+  --paper:#e8f1ee;--surface:#f7fbf9;--surface-2:#dceae6;--line:#c3d8d3;--ink:#0a2a32;--muted:#48676d;
+  --abyss:#0a2f3b;--abyss-2:#124858;--block-deep:#0a2f3b;--cobalt:#2f5bd8;--cobalt-2:#1c3c9e;--mist:#b4c8f8;
+  --lagoon:#17b3a3;--foam:#a3e8de;--deep:#0b6b66;--ground:#cdece6;--hero-vein:#1c5c69;--on-dark:#e8f1ee;--on-light:#0a2a32;
+  --fa:#2f5bd8;--fl:#0b8a7d;--iucn-cr:#b32437;--iucn-en:#c2551a;--iucn-vu:#b07a0b;--iucn-nt:#7c8f1e;--iucn-lc:#2c8f5b;--iucn-dd:#6b7f84;--chip-ink:#ffffff;
+  --font-display:"Outfit","Avenir Next",system-ui,sans-serif;--font-body:"Outfit","Avenir Next",system-ui,sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --radius-xs:6px;--radius-s:14px;--radius-card:20px;--radius-tile:28px;--radius-pill:999px;
+  --back:cubic-bezier(.34,1.56,.64,1);--io:cubic-bezier(.65,0,.35,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#061a20;--surface:#0a242b;--surface-2:#0f2f37;--line:#1a434c;--ink:#ddf0ec;--muted:#8eb2b3;--block-deep:#1a5566;
+  --cobalt:#3e6be8;--cobalt-2:#1a3487;--mist:#9db6f5;--lagoon:#2ccbba;--foam:#7fd9cc;--deep:#0b5753;--ground:#0d3b3a;
+  --fa:#86a6ff;--fl:#43d8c4;--iucn-cr:#f2667a;--iucn-en:#f08a4f;--iucn-vu:#e5b042;--iucn-nt:#b8c94e;--iucn-lc:#5ccb8f;--iucn-dd:#8fa6ab;--chip-ink:#03151b;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#061a20;--surface:#0a242b;--surface-2:#0f2f37;--line:#1a434c;--ink:#ddf0ec;--muted:#8eb2b3;--block-deep:#1a5566;
+  --cobalt:#3e6be8;--cobalt-2:#1a3487;--mist:#9db6f5;--lagoon:#2ccbba;--foam:#7fd9cc;--deep:#0b5753;--ground:#0d3b3a;
+  --fa:#86a6ff;--fl:#43d8c4;--iucn-cr:#f2667a;--iucn-en:#f08a4f;--iucn-vu:#e5b042;--iucn-nt:#b8c94e;--iucn-lc:#5ccb8f;--iucn-dd:#8fa6ab;--chip-ink:#03151b;color-scheme:dark}
+[data-regne="Animal"]{--k:var(--fa)}[data-regne="Végétal"]{--k:var(--fl)}
+
+*{box-sizing:border-box}
+html,body{background:var(--paper);color:var(--ink)}
+body{margin:0;font:400 16px/1.55 var(--font-body);overflow-x:hidden}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:clamp(16px,3.5vw,36px)}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:200;margin:0;line-height:1;letter-spacing:-.03em;text-wrap:balance}
+p{margin:0}
+.label{font:500 11.5px/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.sci{font-style:italic}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--lagoon);outline-offset:3px}
+
+/* étiquettes-mots */
+.tag{display:inline-flex;align-items:center;gap:8px;font:400 16px/1 var(--font-display);padding:11px 18px;text-decoration:none;border:1.5px solid currentColor;transition:transform .35s var(--back);color:inherit}
+.tag.slant{border-radius:var(--radius-xs);transform:skewX(-14deg)}.tag.slant>*{display:inline-block;transform:skewX(14deg)}
+.tag.pill{border-radius:var(--radius-pill)}
+.tag:active{transform:scale(.94)}.tag.slant:active{transform:skewX(-14deg) scale(.94)}
+
+/* menu : barre de verre centrée en bas, repliée au défilement */
+.dock{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:2px;padding:6px;border-radius:999px;color:#eef6f4;max-width:calc(100vw - 24px);
+  background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.04) 45%,rgba(120,220,210,.08)),rgba(6,30,38,.38);
+  -webkit-backdrop-filter:blur(16px) saturate(1.9);backdrop-filter:blur(16px) saturate(1.9);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(255,255,255,.1),inset 0 0 0 1px rgba(255,255,255,.16),inset 0 0 18px rgba(255,255,255,.06),0 12px 34px rgba(2,12,16,.32);
+  transition:padding .5s var(--back),transform .5s var(--back)}
+.dock.lg{backdrop-filter:url(#glass) blur(12px) saturate(1.9)}
+.dock::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(120% 140% at 18% -20%,rgba(255,255,255,.35),rgba(255,255,255,0) 45%)}
+.dock-logo{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 8px;text-decoration:none;font:400 15px/1 var(--font-display);letter-spacing:.08em;color:inherit;white-space:nowrap}
+.dock-logo svg{width:24px;height:24px;display:block;color:inherit}
+.dock-links{display:flex;gap:2px;max-width:620px;overflow:hidden;transition:max-width .65s var(--back),opacity .35s}
+.dock-links a{padding:9px 14px;text-decoration:none;color:rgba(238,246,244,.72);font-size:14.5px;white-space:nowrap;border-radius:999px;transition:background .25s,color .25s}
+.dock-links a:hover{color:#fff;background:rgba(255,255,255,.1)}
+.dock-links a[aria-current="page"]{background:rgba(255,255,255,.9);color:#062027}
+.dock-links a[data-route="faune"][aria-current="page"]{background:var(--cobalt);color:#fff;border-radius:var(--radius-xs);transform:skewX(-12deg)}
+.dock-links a[data-route="faune"][aria-current="page"] span{display:inline-block;transform:skewX(12deg)}
+.dock-links a[data-route="flore"][aria-current="page"]{background:var(--lagoon);color:#062027}
+.dock-current{max-width:0;opacity:0;overflow:hidden;white-space:nowrap;font-size:14.5px;padding:0;transition:max-width .5s var(--back),opacity .3s,padding .5s}
+.dock-toggle{border:0;background:rgba(255,255,255,.12);width:36px;height:36px;border-radius:999px;cursor:pointer;display:grid;place-content:center;gap:4px;margin-left:2px;transition:transform .45s var(--back)}
+.dock-toggle i{display:block;width:14px;height:1.5px;background:#eef6f4;border-radius:2px;transition:transform .45s var(--back)}
+.dock:not(.collapsed) .dock-toggle i:first-child{transform:translateY(2.75px) rotate(45deg)}
+.dock:not(.collapsed) .dock-toggle i:last-child{transform:translateY(-2.75px) rotate(-45deg)}
+.dock.collapsed .dock-links{max-width:0;opacity:0}
+.dock.collapsed .dock-current{max-width:160px;opacity:1;padding:0 10px 0 2px}
+.dock.collapsed .dock-logo span{display:none}
+.dock:active{transform:translateX(-50%) scale(.98)}
+@media (max-width:640px){.dock-logo span{display:none}.dock-links a{padding:9px 10px;font-size:13.5px}}
+
+/* relief 3D */
+.relief{position:relative;height:clamp(600px,90vh,920px);overflow:hidden;color:var(--on-dark);background:#03141a;
+  background-image:radial-gradient(ellipse 55% 60% at 70% 48%,#145564 0%,rgba(13,63,76,.55) 32%,rgba(4,24,32,0) 70%),radial-gradient(ellipse 120% 80% at 50% -10%,#0b3340 0%,rgba(3,20,26,0) 60%),linear-gradient(180deg,#05202a 0%,#020c10 100%)}
+.relief::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.22;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.relief::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse 85% 75% at 55% 50%,rgba(0,0,0,0) 55%,rgba(1,8,11,.65) 100%)}
+.relief #reliefSvg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.relief .nums text{font:400 10.5px var(--font-mono);fill:rgba(232,241,238,.32);text-anchor:middle;pointer-events:none}
+.relief .nums text.sp{fill:rgba(232,241,238,.85);font-size:12px}
+.relief .nums text.on{fill:#fff;font-size:13px;font-weight:500}
+.relief .head,.relief .foot{z-index:2;pointer-events:none}.relief .legend{pointer-events:none}
+.relief .head{position:absolute;left:0;right:0;top:0;pointer-events:none}
+.relief .head .wrap{padding-top:clamp(28px,5vw,56px);display:grid;gap:14px}
+.relief h1{font-size:clamp(52px,9.5vw,136px);line-height:.9;letter-spacing:-.05em;max-width:9ch}
+.relief h1 em{font-style:normal;color:var(--foam)}
+.relief .label{color:color-mix(in srgb,var(--on-dark) 65%,transparent)}
+.fl-labels{position:absolute;inset:0;pointer-events:none}
+.fl-lab{position:absolute;left:0;top:0;font:400 10.5px/1 var(--font-mono);color:color-mix(in srgb,var(--on-dark) 45%,transparent);letter-spacing:.04em;transition:color .2s}
+.fl-lab.sp{color:var(--on-dark);font-size:11.5px}
+.fl-lab.on{color:#fff;font-weight:500}
+.relief .foot{position:absolute;left:0;right:0;bottom:0;pointer-events:none}
+.relief .foot .wrap{display:flex;justify-content:space-between;align-items:end;gap:16px;padding-bottom:24px;flex-wrap:wrap}
+.relief .lede{max-width:36ch;color:color-mix(in srgb,var(--on-dark) 75%,transparent);font-size:16px}
+.legend{display:flex;gap:14px;align-items:center;color:color-mix(in srgb,var(--on-dark) 75%,transparent);font-size:14px;pointer-events:auto}
+.legend i{display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:-1px}
+.legend .fa{background:var(--cobalt)}.legend .fl{background:var(--lagoon);border-radius:50%}
+.peek{position:absolute;left:0;top:0;width:280px;background:var(--surface);border-radius:var(--radius-card);padding:10px;pointer-events:none;opacity:0;transform-origin:0 0;z-index:5}
+.peek .sg{border-radius:var(--radius-s);overflow:hidden;aspect-ratio:16/9;background:var(--surface-2)}
+.peek .sg svg{display:block;width:100%;height:100%}
+.peek .bd{padding:12px 8px 6px;display:grid;gap:4px}
+.peek h3{font:300 24px/1.1 var(--font-display);font-style:italic;letter-spacing:-.01em;color:var(--k)}
+.peek .row{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.peek .ft{display:flex;justify-content:space-between;font:12.5px var(--font-mono);color:var(--muted);border-top:1px solid var(--line);padding-top:8px;margin-top:6px}
+.peek .go{font:500 11px var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.relief.no3d{display:grid;place-items:center}
+
+/* divisions & compositions */
+.div{position:relative;overflow:hidden}
+.div > svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.div .txt{position:absolute;display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:0}
+.on-dark{color:var(--on-dark)}.on-light{color:var(--on-light)}
+.doors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:20px}
+.door{display:block;height:260px;border-radius:var(--radius-tile);text-decoration:none;background:var(--paper);transition:transform .45s var(--back)}
+.door:hover{transform:translateY(-5px)}.door:active{transform:scale(.985);transition-duration:.1s}
+.door .big{font:200 clamp(44px,6vw,72px)/.95 var(--font-display);letter-spacing:-.04em}
+.door .arrow{position:absolute;font:200 44px/1 var(--font-display);transition:transform .45s var(--back)}
+.door:hover .arrow{animation:nudge .55s var(--io)}
+@keyframes nudge{0%{transform:none}30%{transform:translateX(-6px)}70%{transform:translateX(9px)}100%{transform:none}}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin-top:16px}
+.stat{background:var(--surface);border-radius:var(--radius-card);padding:18px 20px;display:grid;gap:4px}
+.stat b{font:200 40px/1 var(--font-display);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat span{font-size:13px;color:var(--muted)}
+
+.band{height:clamp(380px,56vh,520px);border-radius:0 0 var(--radius-tile) var(--radius-tile);background:var(--paper)}
+.band h1{font-size:clamp(52px,8.5vw,118px);line-height:.9;letter-spacing:-.05em}
+.band .lede{font-size:16.5px;max-width:40ch;opacity:.85}
+.band.branche{background:var(--lagoon)}
+.lab-band{height:280px}
+.lab-band h1{font-size:clamp(40px,6vw,80px);letter-spacing:-.04em}
+
+main{padding-bottom:80px}
+.section{padding-top:52px}
+.notice{border:1.5px dashed var(--line);border-radius:14px;background:var(--surface);padding:12px 16px;font-size:14px;color:var(--muted);margin-top:20px}
+.notice b{color:var(--ink);font-weight:500}
+
+/* catalogue */
+.cat-head{display:flex;flex-wrap:wrap;align-items:end;gap:16px;justify-content:space-between;margin-bottom:20px}
+.cat-head h2{font-size:clamp(36px,5vw,58px)}
+.kicker{color:var(--muted);margin-bottom:12px}
+.count{font:13px var(--font-mono);color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:22px}
+.search{flex:1 1 260px;min-width:0;display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:999px;padding:0 18px}
+.search input{border:0;background:transparent;padding:12px 0;width:100%;outline:none}
+.seg{display:inline-flex;gap:4px;background:var(--surface);border-radius:999px;padding:4px}
+.seg button{border:0;background:transparent;padding:8px 14px;cursor:pointer;color:var(--muted);font-size:14px;border-radius:999px;transition:background .25s,color .25s,transform .35s var(--back)}
+.seg button:active{transform:scale(.92)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.seg button[data-r="Animal"][aria-pressed="true"]{background:var(--cobalt);color:var(--on-dark);border-radius:var(--radius-xs)}
+.seg button[data-r="Végétal"][aria-pressed="true"]{background:var(--lagoon);color:var(--on-light)}
+select.pill{background:var(--surface);border:0;border-radius:999px;padding:11px 16px;font-size:14px;max-width:100%}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.card{display:grid;grid-template-rows:auto 1fr;background:var(--surface);border:0;border-radius:var(--radius-card);padding:10px;text-align:left;cursor:pointer;transform-origin:50% 60%}
+.thumb{position:relative;aspect-ratio:4/3;border-radius:var(--radius-s);overflow:hidden;background:var(--surface-2);transition:transform .5s var(--back)}
+.card:hover .thumb{transform:scale(1.02)}
+.thumb svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.thumb .tl{position:absolute;inset:10px 10px auto 10px;display:flex;justify-content:space-between;align-items:start;gap:6px}
+.king{font:400 13px/1 var(--font-display);padding:7px 11px;background:var(--paper)}
+.king.fa{color:var(--fa);border-radius:var(--radius-xs);transform:skewX(-12deg)}.king.fa i{display:inline-block;transform:skewX(12deg);font-style:normal}
+.king.fl{color:var(--fl);border-radius:999px}.king.fl i{font-style:normal}
+.iucn{font:500 11px/1 var(--font-mono);padding:6px 8px;border-radius:var(--radius-xs);color:var(--chip-ink);letter-spacing:.04em}
+.iucn[data-s="LC"]{background:var(--iucn-lc)}.iucn[data-s="NT"]{background:var(--iucn-nt)}.iucn[data-s="VU"]{background:var(--iucn-vu)}
+.iucn[data-s="EN"]{background:var(--iucn-en)}.iucn[data-s="CR"]{background:var(--iucn-cr)}.iucn[data-s="DD"],.iucn[data-s="NE"]{background:var(--iucn-dd)}
+.card .body{padding:14px 8px 6px;display:grid;gap:5px;align-content:start;min-width:0}
+.card .meta{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card h3{font:300 23px/1.1 var(--font-display);font-style:italic;letter-spacing:-.01em;overflow-wrap:anywhere}
+.card .common{color:var(--muted);font-size:15px}
+.card .foot{display:flex;justify-content:space-between;gap:8px;font:12.5px var(--font-mono);color:var(--muted);padding-top:10px;margin-top:4px;border-top:1px solid var(--line)}
+.empty{background:var(--surface);border-radius:var(--radius-card);padding:48px 24px;text-align:center;color:var(--muted);grid-column:1/-1}
+.empty h3{color:var(--ink);font-size:28px;margin-bottom:8px}
+
+/* fiche */
+dialog.fiche{border:0;padding:0;margin:0 0 0 auto;height:100%;max-height:100%;width:min(700px,100%);max-width:100%;background:var(--paper);color:var(--ink);overflow-y:auto}
+dialog.fiche::backdrop{background:rgba(5,25,32,.55)}
+.fiche .hd{position:relative;aspect-ratio:16/8.5;max-width:100%;background:var(--surface-2)}
+.fiche .hd svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.fiche .hd .king{position:absolute;left:clamp(16px,4vw,32px);top:calc(18px + env(safe-area-inset-top,0px))}
+.fiche .close{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;border:0;background:var(--paper);color:var(--ink);border-radius:999px;width:42px;height:42px;cursor:pointer;font-size:22px;line-height:1;transition:transform .35s var(--back)}
+.fiche .close:hover{transform:rotate(90deg)}
+.fiche .content{padding:28px clamp(16px,4vw,32px) 48px;display:grid;gap:24px}
+.fiche h2{font-size:clamp(38px,6.5vw,58px);font-style:italic;font-weight:300;letter-spacing:-.03em;color:var(--k)}
+.fiche .sub{color:var(--muted);margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sect{background:var(--surface);border-radius:var(--radius-card);padding:18px 20px}
+.sect h4{margin:0 0 8px;color:var(--k)}
+dl.kv{display:grid;grid-template-columns:minmax(120px,38%) 1fr;margin:0}
+dl.kv dt,dl.kv dd{padding:9px 0;border-bottom:1px solid var(--line);margin:0;min-width:0}
+dl.kv > :nth-last-child(-n+2){border-bottom:0}
+dl.kv dt{color:var(--muted);font-size:14px}
+dl.kv dd{font:14px var(--font-mono);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.eco{display:grid;grid-template-columns:100px 1fr;gap:20px;align-items:start}
+.gauge svg{width:100px;height:auto;display:block}
+.fiche p.desc{max-width:62ch;font:300 20px/1.45 var(--font-display)}
+.fiche .src{font-size:13px;color:var(--muted)}
+
+/* à propos */
+.about{display:grid;gap:64px;padding-top:56px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:clamp(20px,5vw,64px)}
+.two h2{font-size:clamp(32px,4.5vw,52px)}
+.prose{display:grid;gap:14px;max-width:62ch;font-size:17px}
+.codes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.code{border-radius:var(--radius-tile);overflow:hidden;display:grid;background:var(--surface)}
+.code .vis{height:180px;position:relative}
+.code .vis svg{position:absolute;inset:0;width:100%;height:100%}
+.code .in{padding:20px 22px 24px;display:grid;gap:8px}
+.code h3{font-size:32px}
+.code ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:15px;color:var(--muted)}
+.blocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.blocks div{background:var(--surface);border-radius:var(--radius-card);padding:20px;display:grid;gap:8px;align-content:start}
+.blocks b{font:300 21px/1.15 var(--font-display)}
+.blocks span{font-size:14px;color:var(--muted)}
+ol.steps{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;counter-reset:s}
+ol.steps li{counter-increment:s;background:var(--surface);border-radius:var(--radius-card);padding:20px;display:grid;gap:8px;align-content:start}
+ol.steps li::before{content:counter(s,decimal-leading-zero);font:500 13px var(--font-mono);color:var(--lagoon)}
+ol.steps b{font:300 21px/1.15 var(--font-display)}
+ol.steps span{font-size:14px;color:var(--muted)}
+.leg2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.leg2 div{display:flex;gap:10px;align-items:center;font-size:15px}
+
+/* chercheurs */
+.lab-tabs{display:inline-flex;gap:4px;background:var(--surface);border-radius:999px;padding:4px;margin:32px 0 24px}
+.lab-tabs button{border:0;background:transparent;padding:10px 18px;cursor:pointer;color:var(--muted);border-radius:999px;transition:background .25s,color .25s,transform .35s var(--back)}
+.lab-tabs button:active{transform:scale(.94)}
+.lab-tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+form.entry{display:grid;gap:16px}
+fieldset{border:0;border-radius:var(--radius-card);padding:20px clamp(16px,3vw,24px) 22px;margin:0;background:var(--surface);min-width:0}
+legend{float:left;width:100%;padding:0 0 14px;color:var(--lagoon)}
+.fields{clear:both;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.f{display:grid;gap:6px;min-width:0}.f.wide{grid-column:1/-1}
+.f label{font-size:13px;font-weight:500;color:var(--muted)}.f label i{font-style:normal;color:var(--lagoon)}
+.f input,.f select,.f textarea{width:100%;background:var(--paper);border:1.5px solid transparent;border-radius:12px;padding:11px 13px;font-size:15px;transition:border-color .2s}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--lagoon);outline:none}
+.f textarea{min-height:100px;resize:vertical}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.unit{font:12px var(--font-mono);color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{border:0;background:var(--surface);border-radius:999px;padding:12px 22px;font-weight:500;cursor:pointer;text-decoration:none;display:inline-block;transition:transform .4s var(--back)}
+.btn:hover{transform:translateY(-2px)}.btn:active{transform:scale(.94);transition-duration:.08s}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.msg{font-size:14px}.msg.ok{color:var(--iucn-lc)}.msg.err{color:var(--iucn-cr)}
+.drop{border:2px dashed var(--line);border-radius:var(--radius-tile);padding:44px 20px;text-align:center;background:var(--surface);display:grid;gap:10px;justify-items:center;cursor:pointer;transition:transform .4s var(--back),border-color .2s}
+.drop.over{border-color:var(--lagoon);transform:scale(1.015)}
+.drop strong{font:200 30px var(--font-display)}
+.drop span{color:var(--muted);font-size:14px}
+.tpl{margin-top:18px;display:grid;gap:8px}
+.tpl pre{margin:0;background:var(--surface);border-radius:14px;padding:14px;font:12px/1.5 var(--font-mono);overflow-x:auto;white-space:pre}
+.preview{margin-top:24px;display:grid;gap:14px}
+.tablewrap{overflow-x:auto;background:var(--surface);border-radius:var(--radius-card)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font:500 11px var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+td.st-ok{color:var(--iucn-lc);font-weight:500}td.st-err{color:var(--iucn-cr);white-space:normal;min-width:220px}
+progress{width:100%;accent-color:var(--lagoon)}
+
+footer{padding-block:28px 110px;color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
+@media (max-width:820px){.doors,.codes,.two{grid-template-columns:1fr}.band{height:auto;min-height:440px}}
+@media (max-width:560px){.relief .lede{display:none}.eco{grid-template-columns:1fr}.gauge svg{width:100%;max-width:260px}dl.kv{grid-template-columns:1fr}dl.kv dt{border-bottom:0;padding-bottom:0}.peek{width:240px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="glass" x="-10%" y="-40%" width="120%" height="180%"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.03" numOctaves="2" seed="7" result="t"/><feGaussianBlur in="t" stdDeviation="2" result="tb"/><feDisplacementMap in="SourceGraphic" in2="tb" scale="22" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+<nav class="dock" id="dock" aria-label="Sections">
+  <a class="dock-logo" href="#catalogue" aria-label="BANBIOM, accueil"><svg id="logo" aria-hidden="true"></svg><span>BANBIOM</span></a>
+  <span class="dock-current" id="dockCurrent" aria-hidden="true"></span>
+  <div class="dock-links">
+    <a href="#catalogue" data-route="catalogue"><span>Accueil</span></a>
+    <a href="#faune" data-route="faune"><span>Faune</span></a>
+    <a href="#flore" data-route="flore"><span>Flore</span></a>
+    <a href="#chercheurs" data-route="chercheurs"><span>Chercheurs</span></a>
+    <a href="#apropos" data-route="apropos"><span>À propos</span></a>
+  </div>
+  <button class="dock-toggle" id="dockToggle" type="button" aria-label="Afficher le menu" aria-expanded="true"><i></i><i></i></button>
+</nav>
+
+<!-- ============ ACCUEIL ============ -->
+<div class="view" id="view-catalogue">
+  <section class="relief" id="relief" aria-label="La carte des espèces : chaque cellule numérotée est une espèce">
+    <svg id="reliefSvg" aria-hidden="true"></svg>
+    <div class="head"><div class="wrap">
+      <span class="label">BANBIOM · Banque de biodiversité marine</span>
+      <h1 class="split">La base, <em>cellule</em> par <em>cellule.</em></h1>
+    </div></div>
+    <div class="foot"><div class="wrap">
+      <p class="lede">Chaque cellule numérotée est une fiche. Survolez une cellule pour prévisualiser l'espèce, cliquez pour ouvrir sa fiche.</p>
+      <div class="legend"><span><i class="fa"></i>Faune</span><span><i class="fl"></i>Flore</span><span id="reliefCount" class="mono"></span></div>
+    </div></div>
+    <div class="peek" id="peek" aria-hidden="true"></div>
+  </section>
+  <main class="wrap">
+    <div class="doors">
+      <a class="door div" href="#faune" data-division="door-fa"><svg aria-hidden="true"></svg>
+        <div class="txt on-dark" data-focus-text><span class="label">Catalogue · Faune</span><span class="big">Faune</span><span class="mono" style="font-size:13px"><span data-count="Animal">0</span> espèces animales</span></div>
+        <span class="arrow on-light" data-small-text>→</span></a>
+      <a class="door div" href="#flore" data-division="door-fl"><svg aria-hidden="true"></svg>
+        <div class="txt on-dark" data-focus-text><span class="label">Catalogue · Flore</span><span class="big">Flore</span><span class="mono" style="font-size:13px"><span data-count="Végétal">0</span> espèces végétales</span></div>
+        <span class="arrow on-light" data-small-text>→</span></a>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="notice" data-notice hidden></div>
+    <section class="section" aria-labelledby="catTitle">
+      <div class="cat-head"><div><div class="label kicker">Catalogue complet</div><h2 id="catTitle">Toutes les espèces</h2></div><div class="count" data-countfor="catalogue"></div></div>
+      <div class="filters" data-filters="catalogue"></div>
+      <div class="grid" data-grid="catalogue"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ FAUNE ============ -->
+<div class="view" id="view-faune" data-regne="Animal" hidden>
+  <section class="band div" data-division="band-fa" aria-label="Faune marine"><svg aria-hidden="true"></svg>
+    <div class="txt on-dark" data-focus-text><span class="label">Catalogue · Faune</span><h1 class="split">Faune</h1><p class="lede">Vertébrés et invertébrés, de l'estran aux fonds bathyaux.</p></div>
+  </section>
+  <main class="wrap">
+    <div class="notice" data-notice hidden></div>
+    <section class="section">
+      <div class="cat-head"><div><div class="label kicker">Fiches animales</div><h2>Espèces animales</h2></div><div class="count" data-countfor="faune"></div></div>
+      <div class="filters" data-filters="faune"></div>
+      <div class="grid" data-grid="faune"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ FLORE ============ -->
+<div class="view" id="view-flore" data-regne="Végétal" hidden>
+  <section class="band div" data-division="band-fl" aria-label="Flore marine"><svg aria-hidden="true"></svg>
+    <div class="txt on-dark" data-focus-text><span class="label">Catalogue · Flore</span><h1 class="split">Flore</h1><p class="lede">Phanérogames et algues : les producteurs qui construisent les habitats.</p></div>
+  </section>
+  <main class="wrap">
+    <div class="notice" data-notice hidden></div>
+    <section class="section">
+      <div class="cat-head"><div><div class="label kicker">Fiches végétales</div><h2>Espèces végétales</h2></div><div class="count" data-countfor="flore"></div></div>
+      <div class="filters" data-filters="flore"></div>
+      <div class="grid" data-grid="flore"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ CHERCHEURS ============ -->
+<div class="view" id="view-chercheurs" hidden>
+  <section class="band lab-band div" data-division="band-lab" aria-label="Espace chercheurs"><svg aria-hidden="true"></svg>
+    <div class="txt on-dark" data-focus-text><span class="label">Espace chercheurs</span><h1 class="split">Ajouter des espèces</h1></div>
+  </section>
+  <main class="wrap">
+    <p style="margin-top:28px;max-width:62ch;color:var(--muted)">Saisissez une fiche espèce par espèce, ou importez un lot depuis un fichier CSV, TSV ou JSON exporté de votre base de terrain. Chaque ligne est contrôlée avant l'import.</p>
+    <div class="notice" data-notice hidden></div>
+    <div class="lab-tabs" role="tablist">
+      <button type="button" role="tab" id="tabForm" aria-selected="true" aria-controls="panelForm">Saisie manuelle</button>
+      <button type="button" role="tab" id="tabFile" aria-selected="false" aria-controls="panelFile">Import de fichier</button>
+    </div>
+    <div id="panelForm" role="tabpanel" aria-labelledby="tabForm">
+      <form class="entry" id="entryForm" novalidate>
+        <fieldset><legend class="label">Identification</legend><div class="fields">
+          <div class="f"><label for="i_sci">Nom scientifique <i>*</i></label><input id="i_sci" name="nom_scientifique" required placeholder="Posidonia oceanica"></div>
+          <div class="f"><label for="i_com">Nom commun</label><input id="i_com" name="nom_commun" placeholder="Posidonie"></div>
+          <div class="f"><label for="i_regne">Règne <i>*</i></label><select id="i_regne" name="regne" required><option value="">Choisir…</option><option>Animal</option><option>Végétal</option></select></div>
+          <div class="f"><label for="i_auteur">Auteur, année</label><input id="i_auteur" name="auteur" placeholder="(L.) Delile, 1813"></div>
+        </div></fieldset>
+        <fieldset><legend class="label">Taxonomie</legend><div class="fields">
+          <div class="f"><label for="i_emb">Embranchement / Division</label><input id="i_emb" name="embranchement"></div>
+          <div class="f"><label for="i_cla">Classe</label><input id="i_cla" name="classe"></div>
+          <div class="f"><label for="i_ord">Ordre</label><input id="i_ord" name="ordre"></div>
+          <div class="f"><label for="i_fam">Famille</label><input id="i_fam" name="famille"></div>
+        </div></fieldset>
+        <fieldset><legend class="label">Écologie</legend><div class="fields">
+          <div class="f"><label for="i_hab">Habitat <i>*</i></label><input id="i_hab" name="habitat" list="habList" required placeholder="Herbier, roche infralittorale…"><datalist id="habList"></datalist></div>
+          <div class="f"><label for="i_pmin">Profondeur <span class="unit">m (min – max)</span></label><div class="pair"><input id="i_pmin" name="profondeur_min" type="number" min="0" step="any" aria-label="Profondeur minimale"><input id="i_pmax" name="profondeur_max" type="number" min="0" step="any" aria-label="Profondeur maximale"></div></div>
+          <div class="f"><label for="i_tmin">Température <span class="unit">°C (min – max)</span></label><div class="pair"><input id="i_tmin" name="temperature_min" type="number" step="any" aria-label="Température minimale"><input id="i_tmax" name="temperature_max" type="number" step="any" aria-label="Température maximale"></div></div>
+          <div class="f"><label for="i_sal">Salinité <span class="unit">PSU</span></label><input id="i_sal" name="salinite" placeholder="36 – 39"></div>
+          <div class="f"><label for="i_tro">Mode trophique</label><input id="i_tro" name="mode_trophique" placeholder="Autotrophe, filtreur, carnivore…"></div>
+          <div class="f"><label for="i_taille">Taille max. <span class="unit">cm</span></label><input id="i_taille" name="taille_max_cm" type="number" min="0" step="any"></div>
+          <div class="f wide"><label for="i_rep">Répartition</label><input id="i_rep" name="repartition" placeholder="Méditerranée occidentale, côtes algériennes…"></div>
+        </div></fieldset>
+        <fieldset><legend class="label">Conservation &amp; source</legend><div class="fields">
+          <div class="f"><label for="i_iucn">Statut UICN</label><select id="i_iucn" name="statut_uicn"><option value="NE">NE · Non évalué</option><option value="DD">DD · Données insuffisantes</option><option value="LC">LC · Préoccupation mineure</option><option value="NT">NT · Quasi menacé</option><option value="VU">VU · Vulnérable</option><option value="EN">EN · En danger</option><option value="CR">CR · En danger critique</option></select></div>
+          <div class="f"><label for="i_prot">Protection</label><input id="i_prot" name="protection" placeholder="Convention de Barcelone, ann. II…"></div>
+          <div class="f"><label for="i_ctr">Contributeur <i>*</i></label><input id="i_ctr" name="contributeur" required placeholder="Nom, laboratoire"></div>
+          <div class="f"><label for="i_ref">Référence</label><input id="i_ref" name="reference" placeholder="Publication, DOI, campagne"></div>
+          <div class="f wide"><label for="i_desc">Description et observations</label><textarea id="i_desc" name="description"></textarea></div>
+        </div></fieldset>
+        <div class="actions"><button class="btn primary" type="submit" id="saveBtn">Enregistrer la fiche</button><button class="btn" type="reset">Effacer</button><span class="msg" id="formMsg" role="status"></span></div>
+      </form>
+    </div>
+    <div id="panelFile" role="tabpanel" aria-labelledby="tabFile" hidden>
+      <label class="drop" id="drop" for="fileIn"><strong>Déposez un fichier ici</strong><span>ou cliquez pour parcourir · CSV (séparateur « ; » ou « , »), TSV, JSON</span><input id="fileIn" type="file" accept=".csv,.tsv,.txt,.json" hidden></label>
+      <div class="tpl">
+        <div class="actions"><span class="label" style="color:var(--muted)">Colonnes attendues</span><button class="btn" type="button" id="copyTpl" style="padding:7px 14px;font-size:13px">Copier l'en-tête</button><span class="msg" id="tplMsg"></span></div>
+        <pre id="tplPre"></pre>
+        <span class="unit">Obligatoires : nom_scientifique, regne (Animal / Végétal), habitat. Les en-têtes sans accents ou en anglais (scientific_name, kingdom, depth_min…) sont reconnus.</span>
+      </div>
+      <div class="preview" id="preview" hidden></div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ À PROPOS ============ -->
+<div class="view" id="view-apropos" hidden>
+  <section class="band branche div" data-division="band-ap" aria-label="À propos"><svg aria-hidden="true"></svg>
+    <div class="txt on-dark" data-focus-text><span class="label">À propos</span><h1 class="split">Une cellule par espèce.</h1></div>
+  </section>
+  <main class="wrap about">
+    <section class="two">
+      <div><div class="label kicker">Mission</div><h2>Rendre la biodiversité marine consultable</h2></div>
+      <div class="prose">
+        <p>Les données sur les espèces marines sont dispersées entre rapports de campagne, publications, tableurs de laboratoire et carnets de terrain. BANBIOM les réunit sous une forme commune : une fiche technique par espèce, comparable d'une espèce à l'autre.</p>
+        <p>La base sert d'outil de travail aux équipes scientifiques et de référence aux gestionnaires d'aires marines, aux enseignants et aux bureaux d'études.</p>
+      </div>
+    </section>
+    <section class="two">
+      <div><div class="label kicker">Le motif</div><h2>Pourquoi le voronoï</h2></div>
+      <div class="prose">
+        <p>Un diagramme de Voronoï partage l'espace en cellules : chaque point possède le territoire qui lui est le plus proche. C'est la géométrie des niches écologiques, des territoires de colonies, des cellules végétales et des réseaux de fissures des récifs.</p>
+        <p>Dans BANBIOM, une cellule est une espèce, l'espace entre deux cellules est une relation, et la graine qui engendre la cellule est une donnée. Chaque espèce reçoit une signature calculée à partir de ses mesures : température, profondeur, taille.</p>
+      </div>
+    </section>
+    <section>
+      <div class="label kicker">Trois codes</div>
+      <div class="codes">
+        <div class="code" data-regne="Animal"><div class="vis div" data-division="code-fa"><svg aria-hidden="true"></svg></div><div class="in"><h3 style="color:var(--fa)">Faune</h3><ul><li>Cellules à angles vifs</li><li>Veines fines, cobalt</li><li>Étiquettes en parallélogramme</li></ul></div></div>
+        <div class="code" data-regne="Végétal"><div class="vis div" data-division="code-fl"><svg aria-hidden="true"></svg></div><div class="in"><h3 style="color:var(--fl)">Flore</h3><ul><li>Galets aux coins arrondis</li><li>Veines moyennes, lagon</li><li>Étiquettes en pilule</li></ul></div></div>
+        <div class="code"><div class="vis div" data-division="code-br" style="background:var(--lagoon)"><svg aria-hidden="true"></svg></div><div class="in"><h3>Marque</h3><ul><li>L'espace entre les cellules devient la forme</li><li>Abysse sur lagon</li><li>Divisions et compositions</li></ul></div></div>
+      </div>
+    </section>
+    <section>
+      <div class="label kicker">La fiche technique</div>
+      <div class="blocks">
+        <div><b>Identification</b><span>Nom scientifique, autorité, nom commun, règne</span></div>
+        <div><b>Taxonomie</b><span>Embranchement, classe, ordre, famille</span></div>
+        <div><b>Écologie</b><span>Habitat, profondeur, température, salinité, mode trophique, taille</span></div>
+        <div><b>Répartition &amp; conservation</b><span>Aire de répartition, statut UICN, protection</span></div>
+        <div><b>Source</b><span>Contributeur, référence, date d'ajout</span></div>
+      </div>
+    </section>
+    <section>
+      <div class="label kicker">Contribuer</div>
+      <ol class="steps">
+        <li><b>Obtenir un accès</b><span>Le compte contributeur est attribué par l'équipe qui administre la base.</span></li>
+        <li><b>Saisir ou importer</b><span>Une fiche à la fois, ou un fichier CSV / JSON pour un lot.</span></li>
+        <li><b>Contrôle automatique</b><span>Binôme latin, règne, habitat, cohérence des valeurs, doublons.</span></li>
+        <li><b>Publication</b><span>La fiche rejoint immédiatement le relief et le catalogue.</span></li>
+      </ol>
+      <p style="margin-top:20px"><a class="btn primary" href="#chercheurs">Ouvrir l'espace chercheurs</a></p>
+    </section>
+    <section>
+      <div class="label kicker">Statuts de conservation · Liste rouge UICN</div>
+      <div class="leg2" id="legend"></div>
+    </section>
+  </main>
+</div>
+
+<div class="wrap"><footer><span>BANBIOM · Banque de données des écosystèmes marins</span><span class="mono" id="footCount"></span></footer></div>
+<dialog class="fiche" id="fiche" aria-labelledby="ficheTitle"></dialog>
+
+<script>/* @ds-bundle: {"format":4,"namespace":"Banbiom","components":[]} */
+/* BANBIOM — moteur voronoï partagé.
+   Banbiom.field(canvas, opts)        champ animé ou statique (macro, méso, micro)
+   Banbiom.division(svg, opts)        division d'un cadre en 2, 3, 6, 12… cellules, avec cellule dominante
+   Banbiom.cellPath(seed, w, h, opts) une cellule seule (nano), chemin SVG
+   Banbiom.seedsFromSpecies(sp)       graines placées par les données d'une espèce */
+(function () {
+  "use strict";
+  function rng(seed) { var s = seed >>> 0 || 1; return function () { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; }; }
+  function hash(str) { var h = 2166136261; str = String(str); for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+
+  /* ---------- géométrie ---------- */
+  /* demi-plan de puissance entre p et q (poids wp, wq), recul de g/2 vers p */
+  function clipPower(poly, p, q, g, wp, wq) {
+    var nx = q[0] - p[0], ny = q[1] - p[1], len = Math.hypot(nx, ny) || 1, mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
+    var shift = (wp - wq) / 2, off = g / 2 * len, out = [];
+    function side(v) { return (v[0] - mx) * nx + (v[1] - my) * ny - shift + off; }
+    return cutBy(poly, side);
+  }
+  function cutBy(poly, side) {
+    var out = [];
+    for (var i = 0; i < poly.length; i++) {
+      var a = poly[i], b = poly[(i + 1) % poly.length], sa = side(a), sb = side(b);
+      if (sa <= 0) out.push(a);
+      if ((sa <= 0) !== (sb <= 0)) { var t = sa / (sa - sb); out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]); }
+    }
+    return out;
+  }
+  function frame(w, h, m) { return [[-m, -m], [w + m, -m], [w + m, h + m], [-m, h + m]]; }
+  /* diagramme de puissance : chaque graine {x, y, w (poids, px²)} */
+  function cells(pts, w, h, gapOf, margin) {
+    return pts.map(function (p, i) {
+      var poly = frame(w, h, margin == null ? 60 : margin), g = gapOf(p);
+      for (var j = 0; j < pts.length && poly.length > 2; j++) if (j !== i) poly = clipPower(poly, [p.x, p.y], [pts[j].x, pts[j].y], g, p.w || 0, pts[j].w || 0);
+      return poly;
+    });
+  }
+  function dedupe(poly) {
+    var pts = [];
+    poly.forEach(function (v) { var l = pts[pts.length - 1]; if (!l || Math.hypot(v[0] - l[0], v[1] - l[1]) > 0.05) pts.push(v); });
+    if (pts.length > 1 && Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) <= 0.05) pts.pop();
+    return pts;
+  }
+  function centroid(pts) { var cx = 0, cy = 0; pts.forEach(function (v) { cx += v[0]; cy += v[1]; }); return [cx / pts.length, cy / pts.length]; }
+  function inwardNormal(a, b, c) {
+    var dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
+    if (nx * (c[0] - a[0]) + ny * (c[1] - a[1]) < 0) { nx = -nx; ny = -ny; }
+    return [nx, ny];
+  }
+  /* arrondi adaptatif : rayon = min(R, moitié de la distance du centre au bord le plus proche).
+     La cellule est réduite de ce rayon puis regonflée : coins en arcs exacts, bords inchangés,
+     et une petite cellule garde sa forme au lieu de disparaître. */
+  function rounded(poly, R) {
+    var pts = dedupe(poly); if (pts.length < 3) return null;
+    var c = centroid(pts), n = pts.length, dmin = 1e9;
+    for (var i = 0; i < n; i++) {
+      var a = pts[i], b = pts[(i + 1) % n], nr = inwardNormal(a, b, c);
+      dmin = Math.min(dmin, (c[0] - a[0]) * nr[0] + (c[1] - a[1]) * nr[1]);
+    }
+    if (dmin < 0.8) return null;
+    var r = Math.max(0, Math.min(R, dmin * 0.35));
+    if (r < 0.6) return { pts: pts, r: 0 };
+    var inner = pts;
+    for (var k = 0; k < n; k++) {
+      (function (a, b) { var nr = inwardNormal(a, b, c); inner = cutBy(inner, function (v) { return r - ((v[0] - a[0]) * nr[0] + (v[1] - a[1]) * nr[1]); }); })(pts[k], pts[(k + 1) % n]);
+      if (inner.length < 3) return { pts: pts, r: 0 };
+    }
+    inner = dedupe(inner); if (inner.length < 3) return { pts: pts, r: 0 };
+    return { pts: inner, r: r };
+  }
+  function arcs(shape) {
+    var pts = shape.pts, n = pts.length, c = centroid(pts), out = [];
+    for (var i = 0; i < n; i++) {
+      var a = pts[(i - 1 + n) % n], b = pts[i], d = pts[(i + 1) % n];
+      var n1 = inwardNormal(a, b, c), n2 = inwardNormal(b, d, c);
+      n1 = [-n1[0], -n1[1]]; n2 = [-n2[0], -n2[1]];
+      out.push({ b: b, a1: Math.atan2(n1[1], n1[0]), a2: Math.atan2(n2[1], n2[0]), n1: n1, n2: n2, ccw: (n1[0] * n2[1] - n1[1] * n2[0]) < 0 });
+    }
+    return out;
+  }
+  function traceCanvas(ctx, poly, R) {
+    var s = rounded(poly, R); if (!s) return false;
+    ctx.beginPath();
+    if (!s.r) { s.pts.forEach(function (v, j) { j ? ctx.lineTo(v[0], v[1]) : ctx.moveTo(v[0], v[1]); }); ctx.closePath(); return true; }
+    arcs(s).forEach(function (k) { ctx.arc(k.b[0], k.b[1], s.r, k.a1, k.a2, k.ccw); });
+    ctx.closePath(); return true;
+  }
+  function traceSVG(poly, R) {
+    var s = rounded(poly, R); if (!s) return "";
+    var f = function (v) { return v.toFixed(2); };
+    if (!s.r) return "M" + s.pts.map(function (v) { return f(v[0]) + " " + f(v[1]); }).join("L") + "Z";
+    var d = "", r = s.r;
+    arcs(s).forEach(function (k, i) {
+      var p1 = [k.b[0] + k.n1[0] * r, k.b[1] + k.n1[1] * r], p2 = [k.b[0] + k.n2[0] * r, k.b[1] + k.n2[1] * r];
+      d += (i ? "L" : "M") + f(p1[0]) + " " + f(p1[1]) + "A" + f(r) + " " + f(r) + " 0 0 " + (k.ccw ? 0 : 1) + " " + f(p2[0]) + " " + f(p2[1]);
+    });
+    return d + "Z";
+  }
+  /* plus grand rectangle (rapport donné) centré dans une cellule convexe : zone de texte */
+  function innerRect(poly, aspect) {
+    var pts = dedupe(poly); if (pts.length < 3) return null;
+    var c = centroid(pts), n = pts.length;
+    function inside(x, y) { for (var i = 0; i < n; i++) { var a = pts[i], b = pts[(i + 1) % n], nr = inwardNormal(a, b, c); if ((x - a[0]) * nr[0] + (y - a[1]) * nr[1] < 0) return false; } return true; }
+    var lo = 0, hi = 4000;
+    for (var it = 0; it < 30; it++) { var m = (lo + hi) / 2, hw = m * aspect / 2, hh = m / 2;
+      if (inside(c[0] - hw, c[1] - hh) && inside(c[0] + hw, c[1] - hh) && inside(c[0] + hw, c[1] + hh) && inside(c[0] - hw, c[1] + hh)) lo = m; else hi = m; }
+    return { x: c[0] - lo * aspect / 2, y: c[1] - lo / 2, w: lo * aspect, h: lo };
+  }
+
+  /* ---------- couleurs (tokens du thème courant) ---------- */
+  function hex(h) { h = (h || "#088").trim(); if (h.indexOf("rgb") === 0) return h.replace(/[^\d,.]/g, "").split(",").slice(0, 3).map(Number); h = h.replace("#", ""); if (h.length === 3) h = h.split("").map(function (c) { return c + c; }).join(""); var n = parseInt(h.slice(0, 6), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+  function rgb(a) { return "rgb(" + a.map(Math.round).join(",") + ")"; }
+  function pal(el) {
+    var cs = getComputedStyle(el || document.documentElement), g = function (n) { return hex(cs.getPropertyValue("--" + n)); };
+    return { abyss: g("abyss"), abyss2: g("abyss-2"), cobalt: g("cobalt"), cobalt2: g("cobalt-2"), mist: g("mist"), lagoon: g("lagoon"), foam: g("foam"), deep: g("deep"), ground: g("ground"), vein: g("hero-vein"), paper: g("paper") };
+  }
+
+  /* ---------- styles de champ (aplats) ---------- */
+  var KINDS = {
+    faune: { gap: 1.5, r: 0, bg: function (p) { return p.mist; }, fill: function (s, p) { return s.n < .7 ? p.cobalt : p.cobalt2; } },
+    flore: { gap: 10, r: 26, bg: function (p) { return p.ground; }, fill: function (s, p) { var f = [p.lagoon, p.deep, p.foam, p.lagoon, p.abyss]; return f[Math.floor(s.n * f.length) % f.length]; } },
+    branche: { gap: 18, r: 40, bg: function (p) { return p.lagoon; }, fill: function (s, p) { return p.abyss; } },
+    reseau: { gap: 2, r: 12, bg: function (p) { return p.vein; }, fill: function (s, p) { return s.n < .8 ? p.abyss : p.abyss2; } }
+  };
+
+  function makeSeeds(o, w, h) {
+    var list;
+    if (o.seeds) list = o.seeds(w, h);
+    else {
+      var r = rng(hash(o.seed || "banbiom")), n = o.cells || Math.max(3, Math.round(w * h / 5200 * (o.density || 1)));
+      list = Array.from({ length: Math.min(160, n) }, function () { return { x: r() * w, y: r() * h, n: r() }; });
+    }
+    if (o.focus) { /* cellule dominante : graine fixée + poids */
+      list.push({ x: o.focus.x * w, y: o.focus.y * h, n: .5, w: Math.pow(o.focus.size * Math.min(w, h), 2), pinned: true, focus: true });
+    }
+    var r2 = rng(hash((o.seed || "b") + "m"));
+    return list.map(function (s) { return { hx: s.x, hy: s.y, x: s.x, y: s.y, vx: 0, vy: 0, n: s.n != null ? s.n : .5, w: s.w || 0, pinned: !!s.pinned, focus: !!s.focus, a: r2() * 6.283, s: .08 + r2() * .14, g: 0 }; });
+  }
+
+  function field(cv, opts) {
+    var o = Object.assign({ kind: "faune", seed: "x", live: false, interactive: false }, opts || {});
+    var K = KINDS[o.kind], st = { pts: null, mouse: null, raf: 0, last: 0, t0: performance.now(), energy: 0, vis: true };
+    var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var R = o.radius != null ? o.radius : K.r, GAP = o.gap != null ? o.gap : K.gap;
+    function setup() {
+      var w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
+      var dpr = Math.min(2, window.devicePixelRatio || 1); st.w = w; st.h = h; st.dpr = dpr; cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+      st.pts = makeSeeds(o, w, h); render(); kick();
+    }
+    function render() {
+      if (!st.pts) return;
+      var p = pal(cv), c = cv.getContext("2d"), w = st.w, h = st.h;
+      c.setTransform(st.dpr, 0, 0, st.dpr, 0, 0); c.clearRect(0, 0, w, h);
+      c.fillStyle = rgb(K.bg(p)); c.fillRect(0, 0, w, h);
+      var cs = cells(st.pts, w, h, function (s) { return GAP + s.g; });
+      cs.forEach(function (poly, i) {
+        var s = st.pts[i]; if (poly.length < 3) return;
+        if (!traceCanvas(c, poly, R)) return;
+        c.fillStyle = rgb(s.focus && o.focusColor ? p[o.focusColor] : K.fill(s, p)); c.fill();
+      });
+      if (o.nuclei) st.pts.forEach(function (s, i) { c.fillStyle = o.nucleusColor ? o.nucleusColor(s, i) : rgb(p.mist); c.beginPath(); c.arc(s.x, s.y, o.nucleusSize || 2, 0, 6.283); c.fill(); });
+    }
+    /* ressorts amortis, mouvement retenu : pas de croisement de graines, pas de saut */
+    function step(now) {
+      var t = (now - st.t0) / 1000, amp = o.live && !reduce ? Math.min(st.w, st.h) * .025 : 0, reach = Math.max(90, Math.min(st.w, st.h) * .4), e = 0;
+      st.pts.forEach(function (p) {
+        var tg = 0;
+        if (!p.pinned) {
+          var tx = p.hx + Math.sin(t * p.s + p.a) * amp, ty = p.hy + Math.cos(t * p.s * .8 + p.n * 9) * amp * .8, ax = (tx - p.x) * .03, ay = (ty - p.y) * .03;
+          if (st.mouse) { var dx = p.x - st.mouse.x, dy = p.y - st.mouse.y, d = Math.hypot(dx, dy) || 1; if (d < reach) { var f = Math.pow(1 - d / reach, 2) * 2.4; ax += dx / d * f; ay += dy / d * f; tg = (o.open != null ? o.open : 10) * Math.pow(1 - d / reach, 2); } }
+          p.vx = (p.vx + ax) * .8; p.vy = (p.vy + ay) * .8; p.x += p.vx; p.y += p.vy; e += Math.abs(p.vx) + Math.abs(p.vy);
+        }
+        p.g += (tg - p.g) * .12; e += Math.abs(tg - p.g) * .2;
+      });
+      st.energy = e / st.pts.length;
+    }
+    function kick() {
+      if (st.raf || !st.pts) return;
+      var loop = function (now) {
+        var active = (o.live && st.vis && !reduce) || st.mouse || st.energy > .01;
+        if (!active || !cv.isConnected) { st.raf = 0; render(); return; }
+        if (now - st.last > 16) { step(now); render(); st.last = now; }
+        st.raf = requestAnimationFrame(loop);
+      };
+      st.raf = requestAnimationFrame(loop);
+    }
+    new ResizeObserver(setup).observe(cv);
+    new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "class"] });
+    if (o.live && "IntersectionObserver" in window) new IntersectionObserver(function (es) { st.vis = es[0].isIntersecting; kick(); }).observe(cv);
+    if (o.interactive && !reduce) {
+      var host = o.host || cv.parentElement;
+      host.addEventListener("pointermove", function (e) { if (e.pointerType === "touch") return; var b = cv.getBoundingClientRect(); st.mouse = { x: e.clientX - b.left, y: e.clientY - b.top }; kick(); });
+      host.addEventListener("pointerleave", function () { st.mouse = null; kick(); });
+    }
+    return { redraw: render, setup: setup };
+  }
+
+  /* ---------- divisions d'un cadre ----------
+     n = 2 ou 3 : coupes droites parallèles, inclinées de `angle` degrés ; `sizes` = proportions.
+     n ≥ 4 : diagramme de puissance ; `focus` {x, y, size} réserve une cellule dominante (espace typographique).
+     Rend des <path> dans le <svg> et renvoie les cellules avec leur zone de texte. */
+  function division(svg, opts) {
+    var o = Object.assign({ n: 2, gap: 10, radius: 18, angle: 12, colors: ["var(--abyss)", "var(--cobalt)", "var(--lagoon)"], seed: "division", aspect: 1.6 }, opts || {});
+    var vb = svg.viewBox.baseVal, w = vb && vb.width ? vb.width : svg.clientWidth, h = vb && vb.height ? vb.height : svg.clientHeight;
+    var polys = [], focusIndex = -1;
+    if (o.n <= 3) {
+      var th = o.angle * Math.PI / 180, ux = Math.cos(th), uy = Math.sin(th), cx = w / 2, cy = h / 2;
+      var proj = function (v) { return (v[0] - cx) * ux + (v[1] - cy) * uy; };
+      var F = frame(w, h, 0), lo = Math.min.apply(null, F.map(proj)), hi = Math.max.apply(null, F.map(proj));
+      var sizes = o.sizes || Array.from({ length: o.n }, function () { return 1; }), tot = sizes.reduce(function (a, b) { return a + b; }, 0), acc = 0;
+      var cuts = sizes.map(function (s) { acc += s; return lo + (hi - lo) * acc / tot; });
+      for (var i = 0; i < o.n; i++) {
+        var a = i ? cuts[i - 1] + o.gap / 2 : -1e9, b = i < o.n - 1 ? cuts[i] - o.gap / 2 : 1e9, poly = F;
+        poly = cutBy(poly, function (v) { return a - proj(v); });
+        poly = cutBy(poly, function (v) { return proj(v) - b; });
+        polys.push(poly);
+      }
+      if (o.focusCell != null) focusIndex = o.focusCell; else { var mx = Math.max.apply(null, sizes); focusIndex = sizes.indexOf(mx); }
+    } else {
+      var r = rng(hash(o.seed)), pts = [];
+      var fx = o.focus ? o.focus.x * w : -1, fy = o.focus ? o.focus.y * h : -1, fr = o.focus ? o.focus.size * Math.min(w, h) : 0;
+      var tries = 0;
+      while (pts.length < o.n - (o.focus ? 1 : 0) && tries++ < 2000) {
+        var x = r() * w, y = r() * h;
+        if (o.focus && Math.hypot(x - fx, y - fy) < fr * 1.15) continue;
+        pts.push({ x: x, y: y, w: 0 });
+      }
+      if (o.focus) { pts.unshift({ x: fx, y: fy, w: fr * fr * 0.9 }); focusIndex = 0; }
+      polys = cells(pts, w, h, function () { return o.gap; }, 0);
+    }
+    var ns = "http://www.w3.org/2000/svg", out = [];
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    polys.forEach(function (poly, i) {
+      var d = traceSVG(poly, o.radius); if (!d) return;
+      var el = document.createElementNS(ns, "path"); el.setAttribute("d", d);
+      var col = i === focusIndex && o.focusColor ? o.focusColor : o.colors[i % o.colors.length];
+      el.setAttribute("fill", col); el.setAttribute("data-cell", i); if (i === focusIndex) el.setAttribute("data-focus", "");
+      svg.appendChild(el);
+      out.push({ index: i, focus: i === focusIndex, text: innerRect(poly, o.aspect) });
+    });
+    return out;
+  }
+
+  /* une cellule seule (nano) */
+  function cellPath(seed, w, h, opts) {
+    opts = opts || {}; var r = rng(hash(seed)), cx = w / 2, cy = h / 2, k = opts.sides || 6, pts = [{ x: cx, y: cy }];
+    for (var i = 0; i < k; i++) { var a = i / k * 6.283 + (r() - .5) * .8, d = 1.0 + r() * .45; pts.push({ x: cx + Math.cos(a) * w * d, y: cy + Math.sin(a) * h * d }); }
+    var poly = cells(pts, w, h, function () { return 0; }, -(opts.inset || 0))[0];
+    return traceSVG(poly, opts.radius || 0);
+  }
+
+  /* graines placées par les données : x = température, y = profondeur, nombre = taille */
+  function seedsFromSpecies(sp) {
+    return function (w, h) {
+      var r = rng(hash(sp.nom_scientifique || "x")), tmin = sp.temperature_min || 10, tmax = sp.temperature_max || 25, dmin = sp.profondeur_min || 0, dmax = sp.profondeur_max || 50;
+      var count = Math.max(5, Math.min(22, Math.round(Math.log2((sp.taille_max_cm || 20) + 2) * 2.6)));
+      var x0 = (tmin - 5) / 30 * w, x1 = (tmax - 5) / 30 * w, y0 = Math.sqrt(dmin / 1000) * h, y1 = Math.sqrt(Math.max(dmax, dmin + 1) / 1000) * h, out = [];
+      for (var i = 0; i < count; i++) { var band = i < count * .65; out.push({ x: band ? x0 + r() * Math.max(14, x1 - x0) : r() * w, y: band ? y0 + r() * Math.max(14, y1 - y0) : r() * h, n: r() }); }
+      return out;
+    };
+  }
+
+  window.Banbiom = { field: field, division: division, cellPath: cellPath, seedsFromSpecies: seedsFromSpecies, kinds: Object.keys(KINDS), _cells: cells, _traceSVG: traceSVG, _rounded: rounded, _arcs: arcs, _innerRect: innerRect, _hash: hash, _rng: rng };
+})();
+</script>
+<script>
+(() => {
+const B=window.Banbiom;
+const DEMO=[
+ {nom_scientifique:"Posidonia oceanica",auteur:"(L.) Delile, 1813",nom_commun:"Posidonie",regne:"Végétal",embranchement:"Tracheophyta",classe:"Liliopsida",ordre:"Alismatales",famille:"Posidoniaceae",habitat:"Herbier",profondeur_min:0.5,profondeur_max:40,temperature_min:10,temperature_max:28,salinite:"36 – 39",mode_trophique:"Autotrophe",taille_max_cm:150,repartition:"Endémique de Méditerranée",statut_uicn:"LC",protection:"Convention de Barcelone, ann. II",description:"Phanérogame marine formant de vastes herbiers.",contributeur:"Exemple",reference:"Données exemple, à valider"},
+ {nom_scientifique:"Pinna nobilis",auteur:"Linnaeus, 1758",nom_commun:"Grande nacre",regne:"Animal",embranchement:"Mollusca",classe:"Bivalvia",ordre:"Ostreida",famille:"Pinnidae",habitat:"Herbier",profondeur_min:0.5,profondeur_max:60,temperature_min:12,temperature_max:28,salinite:"36 – 39",mode_trophique:"Filtreur",taille_max_cm:120,repartition:"Endémique de Méditerranée",statut_uicn:"CR",protection:"Convention de Barcelone, ann. II",description:"Plus grand bivalve de Méditerranée.",contributeur:"Exemple",reference:"Données exemple, à valider"},
+ {nom_scientifique:"Corallium rubrum",auteur:"(Linnaeus, 1758)",nom_commun:"Corail rouge",regne:"Animal",embranchement:"Cnidaria",classe:"Anthozoa",ordre:"Scleralcyonacea",famille:"Coralliidae",habitat:"Coralligène",profondeur_min:7,profondeur_max:800,temperature_min:10,temperature_max:23,salinite:"37 – 38",mode_trophique:"Suspensivore",taille_max_cm:50,repartition:"Méditerranée",statut_uicn:"EN",protection:"Convention de Barcelone, ann. III",description:"Gorgone à squelette calcaire rouge.",contributeur:"Exemple",reference:"Données exemple, à valider"},
+ {nom_scientifique:"Cymodocea nodosa",auteur:"(Ucria) Asch., 1870",nom_commun:"Cymodocée",regne:"Végétal",embranchement:"Tracheophyta",classe:"Liliopsida",ordre:"Alismatales",famille:"Cymodoceaceae",habitat:"Fond sableux",profondeur_min:0,profondeur_max:30,temperature_min:10,temperature_max:30,salinite:"30 – 40",mode_trophique:"Autotrophe",taille_max_cm:40,repartition:"Méditerranée, Atlantique Est",statut_uicn:"LC",protection:"Convention de Barcelone, ann. II",description:"Phanérogame pionnière des sables.",contributeur:"Exemple",reference:"Données exemple, à valider"}
+];
+const FIELDS=["nom_scientifique","auteur","nom_commun","regne","embranchement","classe","ordre","famille","habitat","profondeur_min","profondeur_max","temperature_min","temperature_max","salinite","mode_trophique","taille_max_cm","repartition","statut_uicn","protection","description","contributeur","reference"];
+const NUM=new Set(["profondeur_min","profondeur_max","temperature_min","temperature_max","taille_max_cm"]);
+const IUCN={CR:"En danger critique",EN:"En danger",VU:"Vulnérable",NT:"Quasi menacé",LC:"Préoccupation mineure",DD:"Données insuffisantes",NE:"Non évalué"};
+const ALIASES={scientific_name:"nom_scientifique",nom_latin:"nom_scientifique",espece:"nom_scientifique",species:"nom_scientifique",taxon:"nom_scientifique",common_name:"nom_commun",nom_vernaculaire:"nom_commun",kingdom:"regne",phylum:"embranchement",division:"embranchement",class:"classe",order:"ordre",family:"famille",author:"auteur",depth_min:"profondeur_min",depth_max:"profondeur_max",temp_min:"temperature_min",temp_max:"temperature_max",salinity:"salinite",diet:"mode_trophique",trophic:"mode_trophique",max_size_cm:"taille_max_cm",taille_max:"taille_max_cm",distribution:"repartition",iucn:"statut_uicn",uicn:"statut_uicn",iucn_status:"statut_uicn",notes:"description",observations:"description",contributor:"contributeur",source:"reference"};
+
+const S={species:[],ready:false,canWrite:true,col:null,
+  views:{catalogue:{regne:"",q:"",habitat:"",iucn:""},faune:{regne:"Animal",q:"",habitat:"",iucn:""},flore:{regne:"Végétal",q:"",habitat:"",iucn:""}}};
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=n=>(n===null||n===undefined||n===""||isNaN(n))?null:Number(n).toLocaleString("fr-FR",{maximumFractionDigits:1});
+const range=(a,b,u)=>{const A=fmt(a),Bv=fmt(b); if(A==null&&Bv==null) return "—"; if(A!=null&&Bv!=null) return `${A}–${Bv} ${u}`; return `${A??Bv} ${u}`;};
+const reduce=matchMedia("(prefers-reduced-motion: reduce)");
+const anim=(el,kf,o)=>(reduce.matches||!el||!el.animate)?null:el.animate(kf,o);
+const BACK="cubic-bezier(.34,1.56,.64,1)", IO="cubic-bezier(.65,0,.35,1)", OUT="cubic-bezier(.16,1,.3,1)";
+const tok=n=>getComputedStyle(document.documentElement).getPropertyValue("--"+n).trim();
+
+/* ================= SIGNATURES (SVG, aplats) ================= */
+function sigStyle(sp,big){ const A=sp.regne==="Animal"; return {A,gap:A?(big?2:1.5):(big?12:8),R:A?0:(big?30:22),
+  cols:A?["var(--cobalt)","var(--cobalt)","var(--cobalt-2)"]:["var(--lagoon)","var(--deep)","var(--foam)","var(--lagoon)","var(--abyss)"],bg:A?"var(--mist)":"var(--ground)"}; }
+function sigPaths(sp,w,h,big,pts){
+  const st=sigStyle(sp,big), cs=B._cells(pts.map(p=>({x:p.x,y:p.y,w:0})),w,h,()=>st.gap+0,0); let d="";
+  cs.forEach((poly,i)=>{const p=B._traceSVG(poly,st.R); if(p) d+=`<path d="${p}" fill="${st.cols[Math.floor(pts[i].n*st.cols.length)%st.cols.length]}"/>`;});
+  return `<rect width="${w}" height="${h}" fill="${st.bg}"/>`+d;
+}
+function signatureSVG(sp,w,h,big){
+  const pts=B.seedsFromSpecies(sp)(w,h);
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${sigPaths(sp,w,h,big,pts)}</svg>`;
+}
+/* vignettes vivantes : au survol, les graines fuient le curseur puis reviennent (ressorts amortis) */
+const live=new WeakMap();
+function liveThumb(card){
+  const sp=S.species.find(x=>x._id===card.dataset.id); if(!sp) return;
+  const svg=card.querySelector(".thumb svg"); if(!svg) return;
+  let st=live.get(card);
+  if(!st){ const base=B.seedsFromSpecies(sp)(320,240); st={sp,svg,pts:base.map(p=>({hx:p.x,hy:p.y,x:p.x,y:p.y,vx:0,vy:0,n:p.n})),m:null,raf:0}; live.set(card,st); }
+  return st;
+}
+function stepThumb(st){
+  let e=0; const R=190;
+  st.pts.forEach(p=>{ let ax=(p.hx-p.x)*.06, ay=(p.hy-p.y)*.06;
+    if(st.m){ const dx=p.x-st.m.x, dy=p.y-st.m.y, d=Math.hypot(dx,dy)||1; if(d<R){ const f=Math.pow(1-d/R,2)*7.5; ax+=dx/d*f; ay+=dy/d*f; } }
+    p.vx=(p.vx+ax)*.8; p.vy=(p.vy+ay)*.8; p.x+=p.vx; p.y+=p.vy; e+=Math.abs(p.vx)+Math.abs(p.vy); });
+  st.svg.innerHTML=sigPaths(st.sp,320,240,false,st.pts);
+  return e>.05||st.m;
+}
+function runThumb(st){ if(st.raf||reduce.matches) return; const loop=()=>{ st.raf=stepThumb(st)?requestAnimationFrame(loop):0; }; st.raf=requestAnimationFrame(loop); }
+document.addEventListener("pointermove",e=>{
+  const t=e.target.closest&&e.target.closest(".card .thumb"); if(!t||e.pointerType==="touch") return;
+  const st=liveThumb(t.closest(".card")); if(!st) return; const b=t.getBoundingClientRect();
+  const sc=Math.max(320/b.width,240/b.height); /* preserveAspectRatio slice */
+  st.m={x:(e.clientX-b.left-b.width/2)*sc+160,y:(e.clientY-b.top-b.height/2)*sc+120}; runThumb(st);
+});
+document.addEventListener("pointerout",e=>{ const t=e.target.closest&&e.target.closest(".card .thumb"); if(!t||t.contains(e.relatedTarget)) return; const st=live.get(t.closest(".card")); if(st){ st.m=null; runThumb(st);} });
+
+/* ================= DIVISIONS ================= */
+const DIVS={
+  "door-fa":{n:2,sizes:[2.5,1],angle:14,gap:10,radius:0,colors:["var(--cobalt)","var(--mist)"]},
+  "door-fl":{n:2,sizes:[2.5,1],angle:14,gap:10,radius:26,colors:["var(--deep)","var(--lagoon)"]},
+  "band-fa":{live:true,n:13,seed:"band-faune",gap:4,radius:0,focus:{x:.26,y:.52,size:.7},aspect:1.45,colors:["var(--cobalt)","var(--cobalt-2)","var(--mist)","var(--cobalt)"],focusColor:"var(--abyss)"},
+  "band-fl":{live:true,n:11,seed:"band-flore-2",gap:10,radius:26,focus:{x:.26,y:.52,size:.7},aspect:1.45,colors:["var(--lagoon)","var(--foam)","var(--deep)","var(--lagoon)"],focusColor:"var(--abyss)"},
+  "band-lab":{n:3,sizes:[2.6,1,.5],angle:12,gap:10,radius:22,aspect:3,colors:["var(--abyss)","var(--lagoon)","var(--foam)"]},
+  "band-ap":{live:true,n:10,seed:"band-apropos",gap:18,radius:34,focus:{x:.3,y:.52,size:.72},aspect:1.5,colors:["var(--abyss)"],focusColor:"var(--abyss)"},
+  "code-fa":{n:16,seed:"code-fa",gap:2,radius:0,colors:["var(--cobalt)","var(--cobalt-2)","var(--cobalt)"]},
+  "code-fl":{n:9,seed:"code-fl",gap:10,radius:24,colors:["var(--lagoon)","var(--deep)","var(--foam)"]},
+  "code-br":{n:8,seed:"code-br",gap:16,radius:30,colors:["var(--abyss)"]}
+};
+/* en-têtes vivants : divisions voronoï dont les cellules fuient le curseur ; la cellule dominante (titre) reste fixe */
+const LIVE=new Map();
+function liveDivision(el,o){
+  const svg=el.querySelector(":scope > svg"), W=el.clientWidth, H=el.clientHeight; if(!W||!H) return null;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const r=B._rng(B._hash(o.seed)), pts=[], fx=o.focus.x*W, fy=o.focus.y*H, fr=o.focus.size*Math.min(W,H);
+  pts.push({hx:fx,hy:fy,x:fx,y:fy,vx:0,vy:0,w:fr*fr*.9,g:0,focus:true});
+  let tries=0; while(pts.length<o.n&&tries++<3000){ const x=r()*W,y=r()*H; if(Math.hypot(x-fx,y-fy)<fr*1.15) continue; pts.push({hx:x,hy:y,x,y,vx:0,vy:0,w:0,g:0}); }
+  const st={el,svg,o,W,H,pts,m:null,raf:0,fr,fx,fy};
+  st.text=B._innerRect(B._cells(pts,W,H,()=>o.gap,0)[0],o.aspect);
+  return st;
+}
+function drawLive(st){
+  const {o,W,H,pts}=st, cs=B._cells(pts,W,H,p=>o.gap+p.g,0); let d="";
+  cs.forEach((poly,i)=>{ const p=B._traceSVG(poly,o.radius); if(!p) return; const c=pts[i].focus?(o.focusColor||o.colors[0]):o.colors[i%o.colors.length]; d+=`<path d="${p}" fill="${c}"/>`; });
+  st.svg.innerHTML=d;
+}
+function stepLive(st){
+  let e=0; const R=Math.max(160,Math.min(st.W,st.H)*.45);
+  st.pts.forEach(p=>{ if(p.focus) return;
+    let ax=(p.hx-p.x)*.05, ay=(p.hy-p.y)*.05, tg=0;
+    if(st.m){ const dx=p.x-st.m.x, dy=p.y-st.m.y, d=Math.hypot(dx,dy)||1; if(d<R){ const f=Math.pow(1-d/R,2)*8.5; ax+=dx/d*f; ay+=dy/d*f; tg=26*Math.pow(1-d/R,2); } }
+    p.vx=(p.vx+ax)*.8; p.vy=(p.vy+ay)*.8; p.x+=p.vx; p.y+=p.vy;
+    /* les graines ne rentrent pas dans la cellule du titre */
+    const fd=Math.hypot(p.x-st.fx,p.y-st.fy), lim=st.fr*1.1; if(fd<lim){ p.x=st.fx+(p.x-st.fx)/fd*lim; p.y=st.fy+(p.y-st.fy)/fd*lim; p.vx*=-.3; p.vy*=-.3; }
+    p.g+=(tg-p.g)*.15; e+=Math.abs(p.vx)+Math.abs(p.vy)+Math.abs(tg-p.g)*.1; });
+  drawLive(st); return e>.05||st.m;
+}
+function runLive(st){ if(st.raf||reduce.matches) return; const loop=()=>{ st.raf=stepLive(st)?requestAnimationFrame(loop):0; }; st.raf=requestAnimationFrame(loop); }
+function placeFocusText(el,t){ const ft=el.querySelector("[data-focus-text]"); if(!ft||!t) return; const pad=Math.min(28,el.clientWidth*.04);
+  Object.assign(ft.style,{left:(t.x+pad)+"px",top:(t.y+pad*.6)+"px",width:Math.max(120,t.w-2*pad)+"px",height:Math.max(60,t.h-pad*1.2)+"px"}); }
+const divRO=new ResizeObserver(es=>es.forEach(e=>fitDivision(e.target)));
+function fitDivision(el){
+  const o=DIVS[el.dataset.division]; if(!o) return;
+  if(o.live&&o.focus){ const st=liveDivision(el,o); if(!st) return; const old=LIVE.get(el); if(old) cancelAnimationFrame(old.raf); LIVE.set(el,st); drawLive(st); placeFocusText(el,st.text); return; }
+  const svg=el.querySelector(":scope > svg"), W=el.clientWidth, H=el.clientHeight; if(!W||!H) return;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const cells=B.division(svg,o);
+  const ft=el.querySelector("[data-focus-text]"), st=el.querySelector("[data-small-text]");
+  const focus=cells.find(c=>c.focus), pad=Math.min(28,W*.04);
+  if(ft&&focus&&focus.text){ const t=focus.text; Object.assign(ft.style,{left:(t.x+pad)+"px",top:(t.y+pad*.6)+"px",width:Math.max(120,t.w-2*pad)+"px",height:Math.max(60,t.h-pad*1.2)+"px"}); }
+  const small=cells.find(c=>!c.focus);
+  if(st&&small&&small.text){ const t=small.text; st.style.left=(t.x+t.w/2-st.offsetWidth/2)+"px"; st.style.top=(t.y+t.h/2-st.offsetHeight/2)+"px"; }
+}
+$$("[data-division]").forEach(el=>{ divRO.observe(el);
+  if(DIVS[el.dataset.division]&&DIVS[el.dataset.division].live){
+    el.addEventListener("pointermove",e=>{ if(e.pointerType==="touch") return; const st=LIVE.get(el); if(!st) return; const b=el.getBoundingClientRect(); st.m={x:e.clientX-b.left,y:e.clientY-b.top}; runLive(st); });
+    el.addEventListener("pointerleave",()=>{ const st=LIVE.get(el); if(st){ st.m=null; runLive(st); } });
+  } });
+
+function repaintTheme(){ $$("[data-division]").forEach(fitDivision); if(R3) R3.recolor(); }
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",repaintTheme);
+new MutationObserver(repaintTheme).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+/* titres en cascade */
+$$("h1.split").forEach(h=>{ const walk=n=>{ [...n.childNodes].forEach(c=>{ if(c.nodeType===3){ const f=document.createDocumentFragment(); c.textContent.split(/(\s+)/).forEach(t=>{ if(!t) return; if(/^\s+$/.test(t)) f.append(t); else {const s=document.createElement("span"); s.style.display="inline-block"; s.className="w"; s.textContent=t; f.append(s);} }); c.replaceWith(f);} else if(c.nodeType===1) walk(c); }); }; walk(h); });
+function intro(view){
+  $$("h1.split .w",view).forEach((w,i)=>anim(w,[{transform:"translateY(.5em)",opacity:0},{transform:"translateY(-.06em)",opacity:1,offset:.7},{transform:"none",opacity:1}],{duration:820,delay:80+i*70,easing:OUT,fill:"backwards"}));
+  $$(".door,.stat",view).forEach((el,i)=>anim(el,[{transform:"translateY(36px) scale(.97)",opacity:0},{transform:"translateY(-5px)",opacity:1,offset:.7},{transform:"none",opacity:1}],{duration:760,delay:220+i*70,easing:OUT,fill:"backwards"}));
+}
+
+/* ================= SPHÈRE DES ESPÈCES ================= */
+/* logo : un disque fracturé en cellules, aplat */
+function sphereLogo(svg,n){
+  const id="lgclip"+Math.random().toString(36).slice(2,7), r=B._rng(B._hash("logo-sphere")), pts=[];
+  while(pts.length<n){ const x=r()*100,y=r()*100; if(Math.hypot(x-50,y-50)<46) pts.push({x,y,w:0}); }
+  const cs=B._cells(pts,100,100,()=>6,8); let d="";
+  cs.forEach(poly=>{ const p=B._traceSVG(poly,7); if(p) d+=`<path d="${p}"/>`; });
+  svg.setAttribute("viewBox","0 0 100 100");
+  svg.innerHTML=`<defs><clipPath id="${id}"><circle cx="50" cy="50" r="49"/></clipPath></defs><g clip-path="url(#${id})" fill="currentColor">${d}</g>`;
+}
+let R3=null;
+/* carte des espèces : champ voronoï à plat, chaque cellule numérotée est une fiche */
+function initMap(){
+  const host=$("#relief"), svg=$("#reliefSvg"), peek=$("#peek");
+  let pts=[], hovered=-1, m=null, raf=0, W=0, H=0;
+  function layout(list){
+    W=host.clientWidth; H=host.clientHeight; svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+    const narrow=W<760, x0=narrow?W*.04:W*.46, x1=W*.97, y0=narrow?H*.36:H*.08, y1=narrow?H*.86:H*.9;
+    const r=B._rng(B._hash("carte")), n=list.length, area=(x1-x0)*(y1-y0), dist=Math.sqrt(area/Math.max(1,n)/2.2);
+    const sorted=list.slice().sort((a,b)=>String(a.nom_scientifique).localeCompare(String(b.nom_scientifique)));
+    pts=[];
+    sorted.forEach((sp,k)=>{ let best=null; for(let t=0;t<500;t++){ const x=x0+r()*(x1-x0), y=y0+r()*(y1-y0); if(pts.every(p=>Math.hypot(p.hx-x,p.hy-y)>dist)){best=[x,y];break;} if(!best) best=[x,y]; }
+      pts.push({hx:best[0],hy:best[1],x:best[0],y:best[1],vx:0,vy:0,w:(dist*.38)**2,sp,g:0}); });
+    let tries=0; const fill=Math.round(W*H/(narrow?5200:4200));
+    while(pts.length<n+fill&&tries++<8000){ const x=r()*W, y=r()*H; if(pts.every(p=>Math.hypot(p.hx-x,p.hy-y)>(p.sp?dist*.62:34))) pts.push({hx:x,hy:y,x,y,vx:0,vy:0,w:0,g:0}); }
+    let k=0; pts.forEach(p=>{ if(p.sp) p.idx=++k; });
+    pts.filter(p=>!p.sp).forEach(p=>p.idx=++k);
+    draw();
+    $("#reliefCount").textContent=`${n} espèce${n>1?"s":""} · ${pts.length} cellules`;
+  }
+  function draw(){
+    const cs=B._cells(pts,W,H,p=>3+p.g,0); let d="", t="";
+    cs.forEach((poly,i)=>{ const p=pts[i], path=B._traceSVG(poly,p.sp?(p.sp.regne==="Animal"?2:22):10); if(!path) return;
+      let fill;
+      if(p.sp){ const A=p.sp.regne==="Animal"; fill=i===hovered?(A?"var(--cobalt)":"var(--lagoon)"):(A?"#123c63":"#0e4a4a"); }
+      else fill=((p.idx*7)%5===0)?"#0c3540":"#082a33";
+      d+=`<path d="${path}" fill="${fill}" data-i="${i}"/>`;
+      if(p.sp){ const sp=p.sp; t+=`<text x="${p.x.toFixed(1)}" y="${(p.y+4).toFixed(1)}" class="${i===hovered?"on":"sp"}">${String(p.idx).padStart(2,"0")}</text>`; }
+      else if(W>760&&p.idx%7===0&&p.x>W*.45) t+=`<text x="${p.x.toFixed(1)}" y="${(p.y+4).toFixed(1)}">${String(p.idx).padStart(2,"0")}</text>`;
+    });
+    svg.innerHTML=`<g>${d}</g><g class="nums">${t}</g>`;
+  }
+  function step(){
+    let e=0; const R=Math.max(160,Math.min(W,H)*.32);
+    pts.forEach((p,i)=>{
+      let ax=(p.hx-p.x)*.06, ay=(p.hy-p.y)*.06, tg=0;
+      if(m&&i!==hovered){ const dx=p.x-m.x, dy=p.y-m.y, dd=Math.hypot(dx,dy)||1; if(dd<R){ const f=Math.pow(1-dd/R,2)*7; ax+=dx/dd*f; ay+=dy/dd*f; tg=10*Math.pow(1-dd/R,2); } }
+      if(i===hovered){ ax+=(m?(m.x-p.x)*.02:0); ay+=(m?(m.y-p.y)*.02:0); }
+      p.vx=(p.vx+ax)*.8; p.vy=(p.vy+ay)*.8; p.x+=p.vx; p.y+=p.vy; p.g+=(tg-p.g)*.15;
+      e+=Math.abs(p.vx)+Math.abs(p.vy)+Math.abs(tg-p.g)*.1; });
+    draw(); movePeek(); return e>.05||m||peekOn;
+  }
+  function kick(){ if(raf) return; const loop=()=>{ raf=step()?requestAnimationFrame(loop):0; }; raf=requestAnimationFrame(loop); }
+  function pickAt(x,y){ let bi=-1,bd=1e12; pts.forEach((p,i)=>{ const d=(p.x-x)**2+(p.y-y)**2-p.w; if(d<bd){bd=d;bi=i;} }); return bi; }
+  function setHover(i){ if(i>=0&&!pts[i].sp) i=-1; if(i===hovered) return; hovered=i; host.style.cursor=i>=0?"pointer":"default"; if(i>=0) showPeek(pts[i].sp,pts[i].idx); else hidePeek(); kick(); }
+  let peekOn=false,px=0,py=0,pvx=0,pvy=0,gx=0,gy=0;
+  function showPeek(sp,idx){
+    const st=sp.statut_uicn||"NE", A=sp.regne==="Animal"; peek.dataset.regne=A?"Animal":"Végétal";
+    peek.innerHTML=`<div class="sg">${signatureSVG(sp,320,180)}</div><div class="bd"><div class="row"><span class="king ${A?"fa":"fl"}"><i>${A?"Faune":"Flore"} · cellule ${String(idx).padStart(2,"0")}</i></span><span class="iucn" data-s="${esc(st)}">${esc(st)}</span></div>
+      <h3>${esc(sp.nom_scientifique)}</h3><span style="color:var(--muted)">${esc(sp.nom_commun||"")}</span>
+      <div class="ft"><span>${range(sp.profondeur_min,sp.profondeur_max,"m")}</span><span>${range(sp.temperature_min,sp.temperature_max,"°C")}</span></div><span class="go">Cliquer pour ouvrir la fiche</span></div>`;
+    if(!peekOn){px=gx;py=gy;} peekOn=true; peek.style.opacity=1;
+    anim(peek,[{transform:`translate(${px}px,${py}px) scale(.85)`,opacity:0},{transform:`translate(${px}px,${py}px) scale(1.03)`,opacity:1,offset:.7},{transform:`translate(${px}px,${py}px) scale(1)`,opacity:1}],{duration:380,easing:OUT});
+  }
+  function hidePeek(){ if(!peekOn) return; peekOn=false; peek.style.opacity=0; }
+  function movePeek(){ if(!peekOn) return; const pw=peek.offsetWidth,ph=peek.offsetHeight;
+    let tx=gx+24,ty=gy+24; if(tx+pw>W-12) tx=gx-pw-24; if(ty+ph>H-12) ty=H-ph-12; if(ty<12) ty=12; if(tx<12) tx=12;
+    pvx=(pvx+(tx-px)*.18)*.68; pvy=(pvy+(ty-py)*.18)*.68; px+=pvx; py+=pvy; peek.style.transform=`translate(${px}px,${py}px)`; }
+  host.addEventListener("pointermove",e=>{ if(e.pointerType==="touch") return; const b=host.getBoundingClientRect(); gx=e.clientX-b.left; gy=e.clientY-b.top; m={x:gx,y:gy}; setHover(pickAt(gx,gy)); kick(); });
+  host.addEventListener("pointerleave",()=>{ m=null; setHover(-1); kick(); });
+  host.addEventListener("click",e=>{ const b=host.getBoundingClientRect(); gx=e.clientX-b.left; gy=e.clientY-b.top; const i=pickAt(gx,gy); if(i<0||!pts[i].sp) return;
+    if(matchMedia("(hover: none)").matches&&hovered!==i){ setHover(i); return; } openFiche(pts[i].sp._id); });
+  let last=[]; new ResizeObserver(()=>layout(last)).observe(host);
+  return {build:list=>{ last=list; layout(list); }, recolor:()=>draw()};
+}
+let relTimer=0;
+function updateRelief(){ if(!R3) return; clearTimeout(relTimer); relTimer=setTimeout(()=>R3.build(S.species),120); }
+
+/* ================= GRILLES ================= */
+function filtered(v){
+  const st=S.views[v], q=st.q.trim().toLowerCase();
+  return S.species.filter(s=>(!st.regne||s.regne===st.regne)&&(!st.habitat||s.habitat===st.habitat)&&(!st.iucn||(s.statut_uicn||"NE")===st.iucn)&&
+    (!q||[s.nom_scientifique,s.nom_commun,s.famille,s.classe,s.embranchement,s.habitat,s.repartition].join(" ").toLowerCase().includes(q)))
+   .sort((a,b)=>String(a.nom_scientifique).localeCompare(String(b.nom_scientifique)));
+}
+function buildFilters(v){
+  const box=$(`[data-filters="${v}"]`), st=S.views[v];
+  box.innerHTML=`<label class="search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Nom scientifique, nom commun, famille…" aria-label="Rechercher" id="q-${v}"></label>
+   ${v==="catalogue"?`<div class="seg" role="group" aria-label="Règne"><button type="button" data-r="" aria-pressed="true">Tout</button><button type="button" data-r="Animal" aria-pressed="false">Faune</button><button type="button" data-r="Végétal" aria-pressed="false">Flore</button></div>`:""}
+   <select class="pill" id="hab-${v}" aria-label="Habitat"><option value="">Tous habitats</option></select>
+   <select class="pill" id="iucn-${v}" aria-label="Statut UICN"><option value="">Tous statuts UICN</option>${Object.entries(IUCN).map(([k,l])=>`<option value="${k}">${k} · ${l}</option>`).join("")}</select>`;
+  let tm; $(`#q-${v}`).addEventListener("input",e=>{st.q=e.target.value;clearTimeout(tm);tm=setTimeout(()=>renderGrid(v),140);});
+  $(`#hab-${v}`).addEventListener("change",e=>{st.habitat=e.target.value;renderGrid(v);});
+  $(`#iucn-${v}`).addEventListener("change",e=>{st.iucn=e.target.value;renderGrid(v);});
+  $$(".seg button",box).forEach(b=>b.addEventListener("click",()=>{st.regne=b.dataset.r;$$(".seg button",box).forEach(x=>x.setAttribute("aria-pressed",x===b));renderGrid(v);}));
+}
+const sigCache=new Map();
+function sig(sp,w,h,big){ const k=sp.nom_scientifique+"|"+w+"|"+h+"|"+(big?1:0)+"|"+sp.profondeur_max+sp.temperature_min; if(!sigCache.has(k)) sigCache.set(k,signatureSVG(sp,w,h,big)); return sigCache.get(k); }
+function cardHTML(s){
+  const st=s.statut_uicn||"NE", A=s.regne==="Animal";
+  return `<button class="card" type="button" data-regne="${A?"Animal":"Végétal"}" data-id="${esc(s._id)}">
+    <div class="thumb">${sig(s,320,240)}<div class="tl"><span class="king ${A?"fa":"fl"}"><i>${A?"Faune":"Flore"}</i></span><span class="iucn" data-s="${esc(st)}" title="${esc(IUCN[st]||"")}">${esc(st)}</span></div></div>
+    <div class="body"><div class="meta label">${esc(s.famille||s.classe||"—")} · ${esc(s.habitat||"—")}</div>
+      <h3>${esc(s.nom_scientifique)}</h3><div class="common">${esc(s.nom_commun||"—")}</div>
+      <div class="foot"><span>${range(s.profondeur_min,s.profondeur_max,"m")}</span><span>${range(s.temperature_min,s.temperature_max,"°C")}</span></div></div></button>`;
+}
+function renderGrid(v,{entrance=false}={}){
+  const g=$(`[data-grid="${v}"]`), list=filtered(v), scope=S.species.filter(s=>!S.views[v].regne||s.regne===S.views[v].regne);
+  $(`[data-countfor="${v}"]`).textContent=`${list.length} / ${scope.length} fiches`;
+  const visible=!g.closest(".view").hidden, before=new Map();
+  if(visible&&!entrance) $$(".card",g).forEach(c=>before.set(c.dataset.id,c.getBoundingClientRect()));
+  if(!scope.length){ const what=v==="faune"?"animale":v==="flore"?"végétale":"";
+    g.innerHTML=`<div class="empty"><h3>${S.ready?`Aucune fiche ${what} pour l'instant`:"Connexion à la base…"}</h3><p>${S.ready?"Les espèces ajoutées depuis l'Espace chercheurs apparaîtront ici avec leur fiche technique.":"Chargement des fiches espèces."}</p>${S.ready?`<p style="margin-top:16px"><a class="btn primary" href="#chercheurs">Ajouter une espèce</a></p>`:""}</div>`; return; }
+  if(!list.length){ g.innerHTML=`<div class="empty"><h3>Aucune espèce ne correspond</h3><p>Élargissez la recherche ou retirez un filtre.</p></div>`; return; }
+  g.innerHTML=list.map(cardHTML).join("");
+  if(!visible) return; let k=0;
+  $$(".card",g).forEach(c=>{ const old=before.get(c.dataset.id);
+    if(old){ const now=c.getBoundingClientRect(), dx=old.left-now.left, dy=old.top-now.top; if(dx||dy) anim(c,[{transform:`translate(${dx}px,${dy}px)`},{transform:"none"}],{duration:620,easing:BACK}); }
+    else anim(c,[{transform:"translateY(34px) scale(.92)",opacity:0},{transform:"translateY(-7px) scale(1.012)",opacity:1,offset:.68},{transform:"none",opacity:1}],{duration:700,delay:Math.min(k++*55,660),easing:OUT,fill:"backwards"}); });
+}
+function renderMeta(){
+  const sp=S.species, A=sp.filter(s=>s.regne==="Animal"), V=sp.filter(s=>s.regne==="Végétal");
+  const hab=new Set(sp.map(s=>s.habitat).filter(Boolean)), thr=sp.filter(s=>["CR","EN","VU"].includes(s.statut_uicn)).length;
+  $("#stats").innerHTML=[["Espèces",sp.length],["Faune",A.length],["Flore",V.length],["Habitats",hab.size],["Menacées · CR EN VU",thr]].map(([l,v])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
+  $$("[data-count]").forEach(el=>el.textContent=sp.filter(s=>s.regne===el.dataset.count).length);
+  $("#footCount").textContent=`${sp.length} fiches · ${A.length} faune · ${V.length} flore`;
+  for(const v of Object.keys(S.views)){ const sel=$(`#hab-${v}`); if(!sel) continue; const cur=sel.value;
+    const hs=[...new Set(sp.filter(s=>!S.views[v].regne||s.regne===S.views[v].regne).map(s=>s.habitat).filter(Boolean))].sort();
+    sel.innerHTML=`<option value="">Tous habitats</option>`+hs.map(h=>`<option ${h===cur?"selected":""}>${esc(h)}</option>`).join(""); }
+  $("#habList").innerHTML=[...hab].sort().map(h=>`<option value="${esc(h)}">`).join("");
+}
+function render(){ renderMeta(); Object.keys(S.views).forEach(v=>renderGrid(v)); updateRelief(); }
+
+document.addEventListener("pointerdown",e=>{ const c=e.target.closest(".card"); if(!c) return; c._press=anim(c,[{transform:"none"},{transform:"scale(.955)"}],{duration:140,easing:"ease-out",fill:"forwards"}); });
+const release=()=>{ $$(".card").forEach(c=>{ if(c._press){ c._press.cancel(); c._press=null; anim(c,[{transform:"scale(.955)"},{transform:"scale(1.02)",offset:.5},{transform:"none"}],{duration:420,easing:BACK}); } }); };
+document.addEventListener("pointerup",release); document.addEventListener("pointercancel",release);
+document.addEventListener("click",e=>{ const c=e.target.closest(".card"); if(c) openFiche(c.dataset.id); });
+
+/* ================= FICHE ================= */
+function gauge(min,max,A){
+  const has=v=>v!==null&&v!==undefined&&v!==""&&!isNaN(v), col=A?"var(--fa)":"var(--fl)";
+  if(!has(min)&&!has(max)) return `<svg viewBox="0 0 100 200" role="img" aria-label="Profondeur non renseignée"><rect x="36" y="10" width="28" height="170" rx="14" fill="var(--surface-2)"/><text x="50" y="100" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="IBM Plex Mono">n.r.</text></svg>`;
+  const a=+(has(min)?min:max), b=+(has(max)?max:min), top=[10,50,100,200,500,1000,2000,5000].find(s=>s>=b)||Math.ceil(b/1000)*1000;
+  const y=v=>10+Math.sqrt(v/top)*170, ticks=[0,top/4,top/2,top].map(Math.round);
+  return `<svg viewBox="0 0 100 200" role="img" aria-label="Profondeur de ${fmt(a)} à ${fmt(b)} mètres">
+    <rect x="36" y="10" width="28" height="170" rx="${A?2:14}" fill="var(--surface-2)"/>
+    <rect class="gfill" x="36" y="${y(a)}" width="28" height="${Math.max(4,y(b)-y(a))}" rx="${A?1:12}" fill="${col}"/>
+    ${ticks.map(t=>`<line x1="64" x2="70" y1="${y(t)}" y2="${y(t)}" stroke="var(--muted)"/><text x="73" y="${y(t)+3.5}" font-size="9.5" fill="var(--muted)" font-family="IBM Plex Mono">${t}</text>`).join("")}
+    <text x="32" y="${y(a)+4}" text-anchor="end" font-size="10" fill="var(--ink)" font-family="IBM Plex Mono">${fmt(a)}</text>
+    <text x="32" y="${y(b)+4}" text-anchor="end" font-size="10" fill="var(--ink)" font-family="IBM Plex Mono">${fmt(b)}</text>
+    <text x="50" y="196" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="IBM Plex Mono">mètres</text></svg>`;
+}
+const fiche=$("#fiche");
+function openFiche(id){
+  const s=S.species.find(x=>x._id===id); if(!s) return;
+  const st=s.statut_uicn||"NE", A=s.regne==="Animal";
+  const kv=rows=>`<dl class="kv">${rows.map(([k,v])=>`<dt>${k}</dt><dd>${v||"—"}</dd>`).join("")}</dl>`;
+  fiche.dataset.regne=A?"Animal":"Végétal";
+  fiche.innerHTML=`<div class="hd">${sig(s,700,372,true)}<span class="king ${A?"fa":"fl"}"><i>Fiche technique · ${A?"Faune":"Flore"}</i></span><button class="close" type="button" aria-label="Fermer la fiche">×</button></div>
+    <div class="content">
+      <div class="st"><h2 id="ficheTitle">${esc(s.nom_scientifique)}</h2><div class="sub"><span>${esc(s.auteur||"")}</span>${s.nom_commun?`<span>· ${esc(s.nom_commun)}</span>`:""}<span class="iucn" data-s="${esc(st)}">${esc(st)} · ${esc(IUCN[st]||"")}</span></div></div>
+      ${s.description?`<p class="desc st">${esc(s.description)}</p>`:""}
+      <div class="sect st"><h4 class="label">Taxonomie</h4>${kv([["Règne",esc(s.regne)],["Embranchement",esc(s.embranchement)],["Classe",esc(s.classe)],["Ordre",esc(s.ordre)],["Famille",esc(s.famille)],["Espèce",`<em class="sci">${esc(s.nom_scientifique)}</em>`]])}</div>
+      <div class="sect st"><h4 class="label">Écologie</h4><div class="eco"><div class="gauge">${gauge(s.profondeur_min,s.profondeur_max,A)}</div>
+        ${kv([["Habitat",esc(s.habitat)],["Profondeur",range(s.profondeur_min,s.profondeur_max,"m")],["Température",range(s.temperature_min,s.temperature_max,"°C")],["Salinité",s.salinite?esc(s.salinite)+" PSU":""],["Mode trophique",esc(s.mode_trophique)],["Taille max.",fmt(s.taille_max_cm)!=null?fmt(s.taille_max_cm)+" cm":""]])}</div></div>
+      <div class="sect st"><h4 class="label">Répartition &amp; conservation</h4>${kv([["Répartition",esc(s.repartition)],["Statut UICN",`${esc(st)} · ${esc(IUCN[st]||"")}`],["Protection",esc(s.protection)]])}</div>
+      <div class="src st">Contributeur : ${esc(s.contributeur||"—")}${s.reference?` · Référence : ${esc(s.reference)}`:""}${s.date_ajout?` · Ajoutée le ${new Date(s.date_ajout).toLocaleDateString("fr-FR")}`:""}</div>
+    </div>`;
+  fiche.showModal(); fiche.scrollTop=0; $(".close",fiche).onclick=closeFiche;
+  anim(fiche,[{transform:"translateX(105%)"},{transform:"translateX(-16px)",offset:.7},{transform:"none"}],{duration:680,easing:"cubic-bezier(.22,.9,.3,1)"});
+  $$(".st",fiche).forEach((el,i)=>anim(el,[{opacity:0,transform:"translateX(40px)"},{opacity:1,transform:"translateX(-4px)",offset:.75},{opacity:1,transform:"none"}],{duration:620,delay:180+i*70,easing:OUT,fill:"backwards"}));
+  const gf=$(".gfill",fiche); if(gf) anim(gf,[{transform:"scaleY(0)",transformOrigin:"50% 0"},{transform:"scaleY(1.06)",transformOrigin:"50% 0",offset:.75},{transform:"scaleY(1)",transformOrigin:"50% 0"}],{duration:800,delay:420,easing:OUT,fill:"backwards"});
+}
+let closing=false;
+function closeFiche(){ if(closing||!fiche.open) return; closing=true;
+  const a=anim(fiche,[{transform:"none"},{transform:"translateX(-14px)",offset:.25},{transform:"translateX(105%)"}],{duration:460,easing:IO});
+  const done=()=>{fiche.close();closing=false;}; a?a.finished.then(done,done):done(); }
+fiche.addEventListener("cancel",e=>{e.preventDefault();closeFiche();});
+fiche.addEventListener("click",e=>{ if(e.target===fiche) closeFiche(); });
+
+/* ================= MENU ================= */
+function initDock(){
+  const d=$("#dock"), t=$("#dockToggle"); let lastY=scrollY, pinned=false, hover=false;
+  try{ if(CSS.supports("backdrop-filter","url(#glass)")&&/Chrome/.test(navigator.userAgent)) d.classList.add("lg"); }catch(e){}
+  const set=c=>{ d.classList.toggle("collapsed",c); t.setAttribute("aria-expanded",String(!c)); t.setAttribute("aria-label",c?"Afficher le menu":"Replier le menu"); };
+  addEventListener("scroll",()=>{ const y=scrollY; if(hover||pinned){ lastY=y; return; }
+    if(y>140&&y>lastY+6) set(true); else if(y<lastY-6||y<140) set(false); lastY=y; },{passive:true});
+  d.addEventListener("pointerenter",e=>{ if(e.pointerType!=="mouse") return; hover=true; set(false); });
+  d.addEventListener("pointerleave",e=>{ if(e.pointerType!=="mouse") return; hover=false; if(scrollY>140) set(true); });
+  d.addEventListener("focusin",()=>set(false));
+  t.addEventListener("click",()=>{ const c=!d.classList.contains("collapsed"); pinned=!c; set(c); });
+  $$(".dock-links a",d).forEach(a=>a.addEventListener("click",()=>{ pinned=false; }));
+}
+/* ================= NAVIGATION ================= */
+const ROUTES=["catalogue","faune","flore","chercheurs","apropos"]; let current=null;
+function route(){
+  const r=ROUTES.includes(location.hash.slice(1))?location.hash.slice(1):"catalogue";
+  if(r===current) return; current=r;
+  ROUTES.forEach(x=>$("#view-"+x).hidden=x!==r);
+  $$(".dock-links a").forEach(a=>{ if(a.dataset.route===r) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+  $("#dockCurrent").textContent=({catalogue:"Accueil",faune:"Faune",flore:"Flore",chercheurs:"Chercheurs",apropos:"À propos"})[r];
+  scrollTo({top:0,behavior:"auto"});
+  const view=$("#view-"+r); $$("[data-division]",view).forEach(fitDivision); intro(view);
+  if(S.views[r]) renderGrid(r,{entrance:true});
+}
+addEventListener("hashchange",route);
+function tab(f){ $("#tabForm").setAttribute("aria-selected",f); $("#tabFile").setAttribute("aria-selected",!f); $("#panelForm").hidden=!f; $("#panelFile").hidden=f;
+  anim(f?$("#panelForm"):$("#panelFile"),[{opacity:0,transform:"translateY(14px)"},{opacity:1,transform:"none"}],{duration:420,easing:OUT}); }
+$("#tabForm").onclick=()=>tab(true); $("#tabFile").onclick=()=>tab(false);
+$("#legend").innerHTML=Object.entries(IUCN).map(([k,l])=>`<div><span class="iucn" data-s="${k}">${k}</span>${l}</div>`).join("");
+
+/* ================= VALIDATION & ÉCRITURE ================= */
+const norm=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim().replace(/[\s\-\.\(\)\/]+/g,"_").replace(/_+$/,"");
+const mapKey=k=>{const n=norm(k);return FIELDS.includes(n)?n:(ALIASES[n]||null);};
+function clean(raw){ const o={};
+  for(const [k,v] of Object.entries(raw)){const key=mapKey(k); if(!key) continue; let val=typeof v==="string"?v.trim():v; if(val===""||val==null) continue;
+    if(NUM.has(key)){const n=Number(String(val).replace(",","."));val=isNaN(n)?val:n;} o[key]=val;}
+  if(o.regne){const r=norm(o.regne);o.regne=/^(animal|animalia|faune|fauna)/.test(r)?"Animal":/^(vegetal|plantae|plante|flore|flora|algue|algae)/.test(r)?"Végétal":o.regne;}
+  if(o.statut_uicn) o.statut_uicn=String(o.statut_uicn).toUpperCase().slice(0,2); return o; }
+function validate(o){ const e=[];
+  if(!o.nom_scientifique) e.push("nom scientifique manquant"); else if(!/^[A-Z][a-zë-]+(\s[a-zë-]+){1,2}/.test(o.nom_scientifique)) e.push("binôme latin attendu (Genre espèce)");
+  if(!["Animal","Végétal"].includes(o.regne)) e.push("règne : Animal ou Végétal");
+  if(!o.habitat) e.push("habitat manquant");
+  for(const k of NUM) if(o[k]!==undefined&&typeof o[k]!=="number") e.push(`${k} non numérique`);
+  if(typeof o.profondeur_min==="number"&&typeof o.profondeur_max==="number"&&o.profondeur_min>o.profondeur_max) e.push("profondeur min > max");
+  if(typeof o.temperature_min==="number"&&typeof o.temperature_max==="number"&&o.temperature_min>o.temperature_max) e.push("température min > max");
+  if(o.statut_uicn&&!IUCN[o.statut_uicn]) e.push("statut UICN inconnu");
+  if(S.species.some(s=>String(s.nom_scientifique).toLowerCase()===String(o.nom_scientifique||"").toLowerCase())) e.push("déjà présente dans la base");
+  return e; }
+async function save(o){ o.date_ajout=new Date().toISOString(); o.statut_uicn=o.statut_uicn||"NE";
+  if(S.col) await S.col.add(o); else { S.species.push({...o,_id:"local-"+Math.random().toString(36).slice(2)}); render(); } }
+$("#entryForm").addEventListener("submit",async e=>{
+  e.preventDefault(); const msg=$("#formMsg"); msg.className="msg";
+  const o=clean(Object.fromEntries(new FormData(e.target))); const errs=validate(o); if(!o.contributeur) errs.push("contributeur manquant");
+  if(errs.length){msg.className="msg err";msg.textContent="À corriger : "+errs.join(" · ");
+    anim($("#saveBtn"),[{transform:"none"},{transform:"translateX(-8px)"},{transform:"translateX(7px)"},{transform:"translateX(-4px)"},{transform:"none"}],{duration:380,easing:"ease-out"}); return;}
+  const b=$("#saveBtn"); b.disabled=true; msg.textContent="Enregistrement…";
+  try{ await save(o); msg.className="msg ok"; msg.innerHTML=`« ${esc(o.nom_scientifique)} » ajoutée : une nouvelle cellule est apparue dans le <a href="#catalogue">relief</a>.`; const c=o.contributeur; e.target.reset(); $("#i_ctr").value=c;
+    anim(msg,[{transform:"scale(.8)",opacity:0},{transform:"scale(1.06)",opacity:1,offset:.7},{transform:"none"}],{duration:480,easing:OUT}); }
+  catch(err){ msg.className="msg err"; msg.textContent=err?.code==="quota_exceeded"?"La base a atteint sa capacité : supprimez des fiches avant d'en ajouter.":"Enregistrement refusé : vous n'avez pas les droits d'écriture sur cette base."; }
+  finally{ b.disabled=!S.canWrite; }
+});
+
+/* ================= IMPORT ================= */
+$("#tplPre").textContent=FIELDS.join(";")+"\nPosidonia oceanica;(L.) Delile, 1813;Posidonie;Végétal;Tracheophyta;Liliopsida;Alismatales;Posidoniaceae;Herbier;0.5;40;10;28;36 – 39;Autotrophe;150;Méditerranée;LC;Convention de Barcelone;Herbier dense;Labo X;DOI…";
+$("#copyTpl").onclick=async()=>{ try{await navigator.clipboard.writeText(FIELDS.join(";"));$("#tplMsg").textContent="En-tête copié.";}catch{const r=document.createRange();r.selectNodeContents($("#tplPre"));getSelection().removeAllRanges();getSelection().addRange(r);$("#tplMsg").textContent="Texte sélectionné : copiez-le avec Ctrl+C.";} };
+function parseDelimited(text){
+  const first=text.split(/\r?\n/)[0]||"", cnt=c=>first.split(c).length;
+  const sep=cnt("\t")>cnt(";")&&cnt("\t")>cnt(",")?"\t":cnt(";")>=cnt(",")?";":",";
+  const rows=[]; let row=[],f="",q=false;
+  for(let i=0;i<text.length;i++){const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){f+='"';i++;} else q=false; } else f+=c; }
+    else if(c==='"') q=true; else if(c===sep){row.push(f);f="";}
+    else if(c==="\n"||c==="\r"){ if(c==="\r"&&text[i+1]==="\n") i++; row.push(f); f=""; if(row.some(x=>x.trim()!=="")) rows.push(row); row=[]; }
+    else f+=c;}
+  row.push(f); if(row.some(x=>x.trim()!=="")) rows.push(row);
+  const head=rows.shift()||[]; return rows.map(r=>Object.fromEntries(head.map((h,i)=>[h.replace(/^﻿/,""),r[i]??""])));
+}
+let pending=[];
+function handleFile(file){ const rd=new FileReader();
+  rd.onload=()=>{ let raw=[]; const pv=$("#preview"); pv.hidden=false; const json=/\.json$/i.test(file.name);
+    try{ if(json){const j=JSON.parse(rd.result);raw=Array.isArray(j)?j:(j.species||j.especes||j.data||[]);} else raw=parseDelimited(rd.result); }
+    catch(err){ pv.innerHTML=`<p class="msg err">Lecture impossible : le fichier n'est pas un ${json?"JSON":"CSV"} valide (${esc(err.message)}).</p>`; return; }
+    const seen=new Set(); pending=raw.map(r=>{const o=clean(r),e=validate(o),k=String(o.nom_scientifique||"").toLowerCase(); if(k&&seen.has(k)) e.push("doublon dans le fichier"); seen.add(k); return {o,e};});
+    renderPreview(file.name); anim(pv,[{opacity:0,transform:"translateY(20px)"},{opacity:1,transform:"none"}],{duration:500,easing:OUT}); };
+  rd.readAsText(file); }
+function renderPreview(name){
+  const ok=pending.filter(p=>!p.e.length).length, ko=pending.length-ok, pv=$("#preview");
+  if(!pending.length){pv.innerHTML=`<p class="msg err">Aucune ligne lue dans « ${esc(name)} ». Vérifiez que la première ligne contient les en-têtes.</p>`;return;}
+  pv.innerHTML=`<div class="actions"><b style="font-weight:500">${esc(name)}</b><span class="count">${pending.length} lignes · <span style="color:var(--iucn-lc)">${ok} valides</span> · <span style="color:var(--iucn-cr)">${ko} à corriger</span></span></div>
+    <div class="tablewrap"><table><thead><tr><th>#</th><th>Contrôle</th><th>Nom scientifique</th><th>Nom commun</th><th>Règne</th><th>Habitat</th><th>Profondeur</th><th>UICN</th></tr></thead><tbody>
+    ${pending.slice(0,200).map((p,i)=>`<tr><td class="mono">${i+1}</td>${p.e.length?`<td class="st-err">${esc(p.e.join(" · "))}</td>`:`<td class="st-ok">OK</td>`}<td><em class="sci">${esc(p.o.nom_scientifique||"—")}</em></td><td>${esc(p.o.nom_commun||"")}</td><td>${esc(p.o.regne||"")}</td><td>${esc(p.o.habitat||"")}</td><td class="mono">${range(p.o.profondeur_min,p.o.profondeur_max,"m")}</td><td class="mono">${esc(p.o.statut_uicn||"NE")}</td></tr>`).join("")}
+    </tbody></table></div>
+    <div class="actions"><button class="btn primary" type="button" id="doImport" ${ok&&S.canWrite?"":"disabled"}>Importer ${ok} fiche${ok>1?"s":""} valide${ok>1?"s":""}</button><span class="msg" id="impMsg" role="status"></span></div>
+    <progress id="impProg" max="${ok}" value="0" hidden></progress>`;
+  $("#doImport").onclick=runImport; }
+async function runImport(){
+  const rows=pending.filter(p=>!p.e.length).map(p=>p.o), b=$("#doImport"), pr=$("#impProg"), m=$("#impMsg");
+  b.disabled=true; pr.hidden=false; let done=0,fail=0;
+  for(const o of rows){ try{await save({...o});done++;}catch(err){fail++; if(err?.code==="quota_exceeded"){m.className="msg err";m.textContent="Capacité de la base atteinte : import interrompu.";break;}} pr.value=done+fail; m.textContent=`${done} / ${rows.length} importées…`; }
+  m.className=fail?"msg err":"msg ok"; m.textContent=fail?`${done} fiches importées, ${fail} refusées.`:`${done} fiches importées dans le catalogue.`; pending=[]; }
+const drop=$("#drop");
+["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop",e=>{const f=e.dataTransfer.files[0]; if(f) handleFile(f);});
+$("#fileIn").addEventListener("change",e=>{const f=e.target.files[0]; if(f) handleFile(f); e.target.value="";});
+
+/* ================= BASE ================= */
+function notice(html){ $$("[data-notice]").forEach(n=>{n.innerHTML=html;n.hidden=!html;}); }
+function setWritable(ok){ S.canWrite=ok; $$("#entryForm input,#entryForm select,#entryForm textarea,#saveBtn,#fileIn").forEach(el=>el.disabled=!ok);
+  if(!ok) notice(`<b>Consultation seule.</b> Pour ajouter des fiches, demandez un accès contributeur au propriétaire de la base.`); }
+async function demoMode(){
+  try{ const r=await fetch("data/especes.json",{cache:"no-store"}); if(r.ok){ const j=await r.json(); if(Array.isArray(j)&&j.length){ S.ready=true; S.species=j.map((d,i)=>({...d,_id:d._id||d.id||"f-"+i})); render();
+    notice(`<b>Version statique.</b> Les fiches viennent de <span class="mono">data/especes.json</span> ; les ajouts depuis l'Espace chercheurs ne sont pas conservés.`); return; } } }catch(e){}
+  S.ready=true; S.species=DEMO.map((d,i)=>({...d,_id:"demo-"+i})); render();
+  notice(`<b>Mode démonstration.</b> La base partagée n'est pas accessible depuis cet affichage : les fiches présentées sont des exemples et les ajouts ne sont pas conservés.`); }
+async function connect(){
+  const c=window.claude; if(!c||!c.use){demoMode();return;}
+  const db=await c.use("db").catch(()=>null); if(!db){demoMode();return;}
+  S.col=db.collection("species");
+  S.col.onSnapshot(snap=>{S.ready=true;S.species=snap.docs.map(d=>({...d.data(),_id:d.id}));render();},()=>{ if(!S.species.length) demoMode(); });
+  const user=await c.use("user").catch(()=>null);
+  if(user){const w=await user.can("data.write"); if(w===false) setWritable(false);}
+}
+
+sphereLogo($("#logo"),9);
+initDock();
+R3=initMap();
+["catalogue","faune","flore"].forEach(buildFilters);
+render(); route(); connect();
+})();
+</script>
+
+</body>
+</html>
