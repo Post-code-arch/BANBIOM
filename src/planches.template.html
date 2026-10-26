@@ -6,7 +6,9 @@
 /* BANBIOM · Planches : branding, typographie, système voronoï animé, mockups. Chaque planche est un format 16:10 autonome. */
 :root{
   --night:#0d1114;--night-2:#161b1f;--paper:#e8f1ee;--surface:#f7fbf9;--ink:#0a2a32;--muted:#48676d;--line:#c3d8d3;
-  --abyss:#0a2f3b;--abyss-2:#124858;--cobalt:#2f5bd8;--cobalt-2:#1c3c9e;--mist:#b4c8f8;--lagoon:#17b3a3;--foam:#a3e8de;--deep:#0b6b66;--ground:#cdece6;
+  --abyss:#10303a;--abyss-2:#1d4852;--cobalt:#4a65b0;--cobalt-2:#2e4282;--mist:#bcc7e2;--lagoon:#3e9b92;--foam:#b3dad3;--deep:#225e5a;--ground:#d4e4df;
+  /* planches : palette désaturée commune ; photos traitées pareil (filtre --grade) */
+  --grade:saturate(.55) contrast(1.03) brightness(.95);
   --font-display:"Outfit",system-ui,sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,monospace;
 }
 *{box-sizing:border-box}
@@ -36,6 +38,7 @@ svg.logo{display:block}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* 01 couverture */
+.shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(13,17,20,.6),rgba(13,17,20,0) 60%)}
 #p1 .t{left:6cqw;bottom:7cqw;display:grid;gap:1.6cqw}
 #p1 h1{margin:0;font:200 11cqw/.86 var(--font-display);letter-spacing:-.05em}
 #p1 h1 span{color:var(--foam)}
@@ -109,33 +112,38 @@ svg.logo{display:block}
 #p13 .s em{font:300 max(11px,1.15cqw)/1.2 var(--font-display);font-style:italic}
 #p13 .s span{font:500 max(9px,.75cqw) var(--font-mono);color:var(--muted)}
 /* 14 pastilles */
-#p14 canvas.f{filter:blur(1.6cqw) saturate(1.2);transform:scale(1.1)}
+.photo{position:absolute;inset:0;background:center/cover no-repeat;filter:var(--grade)}
+.photo::after{content:"";position:absolute;inset:0;background:rgba(16,48,58,.16)}
+#p14 .photo.blur{filter:var(--grade) blur(1.2cqw);transform:scale(1.08)}
 #p14 .grain{position:absolute;inset:0;opacity:.2;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 #p14 .pills{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:1cqw}
 #p14 .pill{display:inline-flex;align-items:center;gap:1.3cqw;padding:1.5cqw 3cqw;border-radius:999px;background:#fff;color:#111;font:500 2.3cqw/1 var(--font-display);letter-spacing:-.01em;transform:translateY(20px);opacity:0;animation:pin .9s cubic-bezier(.34,1.56,.64,1) forwards}
 #p14 .pill svg{width:2.4cqw;height:2.4cqw;fill:none;stroke:#555;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 #p14.on .pill{animation-play-state:running}
 @keyframes pin{to{transform:none;opacity:1}}
-/* 15 dock */
-#p15 .sky{position:absolute;left:0;right:0;top:0;height:58%;background:linear-gradient(115deg,#5f8fc4 0%,#2f5bd8 55%,#17b3a3 120%)}
-#p15 .sky canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.35;mix-blend-mode:soft-light}
-#p15 .dock{position:absolute;left:50%;top:42%;transform:translateX(-50%);display:flex;gap:1.3cqw;padding:1.3cqw;border-radius:2.2cqw;background:rgba(255,255,255,.22);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.3)}
-#p15 .ap{width:6.4cqw;height:6.4cqw;border-radius:1.5cqw;background:#e3e6e8;position:relative;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
-#p15 .ap::after{content:"";position:absolute;left:50%;bottom:-.9cqw;width:.35cqw;height:.35cqw;border-radius:50%;background:rgba(255,255,255,.8);transform:translateX(-50%)}
-#p15 .ap.me{background:var(--abyss);display:grid;place-items:center;transform:translateY(-1.2cqw) scale(1.12)}
-#p15 .ap.me svg{width:62%;height:62%;color:var(--foam)}
-#p15 .tip{position:absolute;left:50%;bottom:calc(100% + 1.8cqw);transform:translateX(-50%);background:#fff;color:#111;font:400 1.3cqw/1 var(--font-display);padding:.8cqw 1.2cqw;border-radius:.8cqw;white-space:nowrap}
-#p15 .tip::after{content:"";position:absolute;left:50%;top:100%;border:.6cqw solid transparent;border-top-color:#fff;transform:translateX(-50%)}
-#p15 .stand{position:absolute;left:31%;right:31%;top:66%;bottom:0;background:linear-gradient(180deg,#3a3d40,#8c8f92 30%,#9fa2a5)}
-#p15 .stand::before{content:"";position:absolute;left:50%;top:-7cqw;width:13cqw;height:13cqw;border-radius:50%;background:#000;transform:translateX(-50%)}
-#p15 .bezel{position:absolute;left:0;right:0;top:58%;height:8%;background:#000}
+/* 15 dock : reconstruction de la référence, proportions relevées sur l'image (1855 × 1325) */
+#p15{aspect-ratio:1855/1325;background:#000}
+#p15 .sky{position:absolute;left:0;right:0;top:0;height:57.7%;
+  background:radial-gradient(ellipse 55% 75% at 95% -5%,#b3bedc 0%,rgba(179,190,220,0) 70%),radial-gradient(ellipse 45% 70% at 0% 95%,#6f9aa3 0%,rgba(111,154,163,0) 75%),linear-gradient(100deg,#8aa3bf 0%,#7a91bd 35%,#6a7db5 70%,#5d6fab 100%)}
+#p15 .dock{position:absolute;left:18.65cqw;width:62.7cqw;top:42.4%;height:11.8%;display:flex;align-items:flex-start;gap:1.35cqw;padding:1.67cqw 0 0 2.1cqw;border-radius:2.2cqw;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#p15 .ap{flex:none;width:5.3cqw;height:5.3cqw;border-radius:1.2cqw;background:#e4e4e4;position:relative;box-shadow:0 .15cqw .4cqw rgba(16,48,58,.12)}
+#p15 .ap::after{content:"";position:absolute;left:50%;top:calc(100% + .62cqw);width:.3cqw;height:.3cqw;border-radius:50%;background:rgba(255,255,255,.9);transform:translateX(-50%)}
+#p15 .ap.me{background:#111;display:grid;place-items:center}
+#p15 .ap.me svg{width:58%;height:58%;color:#fff}
+#p15 .tip{position:absolute;left:50%;bottom:calc(100% + 2.3cqw);transform:translateX(-50%);background:#fff;color:#111;font:400 1.1cqw/1 var(--font-display);letter-spacing:.01em;padding:.55cqw .8cqw;border-radius:.45cqw;white-space:nowrap}
+#p15 .tip::after{content:"";position:absolute;left:50%;top:100%;border:.55cqw solid transparent;border-top-color:#fff;border-bottom:0;transform:translateX(-50%)}
+#p15 .stand{position:absolute;left:31.2cqw;width:37.9cqw;top:67%;bottom:0;overflow:hidden;
+  background:linear-gradient(180deg,#000 0%,#1c1c1c 3%,#7d7d7d 13%,#959595 26%,#9b9b9b 100%)}
+#p15 .stand::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.25),rgba(0,0,0,0) 12%,rgba(0,0,0,0) 88%,rgba(0,0,0,.25))}
+#p15 .stand::after{content:"";position:absolute;inset:0;opacity:.35;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+#p15 .hole{position:absolute;left:50.24cqw;top:71.4%;width:12.6cqw;height:12.6cqw;border-radius:50%;background:#000;transform:translate(-50%,-50%)}
 /* 16 bento */
 #p16 .g{position:absolute;inset:3cqw;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:1.2cqw}
 #p16 .t{border-radius:1.4cqw;background:#1b1b1b;position:relative;overflow:hidden;display:grid;place-items:center}
 #p16 .t .lbl{position:absolute;left:1.4cqw;top:1.4cqw;color:#eee}
 #p16 .t svg{width:78%;height:78%}
 #p16 .wide{grid-column:span 2}
-#p16 .lite{background:linear-gradient(135deg,#ece6ff,#b9c8f5 60%,#a3e8de);color:var(--ink)}
+#p16 .lite{background:linear-gradient(135deg,#e6eaf0,#c6d0e3 60%,#c4dfda);color:var(--ink)}
 #p16 .lite .lbl{color:var(--ink)}
 #p16 .wht{background:#fff;border:1px solid #ddd}
 #p16 .orb ellipse{animation:spin 18s linear infinite;transform-origin:50% 50%;transform-box:view-box}
@@ -157,6 +165,30 @@ svg.logo{display:block}
 #p17 .ttl span{display:block;font:300 3.4cqw/1.1 var(--font-display);letter-spacing:-.02em;color:rgba(238,243,244,.4)}
 #p17 .cta{left:3cqw;bottom:3cqw;display:inline-flex;align-items:center;gap:1.2cqw;padding:.6cqw .6cqw .6cqw 1.8cqw;border-radius:999px;background:var(--cobalt);color:#fff;font:400 1.4cqw var(--font-display)}
 #p17 .cta i{width:3cqw;height:3cqw;border-radius:50%;background:rgba(255,255,255,.25);display:grid;place-items:center;font-style:normal}
+/* 19 photographie */
+#p19 .g{position:absolute;inset:3cqw;display:grid;grid-template-columns:repeat(3,1fr);gap:1.6cqw}
+#p19 figure{margin:0;display:grid;grid-template-rows:1fr auto;gap:1cqw;min-height:0}
+#p19 canvas{width:100%;height:100%;border-radius:1.2cqw;display:block;min-height:0}
+#p19 figcaption{display:grid;gap:.4cqw}#p19 figcaption b{font:300 2cqw/1 var(--font-display)}
+/* 20 affiches */
+#p20 .g{position:absolute;inset:3cqw 6cqw;display:grid;grid-template-columns:repeat(3,1fr);gap:2.4cqw}
+#p20 .poster{position:relative;border-radius:.4cqw;overflow:hidden;box-shadow:0 2cqw 4cqw rgba(0,0,0,.35)}
+#p20 canvas{position:absolute;inset:0;width:100%;height:100%}
+#p20 .ov{position:absolute;inset:0;padding:1.8cqw;display:flex;flex-direction:column;justify-content:space-between;color:#fff;background:linear-gradient(180deg,rgba(13,17,20,.3),rgba(13,17,20,0) 30%,rgba(13,17,20,0) 55%,rgba(13,17,20,.55))}
+#p20 .word{display:flex;align-items:center;gap:.7cqw;font-size:1.1cqw}#p20 .word svg{width:1.8cqw;height:1.8cqw;color:#fff}
+#p20 h3{margin:.8cqw 0 0;font:300 2.6cqw/1.02 var(--font-display);letter-spacing:-.02em}
+/* 21 réseaux */
+#p21 .g{position:absolute;inset:4cqw 5cqw;display:grid;grid-template-columns:repeat(3,1fr);gap:2.4cqw;align-items:center}
+#p21 .post{position:relative;aspect-ratio:1;border-radius:1.4cqw;overflow:hidden;background:#fff}
+#p21 canvas{position:absolute;inset:0;width:100%;height:100%}
+#p21 .pb{position:absolute;left:1.4cqw;right:1.4cqw;bottom:1.4cqw;padding:1.4cqw;border-radius:1cqw;background:rgba(247,251,249,.92);display:grid;gap:.6cqw;color:var(--ink)}
+#p21 .pb em{font:300 2.2cqw/1 var(--font-display);font-style:italic}
+#p21 .pb b{font:300 1.9cqw/1.05 var(--font-display)}
+#p21 .pb .big{font:200 5cqw/1 var(--font-display)}
+#p21 .pb span:not(.lbl){font-size:max(11px,1.05cqw)}
+#p21 .iucn{justify-self:start;font:500 max(10px,.85cqw) var(--font-mono);padding:.4cqw .7cqw;border-radius:.4cqw;background:#c3a462;color:#fff}
+#p21 .cta2{color:var(--cobalt)}
+#p21 .dk .pb{background:rgba(16,48,58,.88);color:#fff}
 /* 18 écrans */
 #p18 .laptop{position:absolute;left:5%;top:9%;width:66%}
 #p18 .scr{position:relative;aspect-ratio:16/10;background:#000;border-radius:1.4cqw 1.4cqw 0 0;padding:1cqw;border:1px solid #333}
@@ -174,7 +206,7 @@ svg.logo{display:block}
 <main id="main">
   <!-- 01 -->
   <section class="slot" id="s1"><div class="cap"><b>01 · Couverture</b><span>Branding</span></div>
-    <div class="pl abyss keep" id="p1"><canvas class="f" data-field="cover"></canvas>
+    <div class="pl abyss keep" id="p1"><canvas class="f" data-photo="meduses" data-n="40" data-fy=".35"></canvas><div class="shade"></div>
       <div class="ab brand"><svg class="logo" data-logo></svg><span class="word">BANBIOM</span></div>
       <div class="ab t"><span class="lbl">Banque de biodiversité marine · Alger</span><h1>La mer,<br><span>cellule</span> par cellule.</h1></div>
       <div class="ab meta mono"><span class="lbl">Charte graphique</span><span class="lbl">Studio POST_ · 2026</span></div></div></section>
@@ -256,13 +288,12 @@ svg.logo{display:block}
 
   <!-- 14 -->
   <section class="slot" id="s14"><div class="cap"><b>14 · Mockup · actions</b><span>Interface</span></div>
-    <div class="pl" id="p14" style="background:var(--deep)"><canvas class="f" data-field="blur"></canvas><div class="grain"></div>
+    <div class="pl" id="p14" style="background:var(--deep)"><div class="photo blur" style="background-image:url(assets/photos/kelp.jpg)"></div><div class="grain"></div>
       <div class="pills" id="pills"></div></div></section>
 
   <!-- 15 -->
   <section class="slot" id="s15"><div class="cap"><b>15 · Mockup · application</b><span>Interface</span></div>
-    <div class="pl keep" id="p15" style="background:#000"><div class="sky"><canvas data-field="sky"></canvas></div><div class="bezel"></div><div class="stand"></div>
-      <div class="dock" id="dock"></div></div></section>
+    <div class="pl keep" id="p15"><div class="sky"></div><div class="stand"></div><div class="hole"></div><div class="dock" id="dock"></div></div></section>
 
   <!-- 16 -->
   <section class="slot" id="s16"><div class="cap"><b>16 · Mockup · composants</b><span>Interface</span></div>
@@ -272,7 +303,7 @@ svg.logo{display:block}
   <section class="slot" id="s17"><div class="cap"><b>17 · Mockup · affiche</b><span>Édition</span></div>
     <div class="pl dark" id="p17"><div class="gl"><svg id="grid17" preserveAspectRatio="none"></svg></div>
       <div class="ab num" id="bigN">33</div><div class="ab sub">Espèces<br>documentées</div>
-      <div class="ab img"><canvas data-field="poster"></canvas></div>
+      <div class="ab img"><canvas data-photo="tortue" data-n="26" data-fy=".55"></canvas></div>
       <div class="ab ttl"><b>Cartographier le vivant</b><span>Une base ouverte aux chercheurs, des fiches vérifiables, une Méditerranée lisible cellule par cellule.</span></div>
       <div class="ab cta">Ouvrir la console <i>→</i></div></div></section>
 
@@ -282,6 +313,27 @@ svg.logo{display:block}
       <div class="laptop"><div class="scr"><div class="vp"><iframe data-src="index.html#/tableau" data-w="1440" data-h="900" title="Console, bureau" tabindex="-1" loading="lazy"></iframe></div></div><div class="base"></div></div>
       <div class="phone"><div class="vp"><iframe data-src="index.html#/especes" data-w="390" data-h="844" title="Console, mobile" tabindex="-1" loading="lazy"></iframe></div></div>
       <div class="ab leg" style="color:var(--ink)"><span class="lbl">Console BANBIOM · bureau et mobile · interface réelle</span></div></div></section>
+
+  <!-- 19 -->
+  <section class="slot" id="s19"><div class="cap"><b>19 · Photographie · traitement</b><span>Supports</span></div>
+    <div class="pl light" id="p19"><div class="g">
+      <figure><canvas data-photo="corail" data-mode="full" data-n="1"></canvas><figcaption><b>Image</b><span class="lbl">Désaturation 55 % · voile abysse 16 %</span></figcaption></figure>
+      <figure><canvas data-photo="corail" data-mode="veins" data-n="24"></canvas><figcaption><b>Veines</b><span class="lbl">Tracé blanc 26 % · graines</span></figcaption></figure>
+      <figure><canvas data-photo="corail" data-mode="cells" data-n="14"></canvas><figcaption><b>Cellules</b><span class="lbl">Photo vue à travers le voronoï</span></figcaption></figure></div></div></section>
+
+  <!-- 20 -->
+  <section class="slot" id="s20"><div class="cap"><b>20 · Affiches · série</b><span>Supports</span></div>
+    <div class="pl dark" id="p20"><div class="g">
+      <div class="poster"><canvas data-photo="meduses" data-n="20" data-fy=".4"></canvas><div class="ov"><span class="word"><svg data-logo></svg>BANBIOM</span><div><span class="lbl">Pelagia noctiluca · Pélagique</span><h3>Dériver<br>en eaux libres.</h3></div></div></div>
+      <div class="poster"><canvas data-photo="requins" data-n="20"></canvas><div class="ov"><span class="word"><svg data-logo></svg>BANBIOM</span><div><span class="lbl">Prionace glauca · CR en Méditerranée</span><h3>Compter ceux<br>qui disparaissent.</h3></div></div></div>
+      <div class="poster"><canvas data-photo="kelp" data-n="20" data-fx=".3"></canvas><div class="ov"><span class="word"><svg data-logo></svg>BANBIOM</span><div><span class="lbl">Forêts d'algues · Infralittoral</span><h3>Cartographier<br>les forêts sous la mer.</h3></div></div></div></div></div></section>
+
+  <!-- 21 -->
+  <section class="slot" id="s21"><div class="cap"><b>21 · Réseaux sociaux</b><span>Supports</span></div>
+    <div class="pl light" id="p21"><div class="g">
+      <div class="post"><canvas data-photo="tortue" data-mode="cells" data-n="12" data-fy=".7"></canvas><div class="pb"><span class="lbl">Fiche · 04</span><em>Caretta caretta</em><span class="iucn">VU · Vulnérable</span></div></div>
+      <div class="post dk"><canvas data-photo="corail" data-n="18"></canvas><div class="pb"><span class="lbl">Chiffre</span><b class="big" data-n33>33</b><span>espèces documentées sur la côte algérienne</span></div></div>
+      <div class="post"><canvas data-photo="requins" data-mode="cells" data-n="10"></canvas><div class="pb"><span class="lbl">Étude de cas</span><b>Les grands pélagiques</b><span class="cta2">Voir la planche →</span></div></div></div></div></section>
 </main>
 
 <script>
@@ -292,8 +344,12 @@ svg.logo{display:block}
 "use strict";
 const B=window.Banbiom, $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
-const C={abyss:"#0a2f3b",abyss2:"#124858",cobalt:"#2f5bd8",cobalt2:"#1c3c9e",mist:"#b4c8f8",lagoon:"#17b3a3",foam:"#a3e8de",deep:"#0b6b66",ground:"#cdece6",paper:"#e8f1ee",ink:"#0a2a32"};
+const C={abyss:"#10303a",abyss2:"#1d4852",cobalt:"#4a65b0",cobalt2:"#2e4282",mist:"#bcc7e2",lagoon:"#3e9b92",foam:"#b3dad3",deep:"#225e5a",ground:"#d4e4df",paper:"#e8f1ee",ink:"#0a2a32"};
 let SP=[];
+/* photos : même traitement partout (désaturation légère + voile abysse) */
+const IMG={}; function photo(n){ if(!IMG[n]){ const im=new Image(); im.src="assets/photos/"+n+".jpg"; IMG[n]=im; } return IMG[n]; }
+function drawPhoto(c,n,W,H,fx=.5,fy=.5){ const im=photo(n); if(!im.complete||!im.naturalWidth) return false; const s=Math.max(W/im.naturalWidth,H/im.naturalHeight), w=im.naturalWidth*s, h=im.naturalHeight*s;
+  c.save(); c.filter="saturate(.55) contrast(1.03) brightness(.95)"; c.drawImage(im,(W-w)*fx,(H-h)*fy,w,h); c.restore(); c.fillStyle="rgba(16,48,58,.16)"; c.fillRect(0,0,W,H); return true; }
 
 /* ---------- logo : disque coupé en 3 cellules ---------- */
 function logoPaths(){ const r=B._rng(B._hash("logo-sphere")), pts=[]; while(pts.length<3){ const x=r()*100,y=r()*100; if(Math.hypot(x-50,y-50)<46) pts.push({x,y,w:0}); }
@@ -325,8 +381,8 @@ gridLines($("#grid17"),[.29,.31,.66,.68],[.06,.1,.36,.4,.6,.64,.7,.74,.8,.84,.9,
 
 /* couleurs : chaque teinte est une cellule */
 (function(){ const svg=$("#swatches"), W=1600, H=1000; svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
-  const sw=[["Abysse",C.abyss,"#0A2F3B","Fond, texte fort",1.9],["Cobalt",C.cobalt,"#2F5BD8","Faune",1.6],["Lagon",C.lagoon,"#17B3A3","Flore",1.6],["Profond",C.deep,"#0B6B66","Flore, ombre",1.1],
-    ["Cobalt foncé",C.cobalt2,"#1C3C9E","Faune, ombre",1],["Brume",C.mist,"#B4C8F8","Faune, clair",.9],["Écume",C.foam,"#A3E8DE","Flore, clair",.9],["Fond",C.paper,"#E8F1EE","Papier",1.2],["Sol",C.ground,"#CDECE6","Surface",.8]];
+  const sw=[["Abysse",C.abyss,"#10303A","Fond, texte fort",1.9],["Cobalt",C.cobalt,"#4A65B0","Faune",1.6],["Lagon",C.lagoon,"#3E9B92","Flore",1.6],["Profond",C.deep,"#225E5A","Flore, ombre",1.1],
+    ["Cobalt foncé",C.cobalt2,"#2E4282","Faune, ombre",1],["Brume",C.mist,"#BCC7E2","Faune, clair",.9],["Écume",C.foam,"#B3DAD3","Flore, clair",.9],["Fond",C.paper,"#E8F1EE","Papier",1.2],["Sol",C.ground,"#D4E4DF","Surface",.8]];
   const r=B._rng(B._hash("palette")), pts=sw.map((s,i)=>({x:120+r()*(W-240),y:120+r()*(H-240),w:(s[4]*170)**2}));
   for(let k=0;k<60;k++) pts.forEach((p,i)=>pts.forEach((q,j)=>{ if(i===j) return; const d=Math.hypot(p.x-q.x,p.y-q.y)||1; if(d<380){ p.x+=(p.x-q.x)/d*6; p.y+=(p.y-q.y)/d*6; } p.x=Math.max(100,Math.min(W-100,p.x)); p.y=Math.max(100,Math.min(H-100,p.y)); }));
   const cs=B._cells(pts,W,H,()=>14,0); svg.innerHTML=cs.map((poly,i)=>{ const s=sw[i], ir=B._innerRect(poly,1.6), dark=[C.abyss,C.cobalt,C.deep,C.cobalt2,C.lagoon].includes(s[1]), tc=dark?"#fff":C.ink;
@@ -370,6 +426,12 @@ function Field(cv,o){
 const pick=(arr,k)=>arr[Math.floor(k*arr.length)%arr.length];
 const blobs=(ctx,W,H,t,list)=>{ list.forEach(([x,y,r,c],i)=>{ const X=W*(x+.05*Math.sin(t*.3+i)), Y=H*(y+.05*Math.cos(t*.25+i*1.3)), R=Math.max(W,H)*r, g=ctx.createRadialGradient(X,Y,0,X,Y,R); g.addColorStop(0,c); g.addColorStop(1,"rgba(0,0,0,0)"); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); }); };
 const FIELDS={
+  ph:cv=>{ const n=cv.dataset.photo, mode=cv.dataset.mode||"veins", fx=+(cv.dataset.fx||.5), fy=+(cv.dataset.fy||.5), N=+(cv.dataset.n||22);
+    return Field(cv,{n:N,seed:"ph-"+n+mode,gap:mode==="cells"?10:2,R:mode==="cells"?22:4,amp:.03,mouse:true,
+      bg(c,W,H){ if(mode==="cells"){ c.fillStyle=C.paper; c.fillRect(0,0,W,H); } else drawPhoto(c,n,W,H,fx,fy); },
+      paint(c,p,i,s){ if(mode==="cells"){ c.save(); c.clip(p); if(!drawPhoto(c,n,c.canvas.clientWidth||c.canvas.width,c.canvas.clientHeight||c.canvas.height,fx,fy)){ c.fillStyle=C.ground; c.fill(p); } c.restore(); if(s.k>.82){ c.fillStyle=s.k>.93?C.lagoon:C.abyss; c.fill(p); } }
+        else if(mode==="veins"){ c.strokeStyle="rgba(255,255,255,.26)"; c.lineWidth=1; c.stroke(p); if(s.k>.9){ c.fillStyle="rgba(16,48,58,.42)"; c.fill(p); } } },
+      after(c,W,H,t,pts){ if(mode!=="veins") return; c.fillStyle="rgba(255,255,255,.7)"; pts.forEach(s=>{ if(s.k>.75){ c.beginPath(); c.arc(s.x,s.y,1.5,0,6.3); c.fill(); } }); }}); },
   cover:cv=>Field(cv,{n:46,seed:"cover",gap:3,R:0,mouse:true,host:$("#p1"),margin:0,
     paint(c,p,i,s){ c.strokeStyle="rgba(163,232,222,.28)"; c.lineWidth=1; c.stroke(p); if(s.k>.86){ c.fillStyle=s.k>.95?C.lagoon:"rgba(23,179,163,.22)"; c.fill(p); } },
     after(c,W,H,t,pts){ c.fillStyle=C.foam; pts.forEach(s=>{ if(s.k>.7){ c.beginPath(); c.arc(s.x,s.y,1.6,0,6.3); c.fill(); } }); }}),
@@ -379,13 +441,13 @@ const FIELDS={
   nano:cv=>Field(cv,{n:2,seed:"nano2",gap:8,R:18,amp:.05,paint(c,p,i){ c.fillStyle=[C.cobalt,C.mist][i%2]; c.fill(p); }}),
   breathe:cv=>Field(cv,{n:24,seed:"breathe",gap:10,R:28,amp:.07,mouse:true,paint(c,p,i,s){ c.fillStyle=pick([C.lagoon,C.deep,C.foam,C.ground,C.lagoon,C.abyss],s.k); c.fill(p); }}),
   veins:cv=>Field(cv,{n:60,seed:"veins",gap:2,R:6,amp:.02,mouse:true,open:40,
-    paint(c,p,i,s){ c.fillStyle="#161b1f"; c.fill(p); c.strokeStyle=s.g>1?`rgba(77,124,255,${Math.min(1,.25+s.g/30)})`:"rgba(232,238,240,.16)"; c.lineWidth=1; c.stroke(p); },
+    paint(c,p,i,s){ c.fillStyle="#161b1f"; c.fill(p); c.strokeStyle=s.g>1?`rgba(140,160,214,${Math.min(1,.25+s.g/30)})`:"rgba(232,238,240,.16)"; c.lineWidth=1; c.stroke(p); },
     bg(c,W,H){ c.fillStyle="#2a3238"; c.fillRect(0,0,W,H); }}),
   grow:cv=>Field(cv,{n:70,seed:"grow",gap:3,R:10,amp:.01,drift:true,
-    grow(t,n){ const k=Math.floor((t*4)%(n+16)); const v=Math.max(1,Math.min(n,k)); const el=$("#growN"); if(el) el.textContent=`${v} fiche${v>1?"s":""}`; return v; },
+    grow(t,n){ const k=Math.floor((t*4)%(n+16)); const v=Math.max(8,Math.min(n,k)); const el=$("#growN"); if(el) el.textContent=`${v} fiche${v>1?"s":""}`; return v; },
     paint(c,p,i,s,t){ const age=(t*4)%(70+16)-s.born; c.fillStyle=age<2.5?C.foam:pick([C.lagoon,C.deep,C.abyss2,C.cobalt],s.k); c.fill(p); }}),
   glass:cv=>Field(cv,{n:16,seed:"glass",gap:14,R:24,amp:.05,mouse:true,open:16,
-    bg(c,W,H,t){ c.fillStyle="#06222c"; c.fillRect(0,0,W,H); blobs(c,W,H,t,[[.8,.25,.45,"rgba(77,124,255,.9)"],[.62,.75,.4,"rgba(46,224,201,.75)"],[.95,.55,.25,"rgba(180,200,248,.7)"],[.2,.85,.4,"rgba(11,128,120,.8)"],[.4,.45,.3,"rgba(42,79,192,.7)"]]); },
+    bg(c,W,H,t){ c.fillStyle="#06222c"; c.fillRect(0,0,W,H); blobs(c,W,H,t,[[.8,.25,.45,"rgba(110,132,196,.85)"],[.62,.75,.4,"rgba(96,170,160,.7)"],[.95,.55,.25,"rgba(188,199,226,.6)"],[.2,.85,.4,"rgba(34,94,90,.8)"],[.4,.45,.3,"rgba(74,101,176,.6)"]]); },
     paint(c,p){ c.fillStyle="rgba(232,241,238,.10)"; c.fill(p); c.strokeStyle="rgba(232,241,238,.5)"; c.lineWidth=1; c.stroke(p); }}),
   blur:cv=>Field(cv,{n:18,seed:"blur",gap:0,R:0,amp:.08,paint(c,p,i,s){ c.fillStyle=pick(["#6f7f3a","#a5a94d","#3d5a3a","#c9b75a","#7d9a8f","#8fb0c4","#556b2f"],s.k); c.fill(p); }}),
   sky:cv=>Field(cv,{n:20,seed:"sky",gap:6,R:24,amp:.05,paint(c,p,i,s){ c.fillStyle=s.k>.5?"#fff":"#000"; c.fill(p); }}),
@@ -394,6 +456,7 @@ const FIELDS={
     paint(c,p,i,s){ if(s.k>.55){ c.fillStyle=s.k>.85?"rgba(10,47,59,.85)":"rgba(47,91,216,.55)"; c.fill(p); } c.strokeStyle="rgba(255,255,255,.35)"; c.lineWidth=1; c.stroke(p); }})
 };
 $$("canvas[data-field]").forEach(cv=>FIELDS[cv.dataset.field]&&FIELDS[cv.dataset.field](cv));
+$$("canvas[data-photo]").forEach(cv=>FIELDS.ph(cv));
 
 /* ---------- pastilles (mockup 14) ---------- */
 const IC={book:'<path d="M3 5.5C5.5 4 8.5 4 12 6c3.5-2 6.5-2 9-.5V19c-2.5-1.5-5.5-1.5-9 .5-3.5-2-6.5-2-9-.5z"/><path d="M12 6v13.5"/>',scan:'<path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',chat:'<path d="M4 18.5V7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H8z"/>',plus:'<circle cx="12" cy="12" r="8.5" stroke-dasharray="3 2"/><path d="M12 8v8M8 12h8"/>'};
@@ -411,15 +474,15 @@ function sigSVG(sp,w,h){ const A=sp.regne==="Animal", gap=A?2:8, R=A?0:18, cols=
 function useData(){
   const g=$("#sigs"), pick12=SP.filter(s=>s.regne==="Animal").slice(0,6).concat(SP.filter(s=>s.regne==="Végétal").slice(0,6));
   g.insertAdjacentHTML("beforeend",pick12.map(s=>`<div class="s">${sigSVG(s,240,180)}<div><em>${s.nom_scientifique}</em><br><span>${(s.habitat||"").toUpperCase()} · ${s.profondeur_min??"?"}–${s.profondeur_max??"?"} M</span></div></div>`).join(""));
-  $("#bigN").textContent=SP.length||33;
+  $("#bigN").textContent=SP.length||33; $$("[data-n33]").forEach(e=>e.textContent=SP.length||33);
   /* bento */
-  const order=["CR","EN","VU","NT","LC","DD","NE"], col={CR:"#f2667a",EN:"#f08a4f",VU:"#e5b042",NT:"#b8c94e",LC:"#5ccb8f",DD:"#8fa6ab",NE:"#4d5a60"}, n=SP.length||1;
+  const order=["CR","EN","VU","NT","LC","DD","NE"], col={CR:"#b86a72",EN:"#bf8562",VU:"#c3a462",NT:"#a2a86e",LC:"#6fa38b",DD:"#8a999d",NE:"#46545a"}, n=SP.length||1;
   let a0=-90, arcs=""; order.forEach(k=>{ const v=SP.filter(s=>(s.statut_uicn||"NE")===k).length; if(!v) return; const a1=a0+v/n*360-4, r=38, p=a=>[50+r*Math.cos(a*Math.PI/180),50+r*Math.sin(a*Math.PI/180)], [x0,y0]=p(a0), [x1,y1]=p(a1);
     arcs+=`<path d="M${x0} ${y0}A${r} ${r} 0 ${a1-a0>180?1:0} 1 ${x1} ${y1}" fill="none" stroke="${col[k]}" stroke-width="7"/>`; a0=a1+4; });
-  const hab={}; SP.forEach(s=>hab[s.habitat]=(hab[s.habitat]||0)+1); const he=Object.entries(hab).sort((a,b)=>b[1]-a[1]).slice(0,5), hm=Math.max(1,...he.map(e=>e[1])), bc=["#1f6f6a","#8fd16a","#2c5a2a","#5bd0e0","#a3e8de"];
+  const hab={}; SP.forEach(s=>hab[s.habitat]=(hab[s.habitat]||0)+1); const he=Object.entries(hab).sort((a,b)=>b[1]-a[1]).slice(0,5), hm=Math.max(1,...he.map(e=>e[1])), bc=["#3e9b92","#b3dad3","#225e5a","#bcc7e2","#4a65b0"];
   const bars=he.map(([h,v],i)=>`<rect x="${12+i*16}" y="${88-v/hm*70}" width="9" height="${v/hm*70}" fill="${bc[i]}"/>`).join("");
   const orb=Array.from({length:6},(_,i)=>`<ellipse cx="50" cy="50" rx="${44-i*6}" ry="${22-i*1.2}" fill="none" stroke="rgba(255,255,255,${i?.3:.6})" stroke-width=".3" stroke-dasharray="${i?"1 1":"0"}" style="transform:rotate(${i*30}deg)"/>`).join("");
-  $("#bento").innerHTML=`<div class="t orb"><span class="lbl">Réseau d'espèces</span><svg viewBox="0 0 100 100">${orb}<defs><radialGradient id="cg"><stop offset="0" stop-color="#4d7cff"/><stop offset="1" stop-color="#0a2f3b"/></radialGradient></defs><circle cx="50" cy="50" r="6" fill="url(#cg)"/>${[[8,50],[92,50],[30,30],[72,70],[60,38]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.6" fill="#b4c8f8"/>`).join("")}</svg></div>
+  $("#bento").innerHTML=`<div class="t orb"><span class="lbl">Réseau d'espèces</span><svg viewBox="0 0 100 100">${orb}<defs><radialGradient id="cg"><stop offset="0" stop-color="#7d93c9"/><stop offset="1" stop-color="#0a2f3b"/></radialGradient></defs><circle cx="50" cy="50" r="6" fill="url(#cg)"/>${[[8,50],[92,50],[30,30],[72,70],[60,38]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.6" fill="#bcc7e2"/>`).join("")}</svg></div>
     <div class="t lite wide"><span class="lbl">Flux d'import</span><svg viewBox="0 0 200 100"><g stroke="#0a2a32" stroke-dasharray="2 2" fill="none" stroke-width=".5"><path d="M100 26v8M100 34C100 40 60 38 60 46M100 34c0 6 40 4 40 12M60 58v12M140 58v12"/></g>
       ${[[100,18,"Fichier CSV",1],[60,52,"Contrôle"],[140,52,"Doublons"],[60,78,"Validées"],[140,78,"À corriger"]].map(([x,y,t,d])=>`<rect x="${x-24}" y="${y-7}" width="48" height="14" rx="${d?2:7}" fill="${d?"#0a2a32":"rgba(10,42,50,.55)"}"/><text class="ntxt" x="${x-19}" y="${y+2.5}" style="font-size:5px">${t}</text>`).join("")}</svg></div>
     <div class="t wide"><span class="lbl">Statuts UICN · habitats</span><svg viewBox="0 0 200 100"><g transform="translate(10,0)">${arcs}</g><g transform="translate(110,0)">${bars}</g></svg></div>
