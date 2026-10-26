@@ -7,7 +7,7 @@ Banque de données des écosystèmes marins (faune et flore) conçue par le stud
 - `src/site.template.html` : tout le site (HTML, CSS, JS) dans un seul gabarit. **On modifie ici**, jamais directement `index.html`.
 - `src/voronoi.js` : moteur voronoï partagé (`window.Banbiom`) : `field`, `division`, `cellPath`, `seedsFromSpecies`, et les aides `_cells`, `_traceSVG`, `_rounded`, `_arcs`, `_innerRect`, `_hash`, `_rng`.
 - `build.py` : insère `src/voronoi.js` à la place de `/*BUNDLE*/` dans le gabarit et écrit `index.html`. Lancer `python3 build.py` après chaque modification.
-- `data/especes.json` : fiches de départ (données exemple, à valider scientifiquement).
+- `data/especes.json` : 33 fiches de départ : 10 exemples, plus 23 espèces méditerranéennes documentées par recherche web (FishBase, SeaLifeBase, MarLIN, Liste rouge UICN via ces bases…). Chaque fiche cite ses sources dans `reference` et signale ce qui reste à vérifier ; tout est à valider scientifiquement avant publication.
 - `design-system/` : la charte (brand book `README.md`, `tokens.json`, planches `components/*/preview.html`). Toute décision visuelle doit la respecter ; la mettre à jour quand une règle change.
 
 Aperçu local : `python3 build.py && python3 -m http.server` puis http://localhost:8000.
