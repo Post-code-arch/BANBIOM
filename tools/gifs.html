@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>BANBIOM · animations explicatives</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>body{margin:0;background:#0d1114;display:grid;place-items:center;min-height:100vh;gap:16px;color:#eef3f4;font:14px Outfit,sans-serif}canvas{display:block;border-radius:12px}nav{display:flex;gap:8px}button{font:inherit;background:#222a2f;color:inherit;border:0;border-radius:999px;padding:8px 14px;cursor:pointer}</style>
+</head><body>
+<!-- Générateur des GIF explicatifs (voronoï, mouvement, grille). Ouvrir via un serveur à la racine du dépôt ; tools/make-gifs.js capture les images, tools/make_gifs.py assemble les GIF. -->
+<canvas id="c" width="960" height="600"></canvas>
+<nav><button data-s="voronoi">Voronoï</button><button data-s="motion">Mouvement</button><button data-s="grid">Grille</button></nav>
+<script src="../src/voronoi.js"></script>
+<script>
+"use strict";
+const B=window.Banbiom, cv=document.getElementById("c"), ctx=cv.getContext("2d"), W=960, H=600;
+const C={night:"#161b1f",ink:"#eef3f4",mute:"rgba(238,243,244,.5)",faint:"rgba(238,243,244,.14)",abyss:"#10303a",abyss2:"#1d4852",cobalt:"#4a65b0",cobalt2:"#2e4282",mist:"#bcc7e2",lagoon:"#3e9b92",foam:"#b3dad3",deep:"#225e5a",ground:"#d4e4df",paper:"#e8f1ee"};
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)), seg=(t,a,b)=>clamp((t-a)/(b-a));
+const eo=x=>1-Math.pow(1-x,3), eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2, back=x=>{ const c1=1.70158,c3=c1+1; return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2); };
+const path=(poly,r)=>{ const d=B._traceSVG(poly,r); return d?new Path2D(d):null; };
+function frame(title,kicker,steps,t,cur){
+  ctx.fillStyle=C.night; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=C.mute; ctx.font="500 11px 'IBM Plex Mono'"; ctx.fillText(kicker.toUpperCase().split("").join(String.fromCharCode(8202)),40,44);
+  ctx.fillStyle=C.ink; ctx.font="300 30px Outfit"; ctx.fillText(title,40,80);
+  /* logo */ ctx.save(); ctx.translate(W-64,36); ctx.scale(.26,.26); logo("#b3dad3"); ctx.restore();
+  /* étapes */ const n=steps.length, x0=40, w=(W-80)/n;
+  steps.forEach((s,i)=>{ const x=x0+i*w, on=i===cur, done=i<cur;
+    ctx.fillStyle=on?C.ink:done?"rgba(238,243,244,.45)":"rgba(238,243,244,.22)"; ctx.font=(on?"400":"300")+" 14px Outfit"; ctx.fillText(s,x,H-28);
+    ctx.font="500 10px 'IBM Plex Mono'"; ctx.fillText(String(i+1).padStart(2,"0"),x,H-48);
+    ctx.fillStyle="rgba(238,243,244,.12)"; ctx.fillRect(x,H-62,w-12,2);
+    if(done||on){ ctx.fillStyle=on?C.foam:"rgba(179,218,211,.5)"; ctx.fillRect(x,H-62,(w-12)*(on?t:1),2); } });
+}
+let LOGO=null;
+function logo(col){ if(!LOGO){ const r=B._rng(B._hash("logo-sphere")), pts=[]; while(pts.length<3){ const x=r()*100,y=r()*100; if(Math.hypot(x-50,y-50)<46) pts.push({x,y,w:0}); } LOGO=B._cells(pts,100,100,()=>9,8).map(p=>path(p,12)); }
+  ctx.save(); ctx.beginPath(); ctx.arc(50,50,49,0,6.283); ctx.clip(); ctx.fillStyle=col; LOGO.forEach(p=>p&&ctx.fill(p)); ctx.restore(); }
+
+/* ================= 1. SYSTÈME VORONOÏ ================= */
+const V=(()=>{ const ax=60, ay=112, aw=840, ah=398, r=B._rng(B._hash("gif-vor")), pts=[];
+  while(pts.length<15){ const x=30+r()*(aw-60), y=30+r()*(ah-60); if(pts.every(p=>Math.hypot(p.x-x,p.y-y)>95)) pts.push({x,y,w:0,k:r()}); }
+  pts[0].x=aw*.3; pts[0].y=ah*.5;
+  const raw=B._cells(pts,aw,ah,()=>0,0), near=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1])<.8, edges=[];
+  for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){ const sh=raw[i].filter(v=>raw[j].some(u=>near(u,v))); if(sh.length>=2) edges.push({i,j,a:sh[0],b:sh[1]}); }
+  const cols=[C.cobalt,C.lagoon,C.cobalt2,C.deep,C.mist,C.foam,C.lagoon,C.cobalt];
+  const steps=["Graines","Voisins et médiatrices","Cellules","Veines","Arrondis","Cellule dominante"];
+  return {dur:10.4,draw(t){
+    const T=[0,1.6,3.6,4.9,6.1,7.3,9.0], cur=Math.max(0,T.findIndex((v,i)=>t>=v&&t<(T[i+1]??99))), cur2=Math.min(5,cur);
+    frame("Le système voronoï","Banbiom · comment le voronoï opère",steps,seg(t,T[cur2],T[cur2+1]),cur2);
+    ctx.save(); ctx.translate(ax,ay); ctx.beginPath(); ctx.rect(0,0,aw,ah); ctx.clip();
+    ctx.strokeStyle=C.faint; ctx.lineWidth=1; ctx.strokeRect(.5,.5,aw-1,ah-1);
+    const gap=14*eio(seg(t,4.9,6.0)), R=30*eio(seg(t,6.1,7.2)), dom=eio(seg(t,7.3,8.6)), fill=seg(t,3.6,4.6);
+    const P=pts.map((p,i)=>({x:p.x,y:p.y,w:i===0?Math.pow(150*dom,2):0}));
+    if(t>=3.6){ const cs=B._cells(P,aw,ah,()=>gap,0);
+      cs.forEach((poly,i)=>{ const pa=path(poly,R); if(!pa) return; const solid=seg(t,4.9,5.6);
+        ctx.globalAlpha=clamp(.18+.82*solid)*fill; ctx.fillStyle=i===0&&dom>0?mix(cols[i%cols.length],C.abyss,dom):cols[i%cols.length]; ctx.fill(pa); ctx.globalAlpha=1; }); }
+    /* liens entre voisins et médiatrices */
+    const lk=seg(t,1.6,2.5), bs=seg(t,2.4,3.6), fadeL=1-seg(t,4.2,5.0);
+    if(t>=1.6&&fadeL>0) edges.forEach((e,k)=>{ const a=pts[e.i], b=pts[e.j], q=eo(clamp(lk*1.6-k*.02));
+      ctx.globalAlpha=fadeL; ctx.setLineDash([3,4]); ctx.strokeStyle="rgba(238,243,244,.35)"; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(a.x+(b.x-a.x)*q,a.y+(b.y-a.y)*q); ctx.stroke(); ctx.setLineDash([]);
+      const m=[(e.a[0]+e.b[0])/2,(e.a[1]+e.b[1])/2], g=eo(clamp(bs*1.4-k*.015));
+      if(g>0){ ctx.strokeStyle=C.foam; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo(m[0]+(e.a[0]-m[0])*g,m[1]+(e.a[1]-m[1])*g); ctx.lineTo(m[0]+(e.b[0]-m[0])*g,m[1]+(e.b[1]-m[1])*g); ctx.stroke(); ctx.lineWidth=1; }
+      ctx.globalAlpha=1; });
+    /* angle droit sur une médiatrice */
+    if(bs>.3&&fadeL>0){ const e=edges[0], a=pts[e.i], b=pts[e.j], mx=(a.x+b.x)/2, my=(a.y+b.y)/2; ctx.globalAlpha=fadeL*seg(bs,.3,.6); ctx.fillStyle=C.foam; ctx.font="500 11px 'IBM Plex Mono'"; ctx.fillText("médiatrice",mx+8,my-8); ctx.globalAlpha=1; }
+    /* graines */
+    pts.forEach((p,i)=>{ const s=back(seg(t,.1+i*.08,.5+i*.08)); if(s<=0) return; const hide=seg(t,6.1,7.0); ctx.globalAlpha=1-hide*.7;
+      ctx.fillStyle=C.ink; ctx.beginPath(); ctx.arc(p.x,p.y,4.2*s,0,6.283); ctx.fill(); ctx.globalAlpha=1; });
+    /* zone de texte de la cellule dominante */
+    if(dom>0){ const cs=B._cells(P,aw,ah,()=>gap,0), ir=B._innerRect(cs[0],1.7); if(ir){ const a=seg(t,8.2,8.9); ctx.globalAlpha=a; ctx.setLineDash([4,4]); ctx.strokeStyle="rgba(238,243,244,.6)"; ctx.strokeRect(ir.x+10,ir.y+10,ir.w-20,ir.h-20); ctx.setLineDash([]);
+      ctx.fillStyle=C.ink; ctx.font="500 10px 'IBM Plex Mono'"; ctx.fillText("ESPACE TYPOGRAPHIQUE",ir.x+22,ir.y+32); ctx.font="italic 300 "+Math.round(ir.w/9)+"px Outfit"; ctx.fillText("Posidonia",ir.x+22,ir.y+ir.h*.62); ctx.globalAlpha=1; } }
+    ctx.restore();
+    /* légende de l'étape */
+    const notes=["Chaque donnée place une graine.","Entre deux voisines, la médiatrice partage l'espace à égale distance.","Chaque point du plan appartient à la graine la plus proche.","L'espace entre les cellules devient la veine : la relation.","Rayon adaptatif ≤ 35 % : jamais de pointe, jamais de cercle.","Une graine pondérée grandit et porte le texte."];
+    ctx.fillStyle=C.mute; ctx.font="300 15px Outfit"; ctx.textAlign="right"; ctx.fillText(notes[cur2],W-40,80); ctx.textAlign="left";
+    fadeOut(t,this.dur);
+  }}; })();
+
+function mix(a,b,k){ const h=s=>[1,3,5].map(i=>parseInt(s.slice(i,i+2),16)), A=h(a), Bb=h(b); return "rgb("+A.map((v,i)=>Math.round(v+(Bb[i]-v)*k)).join(",")+")"; }
+function fadeOut(t,dur){ const k=seg(t,dur-.35,dur); if(k>0){ ctx.fillStyle=`rgba(22,27,31,${k})`; ctx.fillRect(0,0,W,H); } const k2=1-seg(t,0,.25); if(k2>0){ ctx.fillStyle=`rgba(22,27,31,${k2})`; ctx.fillRect(0,0,W,H); } }
+
+/* ================= 2. MOUVEMENT ================= */
+const M=(()=>{ const ax=40, ay=112, aw=500, ah=398, dur=9, hz=60, r=B._rng(B._hash("gif-mot")), seeds=[];
+  while(seeds.length<20){ const x=20+r()*(aw-40), y=20+r()*(ah-40); if(seeds.every(p=>Math.hypot(p.hx-x,p.hy-y)>72)) seeds.push({hx:x,hy:y,x,y,vx:0,vy:0,g:0,k:r()}); }
+  const cursor=t=>{ const a=seg(t,1.0,5.2); if(t<1||t>5.6) return null; const e=eio(a); return {x:-20+e*(aw+40), y:ah*.62-Math.sin(e*Math.PI)*ah*.3}; };
+  /* graine suivie : la plus proche du milieu de la trajectoire */
+  const mid=cursor(3.1); let tr=0; seeds.forEach((p,i)=>{ if(Math.hypot(p.hx-mid.x,p.hy-mid.y)<Math.hypot(seeds[tr].hx-mid.x,seeds[tr].hy-mid.y)) tr=i; });
+  const hist=[], snaps=[];
+  for(let n=0;n<=dur*hz;n++){ const t=n/hz, m=cursor(t), R=150;
+    seeds.forEach(p=>{ let axx=(p.hx-p.x)*.09, ayy=(p.hy-p.y)*.09, tg=0;
+      if(m){ const dx=p.x-m.x, dy=p.y-m.y, d=Math.hypot(dx,dy)||1; if(d<R){ const k=(1-d/R)**2; axx+=dx/d*k*10; ayy+=dy/d*k*10; tg=18*k; } }
+      p.vx=(p.vx+axx)*.74; p.vy=(p.vy+ayy)*.74; p.x+=p.vx; p.y+=p.vy; p.g+=(tg-p.g)*.25; });
+    const s=seeds[tr]; hist.push(Math.hypot(s.x-s.hx,s.y-s.hy)*Math.sign((s.x-s.hx)||1)); snaps.push(seeds.map(p=>({x:p.x,y:p.y,g:p.g,k:p.k}))); }
+  /* repères de phase */
+  let iMax=0; hist.forEach((v,i)=>{ if(Math.abs(v)>Math.abs(hist[iMax])) iMax=i; });
+  const steps=["Le curseur approche","Poussée et élan","Les veines s'ouvrent","Dépassement","Retour amorti"];
+  return {dur,draw(t){
+    const n=Math.min(snaps.length-1,Math.round(t*hz)), S=snaps[n], m=cursor(t);
+    const T=[0,1.0,2.2,3.6,5.4,9.1], cur=Math.min(4,Math.max(0,T.findIndex((v,i)=>t>=v&&t<T[i+1])));
+    frame("Le mouvement","Banbiom · système de mouvement",steps,seg(t,T[cur],T[cur+1]),cur);
+    /* champ */
+    ctx.save(); ctx.translate(ax,ay); ctx.beginPath(); ctx.rect(0,0,aw,ah); ctx.clip(); ctx.fillStyle="#10181c"; ctx.fillRect(0,0,aw,ah);
+    const cs=B._cells(S.map(p=>({x:p.x,y:p.y,w:0,g:p.g})),aw,ah,p=>6+p.g,0);
+    cs.forEach((poly,i)=>{ const pa=path(poly,16); if(!pa) return; ctx.fillStyle=[C.lagoon,C.deep,C.abyss2,C.cobalt,C.deep][Math.floor(S[i].k*5)]; ctx.fill(pa); if(i===tr){ ctx.strokeStyle=C.foam; ctx.lineWidth=2; ctx.stroke(pa); ctx.lineWidth=1; } });
+    const s=S[tr], h=seeds[tr]; ctx.setLineDash([3,3]); ctx.strokeStyle="rgba(238,243,244,.7)"; ctx.beginPath(); ctx.moveTo(h.hx,h.hy); ctx.lineTo(s.x,s.y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="rgba(238,243,244,.45)"; ctx.beginPath(); ctx.arc(h.hx,h.hy,3,0,6.283); ctx.fill(); ctx.fillStyle=C.ink; ctx.beginPath(); ctx.arc(s.x,s.y,4.5,0,6.283); ctx.fill();
+    if(m){ ctx.strokeStyle="rgba(238,243,244,.25)"; ctx.beginPath(); ctx.arc(m.x,m.y,150,0,6.283); ctx.stroke(); ctx.fillStyle="#fff"; ctx.beginPath(); ctx.moveTo(m.x,m.y); ctx.lineTo(m.x+4,m.y+17); ctx.lineTo(m.x+8.5,m.y+12.5); ctx.lineTo(m.x+15,m.y+14); ctx.closePath(); ctx.fill(); }
+    ctx.restore();
+    /* courbe */
+    const gx=580, gy=130, gw=340, gh=250, mx=Math.max(...hist.map(Math.abs))*1.15, i0=Math.round(.8*hz), i1=Math.round(7*hz), X=i=>gx+(i-i0)/(i1-i0)*gw, Y=v=>gy+gh/2-v/mx*gh/2;
+    ctx.strokeStyle=C.faint; ctx.strokeRect(gx,gy,gw,gh); ctx.setLineDash([2,4]); ctx.beginPath(); ctx.moveTo(gx,gy+gh/2); ctx.lineTo(gx+gw,gy+gh/2); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle=C.mute; ctx.font="500 10px 'IBM Plex Mono'"; ctx.fillText("ÉCART DE LA GRAINE SUIVIE",gx,gy-10); ctx.fillText("REPOS",gx+gw-40,gy+gh/2-6); ctx.fillText("TEMPS →",gx+gw-52,gy+gh+16);
+    ctx.strokeStyle=C.foam; ctx.lineWidth=2; ctx.beginPath(); for(let i=i0;i<=Math.min(n,i1);i++){ const x=X(i), y=Y(hist[i]); i>i0?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke(); ctx.lineWidth=1;
+    const nn=Math.max(i0,Math.min(n,i1)); ctx.fillStyle=C.ink; ctx.beginPath(); ctx.arc(X(nn),Y(hist[nn]),4,0,6.283); ctx.fill();
+    /* annotations */
+    const pk=(i,l)=>{ if(n<i) return; ctx.fillStyle=C.ink; ctx.beginPath(); ctx.arc(X(i),Y(hist[i]),3,0,6.283); ctx.fill(); ctx.font="300 13px Outfit"; ctx.fillText(l,X(i)+7,Y(hist[i])+(hist[i]>0?-8:16)); };
+    pk(iMax,"élan maximal");
+    /* dépassement : l'écart le plus fort de signe opposé dans la seconde qui suit l'élan */
+    let iOv=iMax+1; for(let i=iMax+1;i<Math.min(hist.length,iMax+hz);i++){ if(Math.sign(hist[i])!==Math.sign(hist[iMax])&&Math.abs(hist[i])>Math.abs(hist[iOv]*(Math.sign(hist[iOv])!==Math.sign(hist[iMax])?1:0))) iOv=i; }
+    pk(iOv,"dépassement");
+    const iR=Math.min(i1-Math.round(1.2*hz),iOv+Math.round(1.4*hz)); if(n>=iR){ ctx.fillStyle=C.ink; ctx.font="300 13px Outfit"; ctx.fillText("retour amorti",X(iR),Y(0)-10); }
+    /* paramètres */
+    ctx.fillStyle=C.mute; ctx.font="500 10px 'IBM Plex Mono'";
+    ["RESSORT  raideur 0,09 · amortissement 0,74","RÉPULSION  rayon 150 px · force décroissante (1 − d/R)²","VEINES  +18 px au plus près du curseur","CARTES  cubic-bezier(.34, 1.56, .64, 1)"].forEach((l,i)=>ctx.fillText(l,gx,gy+gh+44+i*18));
+    /* courbe de la carte (dépassement) */
+    const bx=gx+gw-86, by=gy+gh+40, bz=x=>{ let lo=0,hi=1; for(let k=0;k<30;k++){ const m2=(lo+hi)/2, xx=3*(1-m2)**2*m2*.34+3*(1-m2)*m2*m2*.64+m2**3; xx<x?lo=m2:hi=m2; } const u=(lo+hi)/2; return 3*(1-u)**2*u*1.56+3*(1-u)*u*u*1+u**3; };
+    ctx.strokeStyle=C.faint; ctx.strokeRect(bx,by,86,60); ctx.strokeStyle=C.mist; ctx.beginPath(); for(let i=0;i<=40;i++){ const x=i/40; const y=bz(x); i?ctx.lineTo(bx+x*86,by+60-y*44):ctx.moveTo(bx,by+60); } ctx.stroke();
+    const notes=["Rien ne bouge tant qu'on ne s'approche pas.","Les graines fuient le curseur et prennent de l'élan.","Sous le curseur, l'espace entre les cellules s'élargit.","Le ressort dépasse sa position de repos.","Puis revient sans à-coup ; les graines ne se croisent jamais."];
+    ctx.fillStyle=C.mute; ctx.font="300 15px Outfit"; ctx.textAlign="right"; ctx.fillText(notes[cur],W-40,80); ctx.textAlign="left";
+    fadeOut(t,dur);
+  }}; })();
+
+/* ================= 3. GRILLE ================= */
+const G=(()=>{ const ax=60, ay=106, aw=840, ah=400, mg=24, gut=10, cols=12, cw=(aw-2*mg-(cols-1)*gut)/cols, rows=8, rh=(ah-2*mg-(rows-1)*gut)/rows;
+  const cx=c=>ax+mg+c*(cw+gut), ry=r=>ay+mg+r*(rh+gut), span=(c0,c1)=>(c1-c0)*cw+(c1-c0-1)*gut, vspan=(r0,r1)=>(r1-r0)*rh+(r1-r0-1)*gut;
+  const blocks=[{c:0,cs:2,r:0,rs:8,col:C.abyss,lab:"Navigation · 2 col."},{c:2,cs:10,r:0,rs:1,col:"#222a2f",lab:"Barre · 10 col."},
+    ...[0,1,2,3,4].map(i=>({c:2+i*2,cs:2,r:1,rs:2,col:"#26333a",lab:i?"":"Tuiles · 2 col."})),{c:2,cs:5,r:3,rs:5,col:"#26333a",lab:"Panneau · 5 col.",vor:true},{c:7,cs:5,r:3,rs:5,col:"#26333a",lab:"Panneau · 5 col."}];
+  const steps=["Format et marges","12 colonnes","8 rangs","Les blocs s'alignent","Division dans un bloc"];
+  const vb=blocks.find(b=>b.vor), vw=span(vb.c,vb.c+vb.cs), vh=vspan(vb.r,vb.r+vb.rs), r=B._rng(B._hash("gif-grid")), vp=[{x:vw*.36,y:vh*.45,w:0}];
+  while(vp.length<9){ const x=r()*vw, y=r()*vh; if(Math.hypot(x-vp[0].x,y-vp[0].y)>vw*.33&&vp.every(p=>Math.hypot(p.x-x,p.y-y)>45)) vp.push({x,y,w:0}); }
+  return {dur:10.4,draw(t){
+    const T=[0,1.2,2.8,3.9,6.3,10.5], cur=Math.min(4,Math.max(0,T.findIndex((v,i)=>t>=v&&t<T[i+1])));
+    frame("La grille","Banbiom · comment la grille fonctionne",steps,seg(t,T[cur],T[cur+1]),cur);
+    const a0=eo(seg(t,.2,1.0)); ctx.globalAlpha=a0; ctx.strokeStyle="rgba(238,243,244,.4)"; ctx.strokeRect(ax+.5,ay+.5,aw,ah);
+    ctx.setLineDash([3,4]); ctx.strokeStyle="rgba(238,243,244,.22)"; ctx.strokeRect(ax+mg,ay+mg,aw-2*mg,ah-2*mg); ctx.setLineDash([]);
+    ctx.fillStyle=C.mute; ctx.font="500 10px 'IBM Plex Mono'"; ctx.fillText("MARGE 24",ax+mg+4,ay+mg-6); ctx.globalAlpha=1;
+    for(let c=0;c<cols;c++){ const k=eo(seg(t,1.2+c*.09,1.7+c*.09)); if(k<=0) continue; const fade=1-.6*seg(t,4.0,5.0);
+      ctx.fillStyle=`rgba(179,218,211,${.12*k*fade})`; ctx.fillRect(cx(c),ay+mg+(ah-2*mg)*(1-k),cw,(ah-2*mg)*k);
+      ctx.globalAlpha=k*fade; ctx.fillStyle=C.mute; ctx.fillText(String(c+1).padStart(2,"0"),cx(c)+cw/2-7,ay+ah+16); ctx.globalAlpha=1; }
+    if(t>2.4){ ctx.globalAlpha=seg(t,2.4,2.8)*(1-.6*seg(t,4.0,5.0)); ctx.fillStyle=C.mute; ctx.fillText("GOUTTIÈRE 10",cx(5)+cw-6,ay+ah-mg+14); ctx.globalAlpha=1; }
+    for(let rr=1;rr<rows;rr++){ const k=eo(seg(t,2.8+rr*.08,3.3+rr*.08)); if(k<=0) continue; ctx.strokeStyle=`rgba(238,243,244,${.16*k*(1-.5*seg(t,4,5))})`; ctx.beginPath(); ctx.moveTo(ax+mg,ry(rr)-gut/2); ctx.lineTo(ax+mg+(aw-2*mg)*k,ry(rr)-gut/2); ctx.stroke(); }
+    blocks.forEach((b,i)=>{ const k=back(seg(t,3.9+i*.16,4.5+i*.16)); if(k<=0) return; const x=cx(b.c), y=ry(b.r), w=span(b.c,b.c+b.cs), h=vspan(b.r,b.r+b.rs);
+      ctx.save(); ctx.translate(x+w/2,y+h/2); ctx.scale(.9+.1*k,.9+.1*k); ctx.globalAlpha=clamp(k); const p=new Path2D(); p.roundRect(-w/2,-h/2,w,h,8); ctx.fillStyle=b.col; ctx.fill(p);
+      if(b.lab){ ctx.fillStyle=C.mute; ctx.font="500 10px 'IBM Plex Mono'"; ctx.fillText(b.lab.toUpperCase(),-w/2+10,-h/2+18); } ctx.restore(); });
+    /* division dans un bloc : voronoï à cellule dominante */
+    const dv=seg(t,6.3,7.6); if(dv>0){ const x=cx(vb.c), y=ry(vb.r), wd=eio(seg(t,6.3,7.4)), tx=seg(t,7.6,8.4);
+      const P=vp.map((p,i)=>({x:p.x,y:p.y,w:i?0:Math.pow(vw*.3*wd,2)})), cs=B._cells(P,vw,vh,()=>6,0);
+      ctx.save(); ctx.translate(x,y); const clip=new Path2D(); clip.roundRect(0,0,vw,vh,8); ctx.clip(clip);
+      cs.forEach((poly,i)=>{ const pa=path(poly,14); if(!pa) return; ctx.globalAlpha=dv; ctx.fillStyle=i?[C.lagoon,C.deep,C.foam,C.cobalt][i%4]:C.abyss; ctx.fill(pa); ctx.globalAlpha=1; });
+      const ir=B._innerRect(cs[0],1.5); if(ir&&tx>0){ ctx.globalAlpha=tx; ctx.setLineDash([4,4]); ctx.strokeStyle="rgba(238,243,244,.7)"; ctx.strokeRect(ir.x+8,ir.y+8,ir.w-16,ir.h-16); ctx.setLineDash([]);
+        ctx.fillStyle=C.ink; ctx.font="500 9px 'IBM Plex Mono'"; ctx.fillText("CELLULE DOMINANTE",ir.x+16,ir.y+24); ctx.font="200 "+Math.round(ir.h*.36)+"px Outfit"; ctx.fillText("Faune",ir.x+16,ir.y+ir.h-18); ctx.globalAlpha=1; }
+      ctx.restore(); }
+    const notes=["Un cadre, des marges de 24 px.","12 colonnes, gouttières de 10 px.","Des rangs réguliers pour aligner les hauteurs.","Chaque bloc occupe un nombre entier de colonnes et de rangs.","Dans un bloc, le voronoï divise ; la cellule dominante porte le texte."];
+    ctx.fillStyle=C.mute; ctx.font="300 15px Outfit"; ctx.textAlign="right"; ctx.fillText(notes[cur],W-40,80); ctx.textAlign="left";
+    fadeOut(t,this.dur);
+  }}; })();
+
+window.SCENES={voronoi:V,motion:M,grid:G};
+window.render=(name,t)=>SCENES[name].draw(t);
+window.ready=document.fonts.load("300 30px Outfit").then(()=>Promise.all(["200 20px Outfit","400 14px Outfit","italic 300 20px Outfit","500 11px 'IBM Plex Mono'"].map(f=>document.fonts.load(f)))).then(()=>document.fonts.ready);
+/* aperçu en boucle */
+let cur="voronoi", t0=performance.now();
+document.querySelectorAll("button").forEach(b=>b.onclick=()=>{ cur=b.dataset.s; t0=performance.now(); });
+(function loop(){ if(!window.CAPTURE){ const t=((performance.now()-t0)/1000)%SCENES[cur].dur; render(cur,t); } requestAnimationFrame(loop); })();
+</script></body></html>
