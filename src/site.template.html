@@ -557,22 +557,9 @@ const tok=n=>getComputedStyle(document.documentElement).getPropertyValue("--"+n)
 /* ================= SIGNATURES (SVG, aplats) ================= */
 function sigStyle(sp,big){ const A=sp.regne==="Animal"; return {A,gap:A?(big?2:1.5):(big?12:8),R:A?0:(big?30:22),
   cols:A?["var(--cobalt)","var(--cobalt)","var(--cobalt-2)"]:["var(--lagoon)","var(--deep)","var(--foam)","var(--lagoon)","var(--abyss)"],bg:A?"var(--mist)":"var(--ground)"}; }
-/* photos : champ « image » de la fiche, sinon la photo principale de la page Wikipédia du nom scientifique (chargée par le navigateur) */
-const PHOTO=new Map(), photoWait=new Set(); let photoSeq=0;
-function photoOf(sp){ if(sp.image) return {src:sp.image,page:sp.image_source||"",credit:sp.image_credit||""}; return PHOTO.get(sp.nom_scientifique)||null; }
-async function loadPhotos(list){
-  let cache={}; try{ cache=JSON.parse(localStorage.getItem("banbiom-photos")||"{}"); }catch(e){}
-  const todo=list.filter(sp=>!sp.image&&!PHOTO.has(sp.nom_scientifique)&&!photoWait.has(sp.nom_scientifique)); todo.forEach(sp=>photoWait.add(sp.nom_scientifique));
-  await Promise.all(todo.map(async sp=>{ const n=sp.nom_scientifique, c=cache[n];
-    if(c&&Date.now()-c.t<7*864e5){ PHOTO.set(n,c.v); return; }
-    let v=null;
-    for(const lang of ["fr","en"]){ try{ const r=await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(n.replace(/ /g,"_"))}`); if(!r.ok) continue;
-      const j=await r.json(), t=j.thumbnail&&j.thumbnail.source; if(!t) continue;
-      v={src:t.replace(/\/(\d+)px-/,"/960px-"),small:t.replace(/\/(\d+)px-/,"/480px-"),page:(j.content_urls&&j.content_urls.desktop&&j.content_urls.desktop.page)||"",credit:"Wikipédia / Wikimedia Commons"}; break; }catch(e){} }
-    PHOTO.set(n,v); cache[n]={t:Date.now(),v}; }));
-  try{ localStorage.setItem("banbiom-photos",JSON.stringify(cache)); }catch(e){}
-  if(todo.length){ sigCache.clear(); render(); }
-}
+/* photo facultative : champ « image » d'une fiche (aucun chargement automatique) */
+let photoSeq=0;
+function photoOf(sp){ return sp.image?{src:sp.image,page:sp.image_source||"",credit:sp.image_credit||""}:null; }
 function sigParts(sp,w,h,big,pts){
   const st=sigStyle(sp,big), cs=B._cells(pts.map(p=>({x:p.x,y:p.y,w:0})),w,h,()=>st.gap+0,0), ph=photoOf(sp); let d="", clip="";
   cs.forEach((poly,i)=>{ const p=B._traceSVG(poly,st.R); if(!p) return; const ci=Math.floor(pts[i].n*st.cols.length)%st.cols.length;
@@ -906,7 +893,7 @@ function renderMeta(){
     sel.innerHTML=`<option value="">Tous habitats</option>`+hs.map(h=>`<option ${h===cur?"selected":""}>${esc(h)}</option>`).join(""); }
   $("#habList").innerHTML=[...hab].sort().map(h=>`<option value="${esc(h)}">`).join("");
 }
-function render(){ renderMeta(); Object.keys(S.views).forEach(v=>renderGrid(v)); updateRelief(); if(S.species.length) loadPhotos(S.species); }
+function render(){ renderMeta(); Object.keys(S.views).forEach(v=>renderGrid(v)); updateRelief(); }
 
 document.addEventListener("pointerdown",e=>{ const c=e.target.closest(".card"); if(!c) return; c._press=anim(c,[{transform:"none"},{transform:"scale(.955)"}],{duration:140,easing:"ease-out",fill:"forwards"}); });
 const release=()=>{ $$(".card").forEach(c=>{ if(c._press){ c._press.cancel(); c._press=null; anim(c,[{transform:"scale(.955)"},{transform:"scale(1.02)",offset:.5},{transform:"none"}],{duration:420,easing:BACK}); } }); };

@@ -4,9 +4,10 @@ Banque de données des écosystèmes marins (faune et flore) conçue par le stud
 
 ## Structure
 
-- `src/site.template.html` : tout le site (HTML, CSS, JS) dans un seul gabarit. **On modifie ici**, jamais directement `index.html`.
+- `src/app.template.html` : **l'application** (la console BANBIOM), HTML, CSS et JS dans un seul gabarit. **On modifie ici**, jamais directement `index.html`. Vues : tableau de bord, espèces (tableau ou cartes, filtres, tri, sélection, export CSV, inspecteur avec modification), carte habitat × profondeur, analyses, études de cas (planches présentables), nouvelle fiche, import, à vérifier. Palette de commandes Ctrl K.
+- `src/site.template.html` : l'ancien site vitrine, conservé et construit en `vitrine.html`.
 - `src/voronoi.js` : moteur voronoï partagé (`window.Banbiom`) : `field`, `division`, `cellPath`, `seedsFromSpecies`, et les aides `_cells`, `_traceSVG`, `_rounded`, `_arcs`, `_innerRect`, `_hash`, `_rng`.
-- `build.py` : insère `src/voronoi.js` à la place de `/*BUNDLE*/` dans le gabarit et écrit `index.html`. Lancer `python3 build.py` après chaque modification.
+- `build.py` : insère `src/voronoi.js` à la place de `/*BUNDLE*/` dans chaque gabarit et écrit `index.html` (application) et `vitrine.html`. Lancer `python3 build.py` après chaque modification.
 - `data/especes.json` : 33 fiches de départ : 10 exemples, plus 23 espèces méditerranéennes documentées par recherche web (FishBase, SeaLifeBase, MarLIN, Liste rouge UICN via ces bases…). Chaque fiche cite ses sources dans `reference` et signale ce qui reste à vérifier ; tout est à valider scientifiquement avant publication.
 - `design-system/` : la charte (brand book `README.md`, `tokens.json`, planches `components/*/preview.html`). Toute décision visuelle doit la respecter ; la mettre à jour quand une règle change.
 
@@ -16,7 +17,8 @@ Aperçu local : `python3 build.py && python3 -m http.server` puis http://localho
 
 - Sur claude.ai, le site utilise la base partagée de l'artifact (`window.claude.use("db")`, collection `species`).
 - En autonome (GitHub Pages), `connect()` ne trouve pas `window.claude` et `demoMode()` charge `data/especes.json`. Les ajouts restent locaux. Pour une vraie base, brancher `connect()` sur un service (Supabase, Firebase…).
-- Photos : `loadPhotos()` demande au navigateur la photo principale de la page Wikipédia (fr, puis en) du nom scientifique, avec un cache de 7 jours dans `localStorage`. Une fiche peut imposer sa photo avec les champs facultatifs `image`, `image_source` et `image_credit`. Sans photo trouvée, la signature reste en aplats.
+- Pas de photos : les espèces sont représentées par leur signature voronoï (aplats).
+- Études de cas : la répartition sur la carte est indicative, déduite du champ `repartition` (bassins) et de l'habitat (côtier ou large) ; il n'y a pas de coordonnées dans les fiches.
 - Champs d'une fiche : liste `FIELDS` du gabarit. Obligatoires : `nom_scientifique`, `regne` (`Animal` | `Végétal`), `habitat`. Validation dans `validate()`.
 
 ## Charte (résumé, détail dans design-system/README.md)
@@ -34,5 +36,5 @@ Aperçu local : `python3 build.py && python3 -m http.server` puis http://localho
 ## Décisions déjà prises (ne pas revenir dessus sans demande)
 
 - Pas de 3D pour l'instant (sphère et relief abandonnés) : l'accueil est une carte des espèces à plat, cellules numérotées, aperçu au survol.
-- Pas de nageoire comme logo ; le logo est un disque fracturé en cellules.
+- Pas de nageoire comme logo ; le logo est un disque coupé en 3 cellules (version simplifiée).
 - Outfit remplace Geologica.

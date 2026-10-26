@@ -123,9 +123,22 @@ Pleine hauteur d'écran : Faune et Flore côte à côte à 50/50 (empilées sur 
 
 Entre Faune / Flore et le catalogue. Une grande cellule claire porte le texte (libellé, titre, paragraphe, bouton principal et bouton flèche), coupée en diagonale. À droite, une seule image vue à travers trois cellules (deux empilées le long de la diagonale, une haute colonne à droite), en coupes droites et parallèles, coins arrondis 28 px, veines de 12 px. L'image glisse légèrement sous le curseur (parallaxe). En attendant une photo, l'image est une scène sous-marine en dégradé avec grain ; une photo se branche via la variable CSS `--mosaic-img` (`.mosaic{--mosaic-img:url(...)}`).
 
-## Photos d'espèces
+## Application : la console BANBIOM
 
-La photo ne remplace pas la signature voronoï : elle se voit à travers ses cellules (vignettes, fiche, aperçu de la carte), et une cellule sur quatre environ garde l'aplat du règne. Les veines restent claires. Le crédit (« Photo : … », lien vers la source) s'affiche en pastille en bas à droite de l'en-tête de la fiche. Sans photo, la signature reste en aplats.
+Le produit est une application de travail et non plus un site vitrine (`vitrine.html` conserve l'ancien site). Logo : disque coupé en 3 cellules. Coque : barre latérale abysse (logo, base active, navigation par groupes Explorer / Contribuer / Qualité, état de la source, thème), barre du haut (fil d'Ariane, recherche Ctrl K, « Nouvelle fiche »), zone de travail, inspecteur à droite.
+
+Composants (tous en aplats, sauf la planche d'étude de cas) :
+- **Bouton** : primaire (encre), secondaire (contour), fantôme, icône ; tailles 38 et 30 px ; écrasement à l'appui.
+- **Champ** : libellé, saisie 38 px rayon 10, aide, erreur en rouge UICN CR sous le champ ; focus cobalt.
+- **Contrôle segmenté** (règne, affichage), **filtre-pastille** retirable, **étiquette de règne** (Faune parallélogramme, Flore pilule), **badge UICN** (code + libellé au survol, jamais la couleur seule), **drapeau** « à reprendre ».
+- **Tuile KPI** : libellé mono, grand chiffre Outfit 200, ornement nano (1 à 3 cellules) de la couleur de la donnée.
+- **Panneau**, **liste à barres** (une seule teinte, valeurs écrites), **tableau** (en-tête collant, tri, sélection, barre de sélection flottante), **inspecteur** (signature, onglets Fiche / Écologie / Statut et sources, modification en place), **étapes**, **zone de dépôt**, **palette de commandes**, **notification**.
+
+Visualisations (vue Analyses) : une couleur par règne (Faune cobalt, Flore lagon, légende toujours présente), échelles logarithmiques pour profondeur et taille, matrice UICN × habitat en séquentiel une teinte (cobalt, du clair au foncé, nombres écrits dans les cases), étiquettes directes sélectives, info-bulle au survol, clic pour ouvrir la fiche.
+
+## Études de cas (planches)
+
+Planches présentables (bouton « Présenter » en plein écran, flèches clavier) : fond nuit #030a14, carte de la Méditerranée en points blancs, halos de densité bleu électrique là où vivent les espèces du thème, titre centré en deux lignes (thème en gris, accroche en blanc), liste d'espèces à gauche (nom en italique, badge UICN translucide ; le survol isole la répartition de l'espèce), chiffres clés à droite, boutons ronds précédent / suivant en bas à gauche (suivant en cobalt). Seule autre exception aux aplats avec le hero vitrine. La répartition est indicative et le dit sur la planche.
 
 ## À faire, à éviter
 

@@ -1,0 +1,1127 @@
+<title>BANBIOM · Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* BANBIOM · Console : l'application de travail sur la base (explorer, contribuer, contrôler).
+   Composants : coque (barre latérale, barre du haut), bouton, champ, contrôle segmenté, filtre-pastille, badge UICN, étiquette de règne,
+   tuile KPI, panneau, liste à barres, tableau, inspecteur, onglets, zone de dépôt, étapes, palette de commandes, notification. */
+:root{
+  --paper:#e8f1ee;--surface:#f7fbf9;--surface-2:#dceae6;--line:#c3d8d3;--ink:#0a2a32;--muted:#48676d;
+  --abyss:#0a2f3b;--cobalt:#2f5bd8;--cobalt-2:#1c3c9e;--mist:#b4c8f8;--lagoon:#17b3a3;--foam:#a3e8de;--deep:#0b6b66;--ground:#cdece6;
+  --on-dark:#e8f1ee;--fa:#2f5bd8;--fl:#0b8a7d;
+  --iucn-cr:#b32437;--iucn-en:#c2551a;--iucn-vu:#b07a0b;--iucn-nt:#7c8f1e;--iucn-lc:#2c8f5b;--iucn-dd:#6b7f84;--chip-ink:#ffffff;
+  --side:#0a2f3b;--side-ink:#e8f1ee;--side-muted:#8fb1b4;--side-hover:#124858;
+  --font-display:"Outfit","Avenir Next",system-ui,sans-serif;--font-body:"Outfit","Avenir Next",system-ui,sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --r-xs:6px;--r-s:10px;--r-m:14px;--r-l:20px;--r-pill:999px;
+  --back:cubic-bezier(.34,1.56,.64,1);--out:cubic-bezier(.16,1,.3,1);
+  --h-top:60px;--w-side:240px;--w-insp:460px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#061a20;--surface:#0a242b;--surface-2:#0f2f37;--line:#1a434c;--ink:#ddf0ec;--muted:#8eb2b3;
+  --cobalt:#3e6be8;--cobalt-2:#1a3487;--mist:#9db6f5;--lagoon:#2ccbba;--foam:#7fd9cc;--deep:#0b5753;--ground:#0d3b3a;
+  --fa:#86a6ff;--fl:#43d8c4;--iucn-cr:#f2667a;--iucn-en:#f08a4f;--iucn-vu:#e5b042;--iucn-nt:#b8c94e;--iucn-lc:#5ccb8f;--iucn-dd:#8fa6ab;--chip-ink:#03151b;
+  --side:#04131a;--side-hover:#0f2f37;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#061a20;--surface:#0a242b;--surface-2:#0f2f37;--line:#1a434c;--ink:#ddf0ec;--muted:#8eb2b3;
+  --cobalt:#3e6be8;--cobalt-2:#1a3487;--mist:#9db6f5;--lagoon:#2ccbba;--foam:#7fd9cc;--deep:#0b5753;--ground:#0d3b3a;
+  --fa:#86a6ff;--fl:#43d8c4;--iucn-cr:#f2667a;--iucn-en:#f08a4f;--iucn-vu:#e5b042;--iucn-nt:#b8c94e;--iucn-lc:#5ccb8f;--iucn-dd:#8fa6ab;--chip-ink:#03151b;
+  --side:#04131a;--side-hover:#0f2f37;color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{background:var(--paper);color:var(--ink);height:100%}
+body{margin:0;font:400 14.5px/1.5 var(--font-body);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:300;margin:0;line-height:1.1;letter-spacing:-.02em}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+.mono{font-family:var(--font-mono)}
+.label{font:500 11px/1.2 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+em.sci,.sci{font-style:italic}
+.ico{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
+
+/* ---------- coque ---------- */
+.app{display:grid;grid-template-columns:var(--w-side) minmax(0,1fr);grid-template-rows:var(--h-top) minmax(0,1fr);height:100vh;height:100dvh}
+.side{grid-row:1 / span 2;background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;gap:6px;padding:14px 12px;overflow:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 14px;text-decoration:none;font:500 15px/1 var(--font-display);letter-spacing:.14em}
+.brand svg{width:26px;height:26px;color:var(--foam)}
+.ws{margin:0 4px 10px;padding:10px 12px;border-radius:var(--r-m);background:var(--side-hover);display:grid;gap:3px}
+.ws .label{color:var(--side-muted)}
+.ws b{font-weight:500;font-size:13.5px}
+.nav{display:grid;gap:2px}
+.nav-h{font:500 10.5px/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--side-muted);padding:14px 10px 6px}
+.nav a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r-s);text-decoration:none;color:var(--side-ink);opacity:.82;transition:background .2s,opacity .2s}
+.nav a:hover{background:var(--side-hover);opacity:1}
+.nav a[aria-current="page"]{background:var(--side-ink);color:var(--side);opacity:1}
+.nav a .n{margin-left:auto;font:500 11px/1 var(--font-mono);padding:3px 7px;border-radius:var(--r-pill);background:rgba(232,241,238,.12)}
+.nav a[aria-current="page"] .n{background:rgba(10,47,59,.12)}
+.nav a .n.warn{background:var(--iucn-vu);color:#fff}
+.side-foot{margin-top:auto;display:grid;gap:10px;padding:10px 6px 4px;border-top:1px solid rgba(232,241,238,.12)}
+.src{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--side-muted)}
+.src i{width:8px;height:8px;border-radius:50%;background:var(--iucn-vu);flex:none}
+.src.live i{background:var(--iucn-lc)}
+.side .btn.ghost{color:var(--side-ink);justify-content:flex-start}
+.side .btn.ghost:hover{background:var(--side-hover)}
+
+.top{display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid var(--line);background:var(--paper);min-width:0}
+.crumb{display:flex;align-items:center;gap:8px;min-width:0;font-size:14px;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.search{margin-left:auto;display:flex;align-items:center;gap:10px;width:min(360px,40vw);height:38px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r-pill);background:var(--surface);color:var(--muted);cursor:pointer;text-align:left}
+.search span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+kbd{font:500 11px/1 var(--font-mono);padding:4px 6px;border-radius:var(--r-xs);border:1px solid var(--line);background:var(--surface-2);color:var(--muted)}
+.top .menu-btn{display:none}
+
+.main{overflow:auto;min-width:0;position:relative}
+.view{padding:24px clamp(16px,2.4vw,32px) 64px;display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-content:start;max-width:1440px}
+.view[hidden]{display:none}
+.vhead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.vhead h1{font-size:clamp(26px,2.6vw,34px);font-weight:300}
+.vhead p{color:var(--muted);margin-top:6px;max-width:64ch}
+.vhead .actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---------- bouton ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 16px;border:1px solid transparent;border-radius:var(--r-pill);background:var(--surface);color:var(--ink);font-weight:500;font-size:14px;cursor:pointer;text-decoration:none;white-space:nowrap;transition:transform .35s var(--back),background .2s,border-color .2s}
+.btn:hover{border-color:var(--line)}
+.btn:active{transform:scale(.95);transition-duration:.08s}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn.primary:hover{border-color:var(--ink);background:var(--abyss)}
+.btn.secondary{background:var(--surface);border-color:var(--line)}
+.btn.secondary:hover{border-color:var(--ink)}
+.btn.ghost{background:transparent}
+.btn.ghost:hover{background:var(--surface-2);border-color:transparent}
+.btn.s{height:30px;padding:0 12px;font-size:13px}
+.btn.icon{width:38px;padding:0}
+.btn.icon.s{width:30px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* ---------- champ ---------- */
+.field{display:grid;gap:6px;min-width:0;align-content:start}
+.field>label{font-size:13px;color:var(--muted)}
+.field>label i{color:var(--iucn-cr);font-style:normal}
+.input,.select,.textarea{width:100%;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--surface);transition:border-color .2s,box-shadow .2s}
+.textarea{height:auto;min-height:88px;padding:10px 12px;resize:vertical}
+.input:hover,.select:hover,.textarea:hover{border-color:var(--muted)}
+.input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--cobalt);box-shadow:0 0 0 3px color-mix(in srgb,var(--cobalt) 18%,transparent)}
+.field.err .input,.field.err .select,.field.err .textarea{border-color:var(--iucn-cr)}
+.field .hint{font-size:12.5px;color:var(--muted)}
+.field .msg{font-size:12.5px;color:var(--iucn-cr)}
+.select{appearance:none;padding-right:32px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' fill='none' stroke='%2348676d' stroke-width='1.6'/></svg>");background-repeat:no-repeat;background-position:right 12px center}
+.searchbox{position:relative;flex:1 1 220px;min-width:0;max-width:360px}
+.searchbox .ico{position:absolute;left:12px;top:10px;color:var(--muted)}
+.searchbox .input{padding-left:38px;border-radius:var(--r-pill)}
+
+/* ---------- contrôle segmenté ---------- */
+.seg{display:inline-flex;padding:3px;border-radius:var(--r-pill);background:var(--surface-2);gap:2px}
+.seg button{border:0;background:none;height:32px;padding:0 14px;border-radius:var(--r-pill);cursor:pointer;color:var(--muted);font-size:13.5px;display:inline-flex;align-items:center;gap:6px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:500}
+
+/* ---------- filtre-pastille, étiquette de règne, badge UICN ---------- */
+.chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 6px 0 12px;border-radius:var(--r-pill);background:var(--surface);border:1px solid var(--line);font-size:13px}
+.chip button{border:0;background:none;width:20px;height:20px;border-radius:50%;cursor:pointer;color:var(--muted);display:grid;place-items:center}
+.chip button:hover{background:var(--surface-2);color:var(--ink)}
+.king{display:inline-flex;align-items:center;height:22px;font:500 12px/1 var(--font-body);color:#fff;white-space:nowrap}
+.king i{font-style:normal;padding:0 10px}
+.king.fa{background:var(--fa);transform:skewX(-14deg);border-radius:3px}.king.fa i{display:inline-block;transform:skewX(14deg)}
+.king.fl{background:var(--fl);border-radius:var(--r-pill)}
+:root[data-theme="dark"] .king{color:#03151b}
+.iucn{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 8px;border-radius:var(--r-xs);font:500 11.5px/1 var(--font-mono);color:var(--chip-ink);background:var(--iucn-dd);white-space:nowrap}
+.iucn[data-s="CR"]{background:var(--iucn-cr)}.iucn[data-s="EN"]{background:var(--iucn-en)}.iucn[data-s="VU"]{background:var(--iucn-vu)}
+.iucn[data-s="NT"]{background:var(--iucn-nt)}.iucn[data-s="LC"]{background:var(--iucn-lc)}
+.flag{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:var(--r-pill);font-size:12.5px;background:color-mix(in srgb,var(--iucn-vu) 16%,var(--surface));color:var(--ink);border:1px solid color-mix(in srgb,var(--iucn-vu) 40%,transparent)}
+.flag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--iucn-vu)}
+
+/* ---------- panneau, tuile KPI, liste à barres ---------- */
+.panel{background:var(--surface);border-radius:var(--r-l);padding:18px 20px;display:grid;gap:14px;align-content:start;min-width:0}
+.panel>header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.panel>header h2{font-size:17px;font-weight:400}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.kpi{position:relative;overflow:hidden;background:var(--surface);border-radius:var(--r-l);padding:16px 18px;display:grid;gap:6px;text-decoration:none;min-height:116px;transition:transform .4s var(--back)}
+a.kpi:hover{transform:translateY(-2px)}
+.kpi b{font:200 40px/1 var(--font-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi small{color:var(--muted);font-size:12.5px}
+.kpi svg{position:absolute;right:-6px;top:-6px;width:64px;height:64px}
+.bars{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.bars li{display:grid;grid-template-columns:minmax(120px,170px) minmax(0,1fr) 36px;align-items:center;gap:12px;font-size:13.5px}
+.bars .lab{display:flex;align-items:center;gap:8px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bars .track{height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.bars .bar{display:block;height:100%;border-radius:0 4px 4px 0;background:var(--ink);transform-origin:left;transition:transform .7s var(--out)}
+.bars .val{font:500 12.5px/1 var(--font-mono);text-align:right;font-variant-numeric:tabular-nums}
+.split{display:grid;gap:10px}
+.split .row{display:flex;height:10px;gap:2px}
+.split .row span{border-radius:4px}
+.split .legend{display:flex;justify-content:space-between;font-size:13px}
+.split .legend span{display:inline-flex;align-items:center;gap:6px}
+.split .legend i{width:10px;height:10px;border-radius:2px}
+.rows{display:grid}
+.rows a{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 4px;border-top:1px solid var(--line);text-decoration:none}
+.rows a:first-child{border-top:0}
+.rows a:hover .sci{text-decoration:underline}
+.rows .sig{width:36px;height:36px;border-radius:var(--r-s);overflow:hidden;flex:none}
+.rows .sig svg{width:100%;height:100%;display:block}
+.rows .t{display:grid;min-width:0}
+.rows .t span{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---------- barre d'outils, tableau ---------- */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.toolbar .sp{flex:1}
+.toolbar .select{width:auto;min-width:150px;border-radius:var(--r-pill)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chips:empty{display:none}
+.count{font:500 12.5px/1 var(--font-mono);color:var(--muted)}
+.tablewrap{background:var(--surface);border-radius:var(--r-l);overflow:auto;max-height:calc(100dvh - 260px)}
+table.t{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
+.t th{position:sticky;top:0;z-index:1;background:var(--surface);text-align:left;font:500 11px/1.2 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:12px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.t th button{border:0;background:none;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;cursor:pointer;display:inline-flex;gap:4px;align-items:center;padding:0}
+.t th[aria-sort] button{color:var(--ink)}
+.t th[aria-sort="ascending"] button::after{content:"↑"}.t th[aria-sort="descending"] button::after{content:"↓"}
+.t td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+.t tbody tr{cursor:pointer;transition:background .15s}
+.t tbody tr:hover{background:color-mix(in srgb,var(--surface-2) 60%,transparent)}
+.t tbody tr[aria-selected="true"]{background:color-mix(in srgb,var(--cobalt) 9%,transparent)}
+.t tbody tr.on{box-shadow:inset 3px 0 0 var(--cobalt)}
+.t .nm{display:grid;line-height:1.3}
+.t .nm em{font-size:14.5px}
+.t .nm span{color:var(--muted);font-size:12.5px}
+.t td.num{font-family:var(--font-mono);font-size:12.5px}
+.t input[type="checkbox"]{width:16px;height:16px;accent-color:var(--cobalt);cursor:pointer}
+.depth{display:grid;grid-template-columns:72px auto;align-items:center;gap:8px}
+.depth .tr{position:relative;height:6px;border-radius:3px;background:var(--surface-2)}
+.depth .tr i{position:absolute;top:0;bottom:0;border-radius:3px;background:var(--k,var(--ink))}
+.selbar{position:sticky;bottom:16px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:8px 8px 8px 16px;border-radius:var(--r-pill);background:var(--ink);color:var(--paper);width:max-content;max-width:100%;z-index:3}
+.selbar[hidden]{display:none}
+.selbar .btn{background:rgba(232,241,238,.12);color:var(--paper)}
+.selbar .btn:hover{border-color:transparent;background:rgba(232,241,238,.22)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.card{display:grid;gap:10px;padding:10px;border-radius:var(--r-l);background:var(--surface);text-align:left;border:0;cursor:pointer;transition:transform .4s var(--back)}
+.card:hover{transform:translateY(-3px)}
+.card .sig{aspect-ratio:4/3;border-radius:var(--r-m);overflow:hidden}
+.card .sig svg{width:100%;height:100%;display:block}
+.card .b{padding:0 6px 6px;display:grid;gap:6px}
+.card .b em{font-size:16px}
+.card .r{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.empty{padding:48px 20px;text-align:center;display:grid;gap:8px;justify-items:center;color:var(--muted)}
+.empty h3{color:var(--ink);font-size:18px;font-weight:400}
+
+/* ---------- carte (profondeur × habitat) ---------- */
+.mapwrap{position:relative;background:var(--surface);border-radius:var(--r-l);overflow:hidden;height:calc(100dvh - 220px);min-height:440px}
+.mapwrap svg{position:absolute;inset:0;width:100%;height:100%}
+.mapwrap .ax{font:500 11px var(--font-mono);fill:var(--muted)}
+.mapwrap .lab{font:400 12px var(--font-mono);fill:#fff;pointer-events:none}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);border-radius:var(--r-s);padding:8px 10px;font-size:12.5px;display:grid;gap:2px;opacity:0;transition:opacity .15s;z-index:2;max-width:240px}
+.tip em{font-size:14px}
+.tip span{opacity:.75;font-family:var(--font-mono);font-size:11.5px}
+
+/* ---------- formulaire de fiche ---------- */
+.formgrid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+.fs{background:var(--surface);border-radius:var(--r-l);padding:18px 20px;border:0;margin:0;display:grid;gap:14px}
+.fs legend{float:left;width:100%;padding:0 0 4px;font:400 17px/1.2 var(--font-display)}
+.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.fields .w2{grid-column:span 2}.fields .w3{grid-column:1 / -1}
+.preview{position:sticky;top:16px;background:var(--surface);border-radius:var(--r-l);padding:12px;display:grid;gap:12px}
+.preview .sig{aspect-ratio:4/3;border-radius:var(--r-m);overflow:hidden;background:var(--surface-2)}
+.preview .sig svg{width:100%;height:100%;display:block}
+.preview .b{padding:0 6px 6px;display:grid;gap:8px}
+.preview h3{font-size:20px;font-style:italic;font-weight:300}
+.check{display:grid;gap:6px;margin:0;padding:0;list-style:none;font-size:13px}
+.check li{display:flex;gap:8px;align-items:center;color:var(--muted)}
+.check li::before{content:"";width:14px;height:14px;border-radius:50%;border:1.5px solid var(--line);flex:none}
+.check li.ok{color:var(--ink)}.check li.ok::before{background:var(--iucn-lc);border-color:var(--iucn-lc)}
+.formbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ---------- import : étapes, zone de dépôt ---------- */
+.steps{display:flex;gap:6px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+.steps li{display:flex;align-items:center;gap:8px;height:34px;padding:0 14px 0 6px;border-radius:var(--r-pill);background:var(--surface);color:var(--muted);font-size:13.5px}
+.steps li b{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);font:500 12px var(--font-mono)}
+.steps li[aria-current="step"]{color:var(--ink)}.steps li[aria-current="step"] b{background:var(--ink);color:var(--paper)}
+.steps li.done b{background:var(--iucn-lc);color:#fff}
+.drop{border:1.5px dashed var(--line);border-radius:var(--r-l);background:var(--surface);padding:40px 20px;display:grid;gap:10px;justify-items:center;text-align:center;transition:border-color .2s,background .2s}
+.drop.over{border-color:var(--cobalt);background:color-mix(in srgb,var(--cobalt) 7%,var(--surface))}
+.drop h3{font-size:18px;font-weight:400}
+.drop p{color:var(--muted);font-size:13.5px}
+pre.tpl{margin:0;padding:12px 14px;border-radius:var(--r-m);background:var(--surface-2);font:12px/1.6 var(--font-mono);white-space:pre-wrap;word-break:break-all}
+.st-ok{color:var(--iucn-lc);font-weight:500}.st-err{color:var(--iucn-cr);white-space:normal!important;min-width:220px}
+progress{width:100%;height:6px;appearance:none;border:0;border-radius:3px;background:var(--surface-2);overflow:hidden}
+progress::-webkit-progress-bar{background:var(--surface-2)}progress::-webkit-progress-value{background:var(--lagoon)}progress::-moz-progress-bar{background:var(--lagoon)}
+
+/* ---------- inspecteur ---------- */
+.scrim{position:fixed;inset:0;background:rgba(4,19,26,.28);opacity:0;pointer-events:none;transition:opacity .3s;z-index:20}
+.scrim.on{opacity:1;pointer-events:auto}
+.insp{position:fixed;top:0;right:0;bottom:0;width:min(var(--w-insp),100vw);background:var(--paper);z-index:21;display:flex;flex-direction:column;transform:translateX(105%);transition:transform .5s var(--out);border-left:1px solid var(--line)}
+.insp.on{transform:none}
+.insp .hd{position:relative;flex:none;height:180px;background:var(--surface-2)}
+.insp .hd svg{position:absolute;inset:0;width:100%;height:100%}
+.insp .hd .x{position:absolute;right:12px;top:12px;background:var(--surface)}
+.insp .hd .tags{position:absolute;left:16px;bottom:14px;display:flex;gap:6px}
+.insp .ti{padding:18px 22px 4px;display:grid;gap:6px}
+.insp .ti h2{font-size:28px;font-style:italic;font-weight:300}
+.insp .ti p{color:var(--muted)}
+.tabs{display:flex;gap:2px;padding:10px 18px 0;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;height:38px;padding:0 12px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--ink);font-weight:500}
+.insp .bd{flex:1;overflow:auto;padding:18px 22px 24px;display:grid;gap:18px;align-content:start}
+.insp .ft{flex:none;display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--line);background:var(--paper)}
+dl.kv{display:grid;grid-template-columns:140px minmax(0,1fr);margin:0;background:var(--surface);border-radius:var(--r-m);padding:4px 14px}
+dl.kv dt,dl.kv dd{margin:0;padding:10px 0;border-top:1px solid var(--line);font-size:13.5px}
+dl.kv dt{color:var(--muted)}
+dl.kv dd{font-family:var(--font-mono);font-size:13px;overflow-wrap:anywhere}
+dl.kv>:nth-child(1),dl.kv>:nth-child(2){border-top:0}
+dl.kv dd .input,dl.kv dd .select,dl.kv dd .textarea{height:32px;font-family:var(--font-body);font-size:13.5px}
+dl.kv dd .textarea{height:auto}
+.eco{display:grid;grid-template-columns:110px minmax(0,1fr);gap:14px;align-items:start}
+.gauge svg{width:100%;height:auto;display:block}
+.prose{font-size:14.5px;line-height:1.6}
+
+/* ---------- palette de commandes ---------- */
+.cmdk{position:fixed;inset:0;z-index:30;display:grid;place-items:start center;padding-top:12vh;background:rgba(4,19,26,.35)}
+.cmdk[hidden]{display:none}
+.cmdk .box{width:min(620px,92vw);background:var(--surface);border-radius:var(--r-l);overflow:hidden;display:grid}
+.cmdk .in{display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--line)}
+.cmdk .in input{flex:1;height:54px;border:0;background:none;font-size:16px;outline:none}
+.cmdk ul{list-style:none;margin:0;padding:8px;max-height:52vh;overflow:auto}
+.cmdk li.h{font:500 10.5px/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:10px 10px 6px}
+.cmdk li.o{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-s);cursor:pointer}
+.cmdk li.o .k{color:var(--muted);font-size:12.5px;margin-left:auto}
+.cmdk li.o[aria-selected="true"]{background:var(--surface-2)}
+.cmdk .foot{display:flex;gap:14px;padding:10px 16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+
+/* ---------- notifications ---------- */
+.toasts{position:fixed;right:16px;bottom:16px;display:grid;gap:8px;z-index:40}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 14px 12px 16px;border-radius:var(--r-m);background:var(--ink);color:var(--paper);font-size:13.5px;max-width:380px}
+.toast i{width:8px;height:8px;border-radius:50%;background:var(--iucn-lc);flex:none}
+.toast.err i{background:var(--iucn-cr)}
+.notice{display:block;padding:10px 14px;border-radius:var(--r-m);background:var(--surface);border:1px dashed var(--line);font-size:13px;color:var(--muted)}
+.notice b{color:var(--ink);font-weight:500;margin-right:6px}
+
+/* ---------- analyses ---------- */
+.chart .plot{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .ax{font:500 11px var(--font-mono);fill:var(--muted)}
+.chart .nm{font:400 12px var(--font-body);font-style:italic;fill:var(--ink)}
+.chart .gl{stroke:var(--line)}
+.chart .hit{cursor:pointer}
+.chart .hit:hover .mk{stroke:var(--ink);stroke-width:2}
+.legend2{display:flex;gap:12px;font-size:13px}
+table.mx{border-collapse:separate;border-spacing:3px;width:100%;font-size:12.5px}
+.mx th{font:500 10.5px/1.2 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center;padding:4px 2px;vertical-align:bottom}
+.mx tbody th{text-align:left}
+.mx td{height:34px;min-width:44px;border-radius:6px;text-align:center;font:500 12.5px var(--font-mono)}
+.legend2 span{display:inline-flex;align-items:center;gap:6px}
+.legend2 i{width:10px;height:10px;border-radius:2px}
+.chart .tip{position:absolute}
+
+/* ---------- études de cas (planches) ---------- */
+.case{--cs-bg:#030a14;position:relative;height:calc(100dvh - 170px);min-height:560px;border-radius:var(--r-l);overflow:hidden;background:var(--cs-bg);color:#e8eef5;isolation:isolate;outline:none}
+.case:fullscreen{border-radius:0;height:100vh}
+.case canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cs-dots{mix-blend-mode:screen}
+.cs-heat{filter:blur(18px) saturate(1.3);animation:cs-breathe 6s ease-in-out infinite alternate;transition:opacity .6s}
+@keyframes cs-breathe{from{opacity:.82}to{opacity:1}}
+.cs-title{position:absolute;left:0;right:0;top:clamp(22px,4vh,44px);text-align:center;display:grid;gap:4px;pointer-events:none;padding:0 16px}
+.cs-title span{font:300 clamp(24px,3.2vw,48px)/1.05 var(--font-display);letter-spacing:-.025em;color:rgba(232,238,245,.55)}
+.cs-title h2{font:400 clamp(28px,3.8vw,58px)/1.05 var(--font-display);letter-spacing:-.025em;color:#fff}
+.cs-list{position:absolute;left:clamp(16px,2.4vw,32px);top:30%;margin:0;padding:0;list-style:none;display:grid;gap:14px;max-width:300px}
+.cs-list li{display:grid;gap:2px;padding-left:16px;border-left:1px solid rgba(232,238,245,.16);cursor:pointer;opacity:.38;transition:opacity .3s}
+.cs-list li.on,.cs-list li:hover{opacity:1}
+.cs-list li b{display:flex;align-items:center;gap:8px;font:400 15px/1.3 var(--font-body);font-style:italic}
+.cs-list li b .iucn{font-style:normal;background:rgba(232,238,245,.14);color:#e8eef5}
+.cs-list li span{font-size:13px;color:rgba(232,238,245,.55)}
+.cs-figs{position:absolute;right:clamp(16px,2.4vw,32px);top:30%;display:grid;gap:14px;text-align:left}
+.cs-figs div{display:grid;gap:2px;padding-left:16px;border-left:1px solid rgba(232,238,245,.16)}
+.cs-figs b{font:300 30px/1 var(--font-display);color:#fff;font-variant-numeric:tabular-nums}
+.cs-figs span{font-size:12.5px;color:rgba(232,238,245,.55)}
+.cs-nav{position:absolute;left:clamp(16px,2.4vw,32px);bottom:24px;display:flex;align-items:center;gap:10px}
+.cs-btn{width:48px;height:48px;border-radius:50%;border:0;background:rgba(232,238,245,.1);color:#fff;font:300 26px/1 var(--font-display);cursor:pointer;display:grid;place-items:center;transition:transform .35s var(--back),background .2s}
+.cs-btn.on{background:var(--cobalt)}
+.cs-btn:hover{transform:scale(1.06)}.cs-btn:active{transform:scale(.92)}
+.cs-count{font:500 12px var(--font-mono);color:rgba(232,238,245,.55);margin-left:6px}
+.cs-note{position:absolute;right:clamp(16px,2.4vw,32px);bottom:30px;font:400 11.5px var(--font-mono);color:rgba(232,238,245,.4);max-width:44ch;text-align:right}
+@media (max-width:900px){.cs-list{top:auto;bottom:90px;max-width:none;right:16px;grid-template-columns:1fr 1fr;gap:10px}.cs-list li:nth-child(n+5){display:none}.cs-figs{top:auto;bottom:auto;display:none}.cs-note{display:none}}
+
+/* ---------- petits écrans ---------- */
+@media (max-width:1180px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.formgrid{grid-template-columns:1fr}.preview{position:static}}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;inset:0 auto 0 0;width:min(280px,86vw);z-index:25;transform:translateX(-105%);transition:transform .45s var(--out)}
+  .side.on{transform:none}
+  .top .menu-btn{display:inline-flex}
+  .search{width:auto;flex:1;max-width:none}.search kbd,.search span{display:none}.search{flex:0 0 38px;padding:0;justify-content:center}
+  .top .btn.primary span{display:none}.top .btn.primary{width:38px;padding:0}
+  .grid-2{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fields{grid-template-columns:1fr 1fr}.fields .w2{grid-column:1 / -1}
+  .t .hide-s{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="app" id="app">
+  <aside class="side" id="side" aria-label="Navigation principale">
+    <a class="brand" href="#/tableau"><svg id="logo" aria-hidden="true"></svg>BANBIOM</a>
+    <div class="ws"><span class="label">Base</span><b>Méditerranée · côte algérienne</b></div>
+    <nav class="nav">
+      <span class="nav-h">Explorer</span>
+      <a href="#/tableau" data-r="tableau"><svg class="ico" data-i="home"></svg><span>Tableau de bord</span></a>
+      <a href="#/especes" data-r="especes"><svg class="ico" data-i="list"></svg><span>Espèces</span><em class="n" id="nEsp">0</em></a>
+      <a href="#/carte" data-r="carte"><svg class="ico" data-i="map"></svg><span>Carte</span></a>
+      <a href="#/analyses" data-r="analyses"><svg class="ico" data-i="chart"></svg><span>Analyses</span></a>
+      <a href="#/etudes" data-r="etudes"><svg class="ico" data-i="slides"></svg><span>Études de cas</span></a>
+      <span class="nav-h">Contribuer</span>
+      <a href="#/nouvelle" data-r="nouvelle"><svg class="ico" data-i="plus"></svg><span>Nouvelle fiche</span></a>
+      <a href="#/import" data-r="import"><svg class="ico" data-i="upload"></svg><span>Importer</span></a>
+      <span class="nav-h">Qualité</span>
+      <a href="#/verifier" data-r="verifier"><svg class="ico" data-i="check"></svg><span>À vérifier</span><em class="n warn" id="nVer">0</em></a>
+    </nav>
+    <div class="side-foot">
+      <span class="src" id="src"><i></i><span>Connexion…</span></span>
+      <button class="btn ghost s" type="button" id="themeBtn"><svg class="ico" data-i="moon"></svg><span>Thème sombre</span></button>
+    </div>
+  </aside>
+
+  <header class="top">
+    <button class="btn icon ghost menu-btn" type="button" id="menuBtn" aria-label="Ouvrir la navigation"><svg class="ico" data-i="menu"></svg></button>
+    <div class="crumb" id="crumb"></div>
+    <button class="search" type="button" id="openK"><svg class="ico" data-i="search"></svg><span>Rechercher une espèce, une action…</span><kbd>Ctrl K</kbd></button>
+    <a class="btn primary" href="#/nouvelle"><svg class="ico" data-i="plus"></svg><span>Nouvelle fiche</span></a>
+  </header>
+
+  <main class="main" id="main">
+    <!-- tableau de bord -->
+    <section class="view" data-v="tableau" hidden>
+      <div class="vhead"><div><h1>Tableau de bord</h1><p>L'état de la base : volume, menaces, milieux et fiches à reprendre.</p></div>
+        <div class="actions"><a class="btn secondary" href="#/import"><svg class="ico" data-i="upload"></svg>Importer</a></div></div>
+      <div class="notice" data-notice hidden></div>
+      <div class="kpis" id="kpis"></div>
+      <div class="grid-2">
+        <section class="panel"><header><h2>Statuts UICN</h2><span class="count" id="uicnN"></span></header><ul class="bars" id="uicnBars"></ul></section>
+        <section class="panel"><header><h2>Habitats</h2><span class="count" id="habN"></span></header><ul class="bars" id="habBars"></ul></section>
+        <section class="panel"><header><h2>Faune et flore</h2></header><div class="split" id="kSplit"></div><ul class="bars" id="phyBars"></ul></section>
+        <section class="panel"><header><h2>À reprendre</h2><a class="btn ghost s" href="#/verifier">Tout voir</a></header><div class="rows" id="verRows"></div></section>
+      </div>
+    </section>
+
+    <!-- espèces -->
+    <section class="view" data-v="especes" hidden>
+      <div class="vhead"><div><h1>Espèces</h1><p>Toutes les fiches de la base. Cliquez une ligne pour ouvrir l'inspecteur.</p></div>
+        <div class="actions"><button class="btn secondary" type="button" id="exportAll"><svg class="ico" data-i="download"></svg>Exporter CSV</button></div></div>
+      <div class="toolbar">
+        <label class="searchbox"><span class="sr">Rechercher dans les fiches</span><svg class="ico" data-i="search"></svg><input class="input" type="search" id="q" placeholder="Nom, famille, habitat…"></label>
+        <div class="seg" role="group" aria-label="Règne" id="segR"><button type="button" data-v="" aria-pressed="true">Tout</button><button type="button" data-v="Animal" aria-pressed="false">Faune</button><button type="button" data-v="Végétal" aria-pressed="false">Flore</button></div>
+        <select class="select" id="fHab" aria-label="Habitat"><option value="">Tous habitats</option></select>
+        <select class="select" id="fIucn" aria-label="Statut UICN"><option value="">Tous statuts</option></select>
+        <span class="sp"></span>
+        <span class="count" id="cnt"></span>
+        <div class="seg" role="group" aria-label="Affichage" id="segV"><button type="button" data-v="table" aria-pressed="true"><svg class="ico" data-i="rows"></svg>Tableau</button><button type="button" data-v="cards" aria-pressed="false"><svg class="ico" data-i="grid"></svg>Cartes</button></div>
+      </div>
+      <div class="chips" id="chips"></div>
+      <div id="listHost"></div>
+      <div class="selbar" id="selbar" hidden><span id="selN"></span><button class="btn s" type="button" id="selExport">Exporter la sélection</button><button class="btn s" type="button" id="selClear">Désélectionner</button></div>
+    </section>
+
+    <!-- carte -->
+    <section class="view" data-v="carte" hidden>
+      <div class="vhead"><div><h1>Carte des espèces</h1><p>Chaque cellule est une espèce, placée selon son habitat (colonnes) et sa profondeur (échelle logarithmique). Survolez une cellule pour son nom. Cliquez une cellule pour ouvrir la fiche.</p></div>
+        <div class="seg" role="group" aria-label="Règne" id="segM"><button type="button" data-v="" aria-pressed="true">Tout</button><button type="button" data-v="Animal" aria-pressed="false">Faune</button><button type="button" data-v="Végétal" aria-pressed="false">Flore</button></div></div>
+      <div class="mapwrap" id="mapwrap"><svg id="mapSvg" role="img" aria-label="Carte des espèces par habitat et profondeur"></svg><div class="tip" id="tip"></div></div>
+    </section>
+
+    <!-- nouvelle fiche -->
+    <section class="view" data-v="nouvelle" hidden>
+      <div class="vhead"><div><h1>Nouvelle fiche</h1><p>Les champs marqués <span style="color:var(--iucn-cr)">*</span> sont obligatoires. L'aperçu se met à jour pendant la saisie.</p></div></div>
+      <div class="notice" data-notice hidden></div>
+      <form class="formgrid" id="entry" novalidate>
+        <div style="display:grid;gap:16px;min-width:0">
+          <fieldset class="fs"><legend>Identification</legend><div class="fields">
+            <div class="field w2" data-f="nom_scientifique"><label for="f_nom_scientifique">Nom scientifique <i>*</i></label><input class="input sci" id="f_nom_scientifique" name="nom_scientifique" placeholder="Genre espèce" autocomplete="off"><span class="hint">Binôme latin, par exemple Posidonia oceanica.</span></div>
+            <div class="field" data-f="auteur"><label for="f_auteur">Auteur</label><input class="input" id="f_auteur" name="auteur" placeholder="(Linnaeus, 1758)"></div>
+            <div class="field" data-f="nom_commun"><label for="f_nom_commun">Nom commun</label><input class="input" id="f_nom_commun" name="nom_commun"></div>
+            <div class="field" data-f="regne"><label for="f_regne">Règne <i>*</i></label><select class="select" id="f_regne" name="regne"><option value="">Choisir…</option><option>Animal</option><option>Végétal</option></select></div>
+            <div class="field" data-f="habitat"><label for="f_habitat">Habitat <i>*</i></label><input class="input" id="f_habitat" name="habitat" list="habList" placeholder="Herbier, Coralligène…"></div>
+          </div></fieldset>
+          <fieldset class="fs"><legend>Taxonomie</legend><div class="fields">
+            <div class="field" data-f="embranchement"><label for="f_embranchement">Embranchement</label><input class="input" id="f_embranchement" name="embranchement"></div>
+            <div class="field" data-f="classe"><label for="f_classe">Classe</label><input class="input" id="f_classe" name="classe"></div>
+            <div class="field" data-f="ordre"><label for="f_ordre">Ordre</label><input class="input" id="f_ordre" name="ordre"></div>
+            <div class="field" data-f="famille"><label for="f_famille">Famille</label><input class="input" id="f_famille" name="famille"></div>
+          </div></fieldset>
+          <fieldset class="fs"><legend>Écologie</legend><div class="fields">
+            <div class="field" data-f="profondeur_min"><label for="f_profondeur_min">Profondeur min. (m)</label><input class="input" id="f_profondeur_min" name="profondeur_min" inputmode="decimal"></div>
+            <div class="field" data-f="profondeur_max"><label for="f_profondeur_max">Profondeur max. (m)</label><input class="input" id="f_profondeur_max" name="profondeur_max" inputmode="decimal"></div>
+            <div class="field" data-f="taille_max_cm"><label for="f_taille_max_cm">Taille max. (cm)</label><input class="input" id="f_taille_max_cm" name="taille_max_cm" inputmode="decimal"></div>
+            <div class="field" data-f="temperature_min"><label for="f_temperature_min">Température min. (°C)</label><input class="input" id="f_temperature_min" name="temperature_min" inputmode="decimal"></div>
+            <div class="field" data-f="temperature_max"><label for="f_temperature_max">Température max. (°C)</label><input class="input" id="f_temperature_max" name="temperature_max" inputmode="decimal"></div>
+            <div class="field" data-f="salinite"><label for="f_salinite">Salinité (PSU)</label><input class="input" id="f_salinite" name="salinite" placeholder="36 – 39"></div>
+            <div class="field" data-f="mode_trophique"><label for="f_mode_trophique">Mode trophique</label><input class="input" id="f_mode_trophique" name="mode_trophique" list="trophList"></div>
+            <div class="field w2" data-f="repartition"><label for="f_repartition">Répartition</label><input class="input" id="f_repartition" name="repartition"></div>
+            <div class="field w3" data-f="description"><label for="f_description">Description</label><textarea class="textarea" id="f_description" name="description"></textarea></div>
+          </div></fieldset>
+          <fieldset class="fs"><legend>Statut et sources</legend><div class="fields">
+            <div class="field" data-f="statut_uicn"><label for="f_statut_uicn">Statut UICN</label><select class="select" id="f_statut_uicn" name="statut_uicn"></select></div>
+            <div class="field w2" data-f="protection"><label for="f_protection">Protection</label><input class="input" id="f_protection" name="protection" placeholder="Convention de Barcelone, ann. II"></div>
+            <div class="field" data-f="contributeur"><label for="f_contributeur">Contributeur <i>*</i></label><input class="input" id="f_contributeur" name="contributeur" autocomplete="name"></div>
+            <div class="field w2" data-f="reference"><label for="f_reference">Référence</label><input class="input" id="f_reference" name="reference" placeholder="Publication, DOI, campagne…"></div>
+          </div></fieldset>
+          <div class="formbar"><button class="btn primary" type="submit" id="saveBtn">Enregistrer la fiche</button><button class="btn ghost" type="reset">Effacer</button><span class="count" id="formMsg" role="status"></span></div>
+        </div>
+        <aside class="preview" aria-label="Aperçu de la fiche"><div class="sig" id="pvSig"></div>
+          <div class="b"><div class="r" style="display:flex;justify-content:space-between;gap:8px"><span id="pvKing"></span><span id="pvIucn"></span></div>
+            <h3 id="pvName">Genre espèce</h3><span class="count" id="pvMeta">—</span>
+            <ul class="check" id="pvCheck"></ul></div></aside>
+      </form>
+      <datalist id="habList"></datalist><datalist id="trophList"></datalist>
+    </section>
+
+    <!-- analyses -->
+    <section class="view" data-v="analyses" hidden>
+      <div class="vhead"><div><h1>Analyses</h1><p>Les données de la base en graphiques. Survolez un repère pour sa valeur, cliquez pour ouvrir la fiche.</p></div>
+        <div class="seg" role="group" aria-label="Règne" id="segA"><button type="button" data-v="" aria-pressed="true">Tout</button><button type="button" data-v="Animal" aria-pressed="false">Faune</button><button type="button" data-v="Végétal" aria-pressed="false">Flore</button></div></div>
+      <div class="grid-2">
+        <section class="panel chart"><header><h2>Taille et profondeur</h2><span class="legend2"><span><i style="background:var(--fa)"></i>Faune</span><span><i style="background:var(--fl)"></i>Flore</span></span></header><div class="plot" id="chScatter"></div><span class="count" id="chScatterN"></span></section>
+        <section class="panel chart"><header><h2>Statut UICN par habitat</h2><span class="count">nombre d'espèces</span></header><div class="plot" id="chMatrix"></div></section>
+      </div>
+      <section class="panel chart"><header><h2>Gamme de profondeur par espèce</h2><span class="legend2"><span><i style="background:var(--fa)"></i>Faune</span><span><i style="background:var(--fl)"></i>Flore</span></span></header><div class="plot" id="chDepth"></div><span class="count">Échelle logarithmique · de la profondeur minimale à la maximale.</span></section>
+    </section>
+
+    <!-- études de cas -->
+    <section class="view" data-v="etudes" hidden>
+      <div class="vhead"><div><h1>Études de cas</h1><p>Des planches prêtes à présenter : un thème, ses espèces et leur répartition dans le bassin méditerranéen.</p></div>
+        <div class="actions"><button class="btn secondary" type="button" id="csPresent"><svg class="ico" data-i="expand"></svg>Présenter</button></div></div>
+      <div class="case" id="case" tabindex="0" aria-roledescription="planche" aria-label="Étude de cas">
+        <canvas class="cs-heat" id="csHeat" aria-hidden="true"></canvas><canvas class="cs-dots" id="csDots" aria-hidden="true"></canvas>
+        <div class="cs-title"><span id="csKicker"></span><h2 id="csName"></h2></div>
+        <ul class="cs-list" id="csList"></ul>
+        <div class="cs-figs" id="csFigs"></div>
+        <div class="cs-nav"><button type="button" class="cs-btn" id="csPrev" aria-label="Planche précédente">‹</button><button type="button" class="cs-btn on" id="csNext" aria-label="Planche suivante">›</button><span class="cs-count" id="csCount"></span></div>
+        <p class="cs-note">Répartition indicative, déduite du champ « Répartition » et de l'habitat de chaque fiche.</p>
+      </div>
+    </section>
+
+    <!-- import -->
+    <section class="view" data-v="import" hidden>
+      <div class="vhead"><div><h1>Importer des fiches</h1><p>CSV, TSV ou JSON. Chaque ligne est contrôlée avant l'import ; seules les lignes valides sont ajoutées.</p></div></div>
+      <ol class="steps" id="steps"><li aria-current="step"><b>1</b>Fichier</li><li><b>2</b>Contrôle</li><li><b>3</b>Import</li></ol>
+      <div class="notice" data-notice hidden></div>
+      <div class="grid-2" style="align-items:start">
+        <label class="drop" id="drop"><svg class="ico" data-i="upload" style="width:28px;height:28px"></svg><h3>Déposez un fichier ici</h3><p>ou cliquez pour le choisir · .csv, .tsv, .txt, .json</p><input type="file" id="fileIn" accept=".csv,.tsv,.txt,.json" class="sr"></label>
+        <section class="panel"><header><h2>Modèle de colonnes</h2><button class="btn secondary s" type="button" id="copyTpl"><svg class="ico" data-i="copy"></svg>Copier l'en-tête</button></header>
+          <pre class="tpl" id="tplPre"></pre><span class="count" id="tplMsg">Séparateur « ; », « , » ou tabulation. Les en-têtes anglais courants sont reconnus.</span></section>
+      </div>
+      <div id="impHost"></div>
+    </section>
+
+    <!-- à vérifier -->
+    <section class="view" data-v="verifier" hidden>
+      <div class="vhead"><div><h1>À vérifier</h1><p>Fiches dont la source signale un point à vérifier, ou dont des champs utiles sont vides.</p></div></div>
+      <div id="verHost"></div>
+    </section>
+  </main>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="insp" id="insp" aria-label="Inspecteur de fiche" aria-hidden="true"></aside>
+<div class="cmdk" id="cmdk" hidden role="dialog" aria-modal="true" aria-label="Palette de commandes"><div class="box">
+  <div class="in"><svg class="ico" data-i="search"></svg><input id="kq" placeholder="Rechercher une espèce, une action…" autocomplete="off" role="combobox" aria-controls="kl" aria-expanded="true"><kbd>Échap</kbd></div>
+  <ul id="kl" role="listbox"></ul>
+  <div class="foot"><span><kbd>↑</kbd> <kbd>↓</kbd> naviguer</span><span><kbd>Entrée</kbd> ouvrir</span></div></div></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+/*BUNDLE*/
+</script>
+<script>
+(function(){
+"use strict";
+const B=window.Banbiom;
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=n=>(n===null||n===undefined||n===""||isNaN(n))?null:Number(n).toLocaleString("fr-FR",{maximumFractionDigits:1});
+const range=(a,b,u)=>{const A=fmt(a),Bv=fmt(b); if(A==null&&Bv==null) return "—"; if(A!=null&&Bv!=null) return `${A}–${Bv} ${u}`; return `${A??Bv} ${u}`;};
+const has=v=>v!==null&&v!==undefined&&v!==""&&!(typeof v==="number"&&isNaN(v));
+const reduce=matchMedia("(prefers-reduced-motion: reduce)");
+const anim=(el,kf,o)=>(reduce.matches||!el||!el.animate)?null:el.animate(kf,o);
+const OUT="cubic-bezier(.16,1,.3,1)", BACK="cubic-bezier(.34,1.56,.64,1)";
+
+/* ================= ICÔNES ================= */
+const ICON={home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/>',list:'<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',
+  map:'<path d="M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3z"/><path d="M9 4v13M15 7v13"/>',plus:'<path d="M12 5v14M5 12h14"/>',upload:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v4h16v-4"/>',
+  download:'<path d="M12 4v12M7 11l5 5 5-5"/><path d="M4 20h16"/>',check:'<path d="M20 6 9 17l-5-5"/>',moon:'<path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',search:'<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/>',rows:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+  grid:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',
+  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',chart:'<path d="M4 20V11M10 20V5M16 20v-6M3 20h18"/>',slides:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',expand:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>'};
+const ico=(n,cls="ico")=>`<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICON[n]||""}</svg>`;
+function paintIcons(root=document){ $$("svg[data-i]",root).forEach(s=>{ s.setAttribute("viewBox","0 0 24 24"); s.setAttribute("aria-hidden","true"); s.innerHTML=ICON[s.dataset.i]||""; }); }
+
+/* ================= MODÈLE ================= */
+const FIELDS=["nom_scientifique","auteur","nom_commun","regne","embranchement","classe","ordre","famille","habitat","profondeur_min","profondeur_max","temperature_min","temperature_max","salinite","mode_trophique","taille_max_cm","repartition","statut_uicn","protection","description","contributeur","reference"];
+const LABELS={nom_scientifique:"Nom scientifique",auteur:"Auteur",nom_commun:"Nom commun",regne:"Règne",embranchement:"Embranchement",classe:"Classe",ordre:"Ordre",famille:"Famille",habitat:"Habitat",
+  profondeur_min:"Profondeur min.",profondeur_max:"Profondeur max.",temperature_min:"Température min.",temperature_max:"Température max.",salinite:"Salinité",mode_trophique:"Mode trophique",
+  taille_max_cm:"Taille max.",repartition:"Répartition",statut_uicn:"Statut UICN",protection:"Protection",description:"Description",contributeur:"Contributeur",reference:"Référence"};
+const NUM=new Set(["profondeur_min","profondeur_max","temperature_min","temperature_max","taille_max_cm"]);
+const IUCN={CR:"En danger critique",EN:"En danger",VU:"Vulnérable",NT:"Quasi menacé",LC:"Préoccupation mineure",DD:"Données insuffisantes",NE:"Non évalué"};
+const IUCN_ORDER=["CR","EN","VU","NT","LC","DD","NE"];
+const ALIASES={scientific_name:"nom_scientifique",nom_latin:"nom_scientifique",espece:"nom_scientifique",species:"nom_scientifique",taxon:"nom_scientifique",common_name:"nom_commun",nom_vernaculaire:"nom_commun",kingdom:"regne",phylum:"embranchement",division:"embranchement",class:"classe",order:"ordre",family:"famille",author:"auteur",depth_min:"profondeur_min",depth_max:"profondeur_max",temp_min:"temperature_min",temp_max:"temperature_max",salinity:"salinite",diet:"mode_trophique",trophic:"mode_trophique",max_size_cm:"taille_max_cm",taille_max:"taille_max_cm",distribution:"repartition",iucn:"statut_uicn",uicn:"statut_uicn",iucn_status:"statut_uicn",notes:"description",observations:"description",contributor:"contributeur",source:"reference"};
+const S={species:[],ready:false,canWrite:true,col:null,
+  list:{q:"",regne:"",habitat:"",iucn:"",sort:"nom_scientifique",dir:1,view:"table",sel:new Set()}, mapRegne:"", open:null, editing:false, tab:"fiche"};
+
+/* points à reprendre d'une fiche : donnée d'exemple, source signalée « à vérifier », ou champs indispensables vides */
+function issues(s){ const out=[];
+  if(/données exemple/i.test(s.reference||"")) out.push("Donnée d'exemple");
+  else if(/vérifier|à valider/i.test(s.reference||"")) out.push("Source à vérifier");
+  if(!has(s.profondeur_max)) out.push("Profondeur max. manquante");
+  if(!s.statut_uicn||s.statut_uicn==="NE") out.push("Statut UICN non évalué");
+  if(!s.reference) out.push("Aucune référence");
+  return out; }
+
+/* ================= SIGNATURES (micro) ================= */
+function sigSVG(sp,w,h,big){
+  const A=sp.regne==="Animal", gap=A?(big?2:1.5):(big?10:7), R=A?0:(big?24:16);
+  const cols=A?["var(--cobalt)","var(--cobalt)","var(--cobalt-2)"]:["var(--lagoon)","var(--deep)","var(--foam)","var(--lagoon)","var(--abyss)"], bg=A?"var(--mist)":"var(--ground)";
+  const pts=B.seedsFromSpecies(sp)(w,h), cs=B._cells(pts.map(p=>({x:p.x,y:p.y,w:0})),w,h,()=>gap,0); let d="";
+  cs.forEach((poly,i)=>{ const p=B._traceSVG(poly,R); if(p) d+=`<path d="${p}" fill="${cols[Math.floor(pts[i].n*cols.length)%cols.length]}"/>`; });
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="${w}" height="${h}" fill="${bg}"/>${d}</svg>`;
+}
+const sigCache=new Map();
+function sig(sp,w,h,big){ const k=[sp.nom_scientifique,sp.regne,sp.profondeur_max,sp.temperature_min,w,h,big?1:0].join("|"); if(!sigCache.has(k)) sigCache.set(k,sigSVG(sp,w,h,big)); return sigCache.get(k); }
+/* nano : 1 à 3 cellules, ornement de composant */
+function nano(seed,color,n=3){ const r=B._rng(B._hash(seed)), pts=[]; while(pts.length<n) pts.push({x:10+r()*80,y:10+r()*80,w:0});
+  const cs=B._cells(pts,100,100,()=>8,0); return `<svg viewBox="0 0 100 100" aria-hidden="true">${cs.map((p,i)=>{ const d=B._traceSVG(p,14); return d?`<path d="${d}" fill="${color}" opacity="${[.9,.55,.3][i%3]}"/>`:""; }).join("")}</svg>`; }
+function logo(svg,n){
+  const id="lg"+Math.random().toString(36).slice(2,7), r=B._rng(B._hash("logo-sphere")), pts=[];
+  while(pts.length<n){ const x=r()*100,y=r()*100; if(Math.hypot(x-50,y-50)<46) pts.push({x,y,w:0}); }
+  const cs=B._cells(pts,100,100,()=>9,8); let d=""; cs.forEach(poly=>{ const p=B._traceSVG(poly,12); if(p) d+=`<path d="${p}"/>`; });
+  svg.setAttribute("viewBox","0 0 100 100"); svg.innerHTML=`<defs><clipPath id="${id}"><circle cx="50" cy="50" r="49"/></clipPath></defs><g clip-path="url(#${id})" fill="currentColor">${d}</g>`; }
+const kingTag=s=>{ const A=s.regne==="Animal"; return `<span class="king ${A?"fa":"fl"}"><i>${A?"Faune":"Flore"}</i></span>`; };
+const iucnTag=(s,long)=>{ const st=s.statut_uicn||"NE"; return `<span class="iucn" data-s="${esc(st)}" title="${esc(IUCN[st]||"")}">${esc(st)}${long?` · ${esc(IUCN[st]||"")}`:""}</span>`; };
+
+function gauge(min,max,A){
+  const col=A?"var(--fa)":"var(--fl)";
+  if(!has(min)&&!has(max)) return `<svg viewBox="0 0 100 200" role="img" aria-label="Profondeur non renseignée"><rect x="36" y="10" width="28" height="170" rx="14" fill="var(--surface-2)"/><text x="50" y="100" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="IBM Plex Mono">n.r.</text></svg>`;
+  const a=+(has(min)?min:max), b=+(has(max)?max:min), top=[10,50,100,200,500,1000,2000,5000].find(s=>s>=b)||Math.ceil(b/1000)*1000;
+  const y=v=>10+Math.sqrt(v/top)*170, ticks=[0,top/4,top/2,top].map(Math.round);
+  return `<svg viewBox="0 0 100 200" role="img" aria-label="Profondeur de ${fmt(a)} à ${fmt(b)} mètres">
+    <rect x="36" y="10" width="28" height="170" rx="${A?2:14}" fill="var(--surface-2)"/>
+    <rect x="36" y="${y(a)}" width="28" height="${Math.max(4,y(b)-y(a))}" rx="${A?1:12}" fill="${col}"/>
+    ${ticks.map(t=>`<line x1="64" x2="70" y1="${y(t)}" y2="${y(t)}" stroke="var(--muted)"/><text x="73" y="${y(t)+3.5}" font-size="9.5" fill="var(--muted)" font-family="IBM Plex Mono">${t}</text>`).join("")}
+    <text x="32" y="${y(a)+4}" text-anchor="end" font-size="10" fill="var(--ink)" font-family="IBM Plex Mono">${fmt(a)}</text>
+    <text x="32" y="${y(b)+4}" text-anchor="end" font-size="10" fill="var(--ink)" font-family="IBM Plex Mono">${fmt(b)}</text>
+    <text x="50" y="196" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="IBM Plex Mono">mètres</text></svg>`;
+}
+
+/* ================= NOTIFICATIONS ================= */
+function toast(msg,err){ const t=document.createElement("div"); t.className="toast"+(err?" err":""); t.innerHTML=`<i></i><span>${msg}</span>`; $("#toasts").append(t);
+  anim(t,[{transform:"translateY(16px) scale(.96)",opacity:0},{transform:"translateY(-3px)",opacity:1,offset:.7},{transform:"none",opacity:1}],{duration:420,easing:OUT});
+  setTimeout(()=>{ const a=anim(t,[{opacity:1},{opacity:0,transform:"translateY(8px)"}],{duration:240}); if(a) a.onfinish=()=>t.remove(); else t.remove(); },3600); }
+function notice(html){ $$("[data-notice]").forEach(n=>{ n.innerHTML=html; n.hidden=!html; }); }
+
+/* ================= ROUTAGE ================= */
+const VIEWS={tableau:"Tableau de bord",especes:"Espèces",carte:"Carte",analyses:"Analyses",etudes:"Études de cas",nouvelle:"Nouvelle fiche",import:"Importer",verifier:"À vérifier"};
+let curView=null;
+function route(){
+  const h=location.hash.replace(/^#\/?/,"").split("/"), v=VIEWS[h[0]]?h[0]:"tableau", id=h[1]?decodeURIComponent(h[1]):null;
+  if(v!==curView){ $$(".view").forEach(s=>s.hidden=s.dataset.v!==v); $$(".nav a").forEach(a=>a.toggleAttribute("aria-current",a.dataset.r===v)); $$(".nav a").forEach(a=>{ if(a.dataset.r===v) a.setAttribute("aria-current","page"); });
+    curView=v; $("#main").scrollTop=0; $("#side").classList.remove("on");
+    const sec=$(`.view[data-v="${v}"]`); anim(sec,[{opacity:0,transform:"translateY(10px)"},{opacity:1,transform:"none"}],{duration:420,easing:OUT});
+    if(v==="carte") requestAnimationFrame(drawMap); if(v==="analyses") requestAnimationFrame(renderAnalyses); if(v==="etudes") requestAnimationFrame(()=>drawCase(true)); }
+  $("#crumb").innerHTML=`<span>BANBIOM</span><span>/</span><b>${VIEWS[v]}</b>`;
+  if(id) openInsp(id); else closeInsp(true);
+}
+addEventListener("hashchange",route);
+const go=h=>{ if(location.hash!==h) location.hash=h; else route(); };
+
+/* ================= TABLEAU DE BORD ================= */
+function renderDash(){
+  const L=S.species, A=L.filter(s=>s.regne==="Animal"), V=L.filter(s=>s.regne==="Végétal"), thr=L.filter(s=>["CR","EN","VU"].includes(s.statut_uicn)), ver=L.filter(s=>issues(s).length);
+  $("#kpis").innerHTML=[["Espèces",L.length,"fiches dans la base","#/especes","var(--ink)"],["Faune",A.length,"espèces animales","#/especes","var(--fa)"],["Flore",V.length,"espèces végétales","#/especes","var(--fl)"],
+    ["Menacées",thr.length,"CR, EN ou VU","#/especes","var(--iucn-cr)"],["À reprendre",ver.length,"fiches à compléter","#/verifier","var(--iucn-vu)"]]
+    .map(([l,v,s,h,c])=>`<a class="kpi" href="${h}" data-k="${esc(l)}"><span class="label">${l}</span><b>${v}</b><small>${s}</small>${nano("kpi-"+l,c)}</a>`).join("");
+  $$("#kpis .kpi").forEach(a=>a.addEventListener("click",()=>{ const k=a.dataset.k; Object.assign(S.list,{regne:k==="Faune"?"Animal":k==="Flore"?"Végétal":"",iucn:"",habitat:"",q:""}); S.list.threat=k==="Menacées"; syncToolbar(); }));
+  const max=Math.max(1,...IUCN_ORDER.map(k=>L.filter(s=>(s.statut_uicn||"NE")===k).length));
+  $("#uicnN").textContent=`${L.length} fiches`;
+  $("#uicnBars").innerHTML=IUCN_ORDER.map(k=>{ const n=L.filter(s=>(s.statut_uicn||"NE")===k).length;
+    return `<li title="${esc(IUCN[k])} : ${n}"><span class="lab"><span class="iucn" data-s="${k}">${k}</span>${esc(IUCN[k])}</span><span class="track"><span class="bar" style="transform:scaleX(${n/max})"></span></span><span class="val">${n}</span></li>`; }).join("");
+  const hab={}; L.forEach(s=>{ const h=s.habitat||"Non renseigné"; hab[h]=(hab[h]||0)+1; }); const he=Object.entries(hab).sort((a,b)=>b[1]-a[1]), hm=Math.max(1,...he.map(e=>e[1]));
+  $("#habN").textContent=`${he.length} milieux`;
+  $("#habBars").innerHTML=he.map(([h,n])=>`<li title="${esc(h)} : ${n}"><span class="lab">${esc(h)}</span><span class="track"><span class="bar" style="transform:scaleX(${n/hm})"></span></span><span class="val">${n}</span></li>`).join("");
+  const pa=L.length?A.length/L.length*100:50;
+  $("#kSplit").innerHTML=`<div class="row" role="img" aria-label="Faune ${A.length}, flore ${V.length}"><span style="width:${pa}%;background:var(--fa)"></span><span style="flex:1;background:var(--fl)"></span></div>
+    <div class="legend"><span><i style="background:var(--fa)"></i>Faune · ${A.length} (${Math.round(pa)} %)</span><span><i style="background:var(--fl)"></i>Flore · ${V.length} (${100-Math.round(pa)} %)</span></div>`;
+  const ph={}; L.forEach(s=>{ const p=s.embranchement||"Non renseigné"; ph[p]=(ph[p]||0)+1; }); const pe=Object.entries(ph).sort((a,b)=>b[1]-a[1]).slice(0,6), pm=Math.max(1,...pe.map(e=>e[1]));
+  $("#phyBars").innerHTML=pe.map(([p,n])=>`<li title="${esc(p)} : ${n}"><span class="lab mono" style="font-size:12.5px">${esc(p)}</span><span class="track"><span class="bar" style="transform:scaleX(${n/pm})"></span></span><span class="val">${n}</span></li>`).join("");
+  $("#verRows").innerHTML=ver.slice(0,5).map(s=>rowLink(s,`<span class="flag">${issues(s).length}</span>`)).join("")||`<div class="empty"><h3>Rien à reprendre</h3><p>Toutes les fiches sont complètes.</p></div>`;
+  $$("#uicnBars .bar,#habBars .bar,#phyBars .bar").forEach((b,i)=>anim(b,[{transform:"scaleX(0)"},{transform:b.style.transform}],{duration:700,delay:i*30,easing:OUT}));
+}
+const rowLink=(s,right)=>`<a href="#/especes/${encodeURIComponent(s._id)}"><span class="sig">${sig(s,72,72)}</span><span class="t"><em class="sci">${esc(s.nom_scientifique)}</em><span>${esc(s.nom_commun||s.famille||"")}</span></span>${right||""}</a>`;
+
+/* ================= ESPÈCES ================= */
+function listed(){
+  const f=S.list, q=f.q.trim().toLowerCase();
+  const L=S.species.filter(s=>(!f.regne||s.regne===f.regne)&&(!f.habitat||s.habitat===f.habitat)&&(!f.iucn||(s.statut_uicn||"NE")===f.iucn)&&(!f.threat||["CR","EN","VU"].includes(s.statut_uicn))&&
+    (!q||[s.nom_scientifique,s.nom_commun,s.famille,s.classe,s.ordre,s.embranchement,s.habitat,s.repartition].join(" ").toLowerCase().includes(q)));
+  const k=f.sort, dir=f.dir, rank=s=>k==="statut_uicn"?IUCN_ORDER.indexOf(s.statut_uicn||"NE"):s[k];
+  return L.sort((a,b)=>{ const x=rank(a), y=rank(b); if(!has(x)&&!has(y)) return 0; if(!has(x)) return 1; if(!has(y)) return -1;
+    return (typeof x==="number"&&typeof y==="number"?x-y:String(x).localeCompare(String(y),"fr"))*dir; });
+}
+function syncToolbar(){
+  const f=S.list; $("#q").value=f.q; $("#fHab").value=f.habitat; $("#fIucn").value=f.iucn;
+  $$("#segR button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===f.regne)); $$("#segV button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===f.view));
+  renderList();
+}
+function renderList(){
+  const f=S.list, L=listed(), host=$("#listHost");
+  const chips=[]; if(f.q) chips.push(["q",`« ${f.q} »`]); if(f.regne) chips.push(["regne",f.regne==="Animal"?"Faune":"Flore"]); if(f.habitat) chips.push(["habitat",f.habitat]); if(f.iucn) chips.push(["iucn",`UICN ${f.iucn}`]); if(f.threat) chips.push(["threat","Menacées"]);
+  $("#chips").innerHTML=chips.map(([k,l])=>`<span class="chip">${esc(l)}<button type="button" data-k="${k}" aria-label="Retirer le filtre ${esc(l)}">${ico("x")}</button></span>`).join("")+(chips.length>1?`<button class="btn ghost s" type="button" data-k="all">Tout effacer</button>`:"");
+  $("#cnt").textContent=`${L.length} / ${S.species.length}`;
+  if(!L.length){ host.innerHTML=`<div class="panel empty"><h3>Aucune fiche ne correspond</h3><p>Modifiez la recherche ou retirez un filtre.</p></div>`; updSel(); return; }
+  if(f.view==="cards"){ host.innerHTML=`<div class="cards">${L.map(s=>`<button class="card" type="button" data-id="${esc(s._id)}"><span class="sig">${sig(s,320,240)}</span><span class="b"><span class="r">${kingTag(s)}${iucnTag(s)}</span><em class="sci">${esc(s.nom_scientifique)}</em><span class="count">${esc(s.nom_commun||"—")} · ${range(s.profondeur_min,s.profondeur_max,"m")}</span></span></button>`).join("")}</div>`; updSel(); return; }
+  const th=(k,l,cls="")=>`<th class="${cls}" ${f.sort===k?`aria-sort="${f.dir>0?"ascending":"descending"}"`:""}><button type="button" data-sort="${k}">${l}</button></th>`;
+  const dmax=Math.max(1,...S.species.map(s=>+s.profondeur_max||0)), sq=v=>Math.sqrt(Math.max(0,v)/dmax)*100;
+  host.innerHTML=`<div class="tablewrap"><table class="t"><thead><tr><th style="width:36px"><input type="checkbox" id="selAll" aria-label="Tout sélectionner"></th>${th("nom_scientifique","Espèce")}${th("regne","Règne")}${th("famille","Famille","hide-s")}${th("habitat","Habitat","hide-s")}${th("profondeur_max","Profondeur")}${th("statut_uicn","UICN")}${th("date_ajout","Ajout","hide-s")}</tr></thead><tbody>
+    ${L.map(s=>{ const sel=f.sel.has(s._id), a=has(s.profondeur_min)?+s.profondeur_min:has(s.profondeur_max)?+s.profondeur_max:null, b=has(s.profondeur_max)?+s.profondeur_max:a;
+      return `<tr data-id="${esc(s._id)}" aria-selected="${sel}" class="${S.open===s._id?"on":""}" data-regne="${esc(s.regne)}">
+      <td><input type="checkbox" ${sel?"checked":""} aria-label="Sélectionner ${esc(s.nom_scientifique)}"></td>
+      <td><span class="nm"><em class="sci">${esc(s.nom_scientifique)}</em><span>${esc(s.nom_commun||"—")}</span></span></td><td>${kingTag(s)}</td>
+      <td class="hide-s">${esc(s.famille||"—")}</td><td class="hide-s">${esc(s.habitat||"—")}</td>
+      <td><span class="depth" style="--k:${s.regne==="Animal"?"var(--fa)":"var(--fl)"}"><span class="tr">${a!=null?`<i style="left:${sq(a)}%;width:${Math.max(3,sq(b)-sq(a))}%"></i>`:""}</span><span class="mono" style="font-size:12px">${range(s.profondeur_min,s.profondeur_max,"m")}</span></span></td>
+      <td>${iucnTag(s)}</td><td class="num hide-s">${s.date_ajout?new Date(s.date_ajout).toLocaleDateString("fr-FR"):"—"}</td></tr>`; }).join("")}
+    </tbody></table></div>`;
+  const all=$("#selAll"); all.checked=L.every(s=>f.sel.has(s._id)); all.indeterminate=!all.checked&&L.some(s=>f.sel.has(s._id));
+  updSel();
+}
+function updSel(){ const n=S.list.sel.size; $("#selbar").hidden=!n; $("#selN").textContent=`${n} fiche${n>1?"s":""} sélectionnée${n>1?"s":""}`; }
+function initList(){
+  $("#q").addEventListener("input",e=>{ S.list.q=e.target.value; clearTimeout(initList.t); initList.t=setTimeout(renderList,120); });
+  $("#segR").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; S.list.regne=b.dataset.v; syncToolbar(); });
+  $("#segV").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; S.list.view=b.dataset.v; syncToolbar(); });
+  $("#fHab").addEventListener("change",e=>{ S.list.habitat=e.target.value; renderList(); });
+  $("#fIucn").addEventListener("change",e=>{ S.list.iucn=e.target.value; renderList(); });
+  $("#chips").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; const k=b.dataset.k;
+    if(k==="all") Object.assign(S.list,{q:"",regne:"",habitat:"",iucn:"",threat:false}); else if(k==="threat") S.list.threat=false; else S.list[k]=""; syncToolbar(); });
+  $("#listHost").addEventListener("click",e=>{
+    const sb=e.target.closest("[data-sort]"); if(sb){ const k=sb.dataset.sort; S.list.dir=S.list.sort===k?-S.list.dir:1; S.list.sort=k; renderList(); return; }
+    if(e.target.id==="selAll"){ const L=listed(); if(e.target.checked) L.forEach(s=>S.list.sel.add(s._id)); else L.forEach(s=>S.list.sel.delete(s._id)); renderList(); return; }
+    const tr=e.target.closest("tr[data-id],.card[data-id]"); if(!tr) return;
+    if(e.target.matches('input[type="checkbox"]')){ const id=tr.dataset.id; e.target.checked?S.list.sel.add(id):S.list.sel.delete(id); tr.setAttribute("aria-selected",e.target.checked); updSel(); return; }
+    go("#/especes/"+encodeURIComponent(tr.dataset.id)); });
+  $("#exportAll").onclick=()=>exportCSV(listed(),"banbiom-especes.csv");
+  $("#selExport").onclick=()=>exportCSV(S.species.filter(s=>S.list.sel.has(s._id)),"banbiom-selection.csv");
+  $("#selClear").onclick=()=>{ S.list.sel.clear(); renderList(); };
+}
+function exportCSV(L,name){
+  const q=v=>{ const t=String(v??""); return /[;"\n]/.test(t)?`"${t.replace(/"/g,'""')}"`:t; };
+  const csv="﻿"+FIELDS.join(";")+"\n"+L.map(s=>FIELDS.map(k=>q(s[k])).join(";")).join("\n");
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  toast(`${L.length} fiche${L.length>1?"s":""} exportée${L.length>1?"s":""} (${esc(name)}).`);
+}
+function fillSelects(){
+  const habs=[...new Set(S.species.map(s=>s.habitat).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
+  const cur=$("#fHab").value; $("#fHab").innerHTML=`<option value="">Tous habitats</option>`+habs.map(h=>`<option>${esc(h)}</option>`).join(""); $("#fHab").value=habs.includes(cur)?cur:"";
+  $("#fIucn").innerHTML=`<option value="">Tous statuts</option>`+IUCN_ORDER.map(k=>`<option value="${k}">${k} · ${IUCN[k]}</option>`).join(""); $("#fIucn").value=S.list.iucn;
+  $("#habList").innerHTML=habs.map(h=>`<option value="${esc(h)}">`).join("");
+  $("#trophList").innerHTML=[...new Set(S.species.map(s=>s.mode_trophique).filter(Boolean))].map(h=>`<option value="${esc(h)}">`).join("");
+}
+
+/* ================= CARTE : habitat × profondeur ================= */
+function drawMap(){
+  const wrap=$("#mapwrap"), svg=$("#mapSvg"), W=wrap.clientWidth, H=wrap.clientHeight; if(!W||!H) return;
+  const L=S.species.filter(s=>!S.mapRegne||s.regne===S.mapRegne), habs=[...new Set(S.species.map(s=>s.habitat||"Non renseigné"))].sort((a,b)=>a.localeCompare(b,"fr"));
+  const m={l:58,r:16,t:16,b:44}, iw=W-m.l-m.r, ih=H-m.t-m.b, top=Math.max(50,...S.species.map(s=>+s.profondeur_max||0)), lg=v=>Math.log10(1+Math.max(0,v)), y=v=>m.t+lg(v)/lg(top)*ih;
+  const cw=iw/Math.max(1,habs.length), r=B._rng(B._hash("carte-console"));
+  const pts=L.map(s=>{ const hi=habs.indexOf(s.habitat||"Non renseigné"), a=has(s.profondeur_min)?+s.profondeur_min:0, b=has(s.profondeur_max)?+s.profondeur_max:a, mid=(a+b)/2;
+    return {x:m.l+cw*(hi+.15+r()*.7), y:Math.min(m.t+ih-6,Math.max(m.t+6,y(Math.sqrt(Math.max(a,.5)*Math.max(b,.5)))+(r()-.5)*30)), w:0, s}; });
+  /* graines de fond pour que chaque colonne reste lisible même vide */
+  const fill=[]; habs.forEach((h,i)=>{ for(let k=0;k<3;k++) fill.push({x:m.l+cw*(i+.15+r()*.7),y:m.t+ih*(.1+r()*.8),w:0}); });
+  const all=pts.concat(fill.filter(f=>pts.every(p=>Math.hypot(p.x-f.x,p.y-f.y)>70)));
+  const frame=[[m.l,m.t],[m.l+iw,m.t],[m.l+iw,m.t+ih],[m.l,m.t+ih]];
+  const cs=B._cells(all.map(p=>({x:p.x-m.l,y:p.y-m.t,w:p.w})),iw,ih,()=>6,0);
+  let d="", lab="", grid="";
+  const ticks=[0,1,10,50,200,1000].filter(t=>t<=top*1.05);
+  ticks.forEach(t=>{ grid+=`<line x1="${m.l}" x2="${m.l+iw}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-dasharray="2 4"/><text class="ax" x="${m.l-8}" y="${y(t)+4}" text-anchor="end">${t} m</text>`; });
+  habs.forEach((h,i)=>{ grid+=`<text class="ax" x="${m.l+cw*(i+.5)}" y="${H-16}" text-anchor="middle">${esc(h)}</text>`; if(i) grid+=`<line x1="${m.l+cw*i}" x2="${m.l+cw*i}" y1="${m.t}" y2="${m.t+ih}" stroke="var(--line)"/>`; });
+  cs.forEach((poly,i)=>{ const p=all[i], sp=p.s, path=B._traceSVG(poly.map(v=>[v[0]+m.l,v[1]+m.t]),sp?(sp.regne==="Animal"?4:18):14); if(!path) return;
+    if(sp){ d+=`<path d="${path}" fill="${sp.regne==="Animal"?"var(--fa)":"var(--fl)"}" data-id="${esc(sp._id)}" style="cursor:pointer" tabindex="0" role="button" aria-label="${esc(sp.nom_scientifique)}"/>`;
+      /* étiquette seulement si la cellule peut la contenir */
+      const w=sp.nom_scientifique.split(" "), t=w[0][0]+". "+(w[1]||""), tw=t.length*7.4+12, ir=B._innerRect(poly,Math.max(1,tw/20));
+      if(ir&&ir.w>=tw&&ir.h>=18) lab+=`<text class="lab" x="${ir.x+ir.w/2+m.l}" y="${ir.y+ir.h/2+m.t+4}" text-anchor="middle">${esc(t)}</text>`; }
+    else d+=`<path d="${path}" fill="var(--surface-2)"/>`; });
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  svg.innerHTML=`${grid}<g>${d}</g><g>${lab}</g>`;
+}
+function initMap(){
+  const wrap=$("#mapwrap"), tip=$("#tip");
+  wrap.addEventListener("pointermove",e=>{ const p=e.target.closest("path[data-id]"); if(!p){ tip.style.opacity=0; return; }
+    const s=S.species.find(x=>x._id===p.dataset.id); if(!s) return; const b=wrap.getBoundingClientRect();
+    tip.innerHTML=`<em class="sci">${esc(s.nom_scientifique)}</em><span>${esc(s.habitat||"—")} · ${range(s.profondeur_min,s.profondeur_max,"m")} · UICN ${esc(s.statut_uicn||"NE")}</span>`;
+    let x=e.clientX-b.left+14, yy=e.clientY-b.top+14; if(x+240>b.width) x-=260; tip.style.left=x+"px"; tip.style.top=yy+"px"; tip.style.opacity=1; });
+  wrap.addEventListener("pointerleave",()=>tip.style.opacity=0);
+  wrap.addEventListener("click",e=>{ const p=e.target.closest("path[data-id]"); if(p) go("#/especes/"+encodeURIComponent(p.dataset.id)); });
+  wrap.addEventListener("keydown",e=>{ if(e.key==="Enter"){ const p=e.target.closest("path[data-id]"); if(p) go("#/especes/"+encodeURIComponent(p.dataset.id)); } });
+  $("#segM").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; S.mapRegne=b.dataset.v; $$("#segM button").forEach(x=>x.setAttribute("aria-pressed",x===b)); drawMap(); });
+  new ResizeObserver(()=>{ if(curView==="carte") drawMap(); }).observe(wrap);
+}
+
+/* ================= INSPECTEUR ================= */
+const insp=$("#insp"), scrim=$("#scrim");
+function openInsp(id){
+  const s=S.species.find(x=>x._id===id); if(!s){ if(S.ready) closeInsp(); return; }
+  if(S.open!==id){ S.editing=false; S.tab="fiche"; }
+  S.open=id; renderInsp(s);
+  if(!insp.classList.contains("on")){ insp.classList.add("on"); scrim.classList.add("on"); insp.setAttribute("aria-hidden","false"); setTimeout(()=>$(".x",insp)?.focus(),60); }
+  $$(".t tbody tr").forEach(tr=>tr.classList.toggle("on",tr.dataset.id===id));
+}
+function closeInsp(silent){
+  if(!S.open&&!insp.classList.contains("on")) return; S.open=null; S.editing=false;
+  insp.classList.remove("on"); scrim.classList.remove("on"); insp.setAttribute("aria-hidden","true"); $$(".t tbody tr.on").forEach(tr=>tr.classList.remove("on"));
+  if(!silent){ const v=curView||"especes"; go("#/"+v); }
+}
+function kvRows(s,keys){
+  return `<dl class="kv">${keys.map(k=>{ const v=s[k];
+    if(S.editing&&k!=="regne"){ const val=esc(v??"");
+      const ctl=k==="statut_uicn"?`<select class="select" name="${k}">${IUCN_ORDER.map(c=>`<option value="${c}" ${c===(v||"NE")?"selected":""}>${c} · ${IUCN[c]}</option>`).join("")}</select>`
+        :k==="description"||k==="reference"?`<textarea class="textarea" name="${k}" rows="3">${val}</textarea>`:`<input class="input" name="${k}" value="${val}">`;
+      return `<dt>${LABELS[k]}</dt><dd>${ctl}</dd>`; }
+    let out=has(v)?esc(v):"—";
+    if(k==="nom_scientifique"&&has(v)) out=`<em class="sci">${esc(v)}</em>`;
+    if(NUM.has(k)&&has(v)) out=fmt(v)+(k.startsWith("profondeur")?" m":k.startsWith("temperature")?" °C":" cm");
+    if(k==="salinite"&&has(v)) out=esc(v)+" PSU";
+    if(k==="statut_uicn") out=iucnTag(s,true);
+    return `<dt>${LABELS[k]}</dt><dd>${out}</dd>`; }).join("")}</dl>`;
+}
+function renderInsp(s){
+  const A=s.regne==="Animal", iss=issues(s), T=S.tab;
+  const body=T==="fiche"?`${s.description&&!S.editing?`<p class="prose">${esc(s.description)}</p>`:""}${kvRows(s,S.editing?["nom_commun","auteur","embranchement","classe","ordre","famille","description"]:["regne","embranchement","classe","ordre","famille","nom_scientifique"])}`
+    :T==="eco"?`<div class="eco"><div class="gauge">${gauge(s.profondeur_min,s.profondeur_max,A)}</div>${kvRows(s,["habitat","profondeur_min","profondeur_max","temperature_min","temperature_max","salinite","mode_trophique","taille_max_cm","repartition"])}</div>`
+    :`${iss.length?`<div style="display:flex;gap:6px;flex-wrap:wrap">${iss.map(i=>`<span class="flag">${esc(i)}</span>`).join("")}</div>`:""}${kvRows(s,["statut_uicn","protection","contributeur","reference"])}<span class="count">Ajoutée le ${s.date_ajout?new Date(s.date_ajout).toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"}):"—"}</span>`;
+  insp.dataset.regne=s.regne;
+  insp.innerHTML=`<div class="hd">${sig(s,460,180,true)}<button class="btn icon s x" type="button" aria-label="Fermer l'inspecteur">${ico("x")}</button><div class="tags">${kingTag(s)}${iucnTag(s,true)}</div></div>
+    <div class="ti"><h2>${esc(s.nom_scientifique)}</h2><p>${esc(s.auteur||"")}${s.nom_commun?` · ${esc(s.nom_commun)}`:""}</p></div>
+    <div class="tabs" role="tablist">${[["fiche","Fiche"],["eco","Écologie"],["src",`Statut et sources${iss.length?` (${iss.length})`:""}`]].map(([k,l])=>`<button type="button" role="tab" data-t="${k}" aria-selected="${T===k}">${l}</button>`).join("")}</div>
+    <form class="bd" id="inspForm">${body}</form>
+    <div class="ft">${S.editing?`<button class="btn primary" type="button" data-a="save">Enregistrer</button><button class="btn ghost" type="button" data-a="cancel">Annuler</button>`
+      :`<button class="btn secondary" type="button" data-a="edit" ${S.canWrite?"":"disabled"}>${ico("edit")}Modifier</button><button class="btn ghost" type="button" data-a="json">${ico("copy")}Copier en JSON</button>`}
+      <span style="flex:1"></span><button class="btn ghost icon" type="button" data-a="prev" aria-label="Fiche précédente">←</button><button class="btn ghost icon" type="button" data-a="next" aria-label="Fiche suivante">→</button></div>`;
+}
+insp.addEventListener("click",async e=>{
+  const s=S.species.find(x=>x._id===S.open); if(!s) return;
+  if(e.target.closest(".x")){ closeInsp(); return; }
+  const t=e.target.closest("[data-t]"); if(t){ S.tab=t.dataset.t; renderInsp(s); return; }
+  const a=e.target.closest("[data-a]")?.dataset.a; if(!a) return;
+  if(a==="edit"){ S.editing=true; renderInsp(s); $("#inspForm .input,#inspForm .select,#inspForm .textarea")?.focus(); }
+  if(a==="cancel"){ S.editing=false; renderInsp(s); }
+  if(a==="save"){ const patch=clean(Object.fromEntries(new FormData($("#inspForm")))); $$("#inspForm [name]").forEach(el=>{ if(el.value.trim()==="") patch[el.name]=null; });
+    const errs=[]; for(const k of NUM) if(has(patch[k])&&typeof patch[k]!=="number") errs.push(`${LABELS[k]} non numérique`);
+    if(errs.length){ toast("À corriger : "+errs.join(" · "),true); return; }
+    try{ await update(s,patch); S.editing=false; renderInsp(S.species.find(x=>x._id===s._id)||s); toast("Fiche mise à jour."); }catch(err){ toast("Modification refusée : droits d'écriture insuffisants.",true); } }
+  if(a==="json"){ const o={}; FIELDS.forEach(k=>{ if(has(s[k])) o[k]=s[k]; }); try{ await navigator.clipboard.writeText(JSON.stringify(o,null,2)); toast("Fiche copiée en JSON."); }catch{ toast("Copie impossible dans ce navigateur.",true); } }
+  if(a==="prev"||a==="next"){ const L=curView==="especes"?listed():S.species, i=L.findIndex(x=>x._id===s._id), n=L[(i+(a==="next"?1:-1)+L.length)%L.length]; if(n) go(`#/${curView==="especes"?"especes":"especes"}/${encodeURIComponent(n._id)}`); }
+});
+scrim.addEventListener("click",()=>closeInsp());
+
+/* ================= PALETTE DE COMMANDES ================= */
+const cmdk=$("#cmdk"), kq=$("#kq"), kl=$("#kl"); let kIdx=0, kItems=[];
+function openK(){ cmdk.hidden=false; kq.value=""; renderK(); setTimeout(()=>kq.focus(),10); anim($(".box",cmdk),[{transform:"translateY(-8px) scale(.98)",opacity:0},{transform:"none",opacity:1}],{duration:260,easing:OUT}); }
+function closeK(){ cmdk.hidden=true; }
+function renderK(){
+  const q=kq.value.trim().toLowerCase();
+  const acts=[["Aller au tableau de bord","#/tableau","home"],["Voir les espèces","#/especes","list"],["Ouvrir la carte","#/carte","map"],["Voir les analyses","#/analyses","chart"],["Études de cas","#/etudes","slides"],["Nouvelle fiche","#/nouvelle","plus"],["Importer un fichier","#/import","upload"],["Fiches à vérifier","#/verifier","check"],["Basculer le thème","theme","moon"]]
+    .filter(a=>!q||a[0].toLowerCase().includes(q));
+  const sp=S.species.filter(s=>!q||[s.nom_scientifique,s.nom_commun,s.famille].join(" ").toLowerCase().includes(q)).slice(0,q?8:5);
+  kItems=[...sp.map(s=>({h:"#/especes/"+encodeURIComponent(s._id),html:`${kingTag(s)}<em class="sci">${esc(s.nom_scientifique)}</em><span class="k">${esc(s.nom_commun||"")}</span>`,g:"Espèces"})),
+    ...acts.map(a=>({h:a[1],html:`${ico(a[2])}${esc(a[0])}`,g:"Actions"}))];
+  kIdx=Math.min(kIdx,Math.max(0,kItems.length-1)); let g="";
+  kl.innerHTML=kItems.map((it,i)=>{ const head=it.g!==g?`<li class="h" role="presentation">${it.g}</li>`:""; g=it.g; return head+`<li class="o" role="option" data-i="${i}" aria-selected="${i===kIdx}">${it.html}</li>`; }).join("")||`<li class="h">Aucun résultat</li>`;
+}
+function runK(i){ const it=kItems[i]; if(!it) return; closeK(); if(it.h==="theme") toggleTheme(); else go(it.h); }
+kq.addEventListener("input",()=>{ kIdx=0; renderK(); });
+kq.addEventListener("keydown",e=>{ if(e.key==="ArrowDown"){ kIdx=Math.min(kItems.length-1,kIdx+1); renderK(); e.preventDefault(); } else if(e.key==="ArrowUp"){ kIdx=Math.max(0,kIdx-1); renderK(); e.preventDefault(); } else if(e.key==="Enter"){ runK(kIdx); e.preventDefault(); } });
+kl.addEventListener("click",e=>{ const o=e.target.closest("[data-i]"); if(o) runK(+o.dataset.i); });
+cmdk.addEventListener("click",e=>{ if(e.target===cmdk) closeK(); });
+document.addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){ e.preventDefault(); cmdk.hidden?openK():closeK(); }
+  else if(e.key==="Escape"){ if(!cmdk.hidden) closeK(); else if(S.open) closeInsp(); else $("#side").classList.remove("on"); }
+  else if(e.key==="/"&&!/input|textarea|select/i.test(document.activeElement.tagName)&&cmdk.hidden){ e.preventDefault(); openK(); }
+});
+$("#openK").onclick=openK;
+
+/* ================= THÈME ================= */
+function isDark(){ const t=document.documentElement.dataset.theme; return t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches; }
+function paintTheme(){ const d=isDark(); $("#themeBtn").innerHTML=`${ico(d?"sun":"moon")}<span>${d?"Thème clair":"Thème sombre"}</span>`; }
+function toggleTheme(){ document.documentElement.dataset.theme=isDark()?"light":"dark"; try{ localStorage.setItem("banbiom-theme",document.documentElement.dataset.theme); }catch(e){} paintTheme(); if(curView==="carte") drawMap(); if(curView==="analyses") renderAnalyses(); }
+try{ const t=localStorage.getItem("banbiom-theme"); if(t) document.documentElement.dataset.theme=t; }catch(e){}
+$("#themeBtn").onclick=toggleTheme;
+$("#menuBtn").onclick=()=>$("#side").classList.toggle("on");
+
+/* ================= VALIDATION & ÉCRITURE ================= */
+const norm=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim().replace(/[\s\-\.\(\)\/]+/g,"_").replace(/_+$/,"");
+const mapKey=k=>{const n=norm(k);return FIELDS.includes(n)?n:(ALIASES[n]||null);};
+function clean(raw){ const o={};
+  for(const [k,v] of Object.entries(raw)){const key=mapKey(k); if(!key) continue; let val=typeof v==="string"?v.trim():v; if(val===""||val==null) continue;
+    if(NUM.has(key)){const n=Number(String(val).replace(",","."));val=isNaN(n)?val:n;} o[key]=val;}
+  if(o.regne){const r=norm(o.regne);o.regne=/^(animal|animalia|faune|fauna)/.test(r)?"Animal":/^(vegetal|plantae|plante|flore|flora|algue|algae)/.test(r)?"Végétal":o.regne;}
+  if(o.statut_uicn) o.statut_uicn=String(o.statut_uicn).toUpperCase().slice(0,2); return o; }
+function fieldErrors(o,{dup=true}={}){ const e={};
+  if(!o.nom_scientifique) e.nom_scientifique="Nom scientifique manquant"; else if(!/^[A-Z][a-zë-]+(\s[a-zë-]+){1,2}/.test(o.nom_scientifique)) e.nom_scientifique="Binôme latin attendu (Genre espèce)";
+  else if(dup&&S.species.some(s=>String(s.nom_scientifique).toLowerCase()===String(o.nom_scientifique).toLowerCase())) e.nom_scientifique="Déjà présente dans la base";
+  if(!["Animal","Végétal"].includes(o.regne)) e.regne="Règne : Animal ou Végétal";
+  if(!o.habitat) e.habitat="Habitat manquant";
+  for(const k of NUM) if(o[k]!==undefined&&typeof o[k]!=="number") e[k]="Valeur numérique attendue";
+  if(typeof o.profondeur_min==="number"&&typeof o.profondeur_max==="number"&&o.profondeur_min>o.profondeur_max) e.profondeur_max="Doit être supérieure au minimum";
+  if(typeof o.temperature_min==="number"&&typeof o.temperature_max==="number"&&o.temperature_min>o.temperature_max) e.temperature_max="Doit être supérieure au minimum";
+  if(o.statut_uicn&&!IUCN[o.statut_uicn]) e.statut_uicn="Statut UICN inconnu";
+  return e; }
+const validate=o=>Object.values(fieldErrors(o));
+async function save(o){ o.date_ajout=new Date().toISOString(); o.statut_uicn=o.statut_uicn||"NE";
+  if(S.col) await S.col.add(o); else { S.species.push({...o,_id:"local-"+Math.random().toString(36).slice(2)}); renderAll(); } }
+async function update(s,patch){
+  if(S.col&&S.col.doc&&!String(s._id).startsWith("local-")&&!String(s._id).startsWith("f-")){ const d=S.col.doc(s._id); if(d.update) await d.update(patch); else if(d.set) await d.set({...s,...patch,_id:undefined}); }
+  else { Object.entries(patch).forEach(([k,v])=>{ if(v===null) delete s[k]; else s[k]=v; }); sigCache.clear(); renderAll(); }
+}
+
+/* ================= NOUVELLE FICHE ================= */
+const entry=$("#entry");
+function formObj(){ return clean(Object.fromEntries(new FormData(entry))); }
+function paintPreview(){
+  const o=formObj(), A=o.regne==="Animal";
+  $("#pvSig").innerHTML=o.nom_scientifique&&o.regne?sigSVG({...o},320,240):"";
+  $("#pvKing").innerHTML=o.regne?kingTag(o):""; $("#pvIucn").innerHTML=iucnTag(o);
+  $("#pvName").textContent=o.nom_scientifique||"Genre espèce";
+  $("#pvMeta").textContent=[o.nom_commun,o.habitat,range(o.profondeur_min,o.profondeur_max,"m")].filter(x=>x&&x!=="—").join(" · ")||"—";
+  const e=fieldErrors(o); const req=[["nom_scientifique","Nom scientifique valide"],["regne","Règne"],["habitat","Habitat"],["contributeur","Contributeur"]];
+  $("#pvCheck").innerHTML=req.map(([k,l])=>`<li class="${(k==="contributeur"?o.contributeur:!e[k])?"ok":""}">${l}</li>`).join("")+`<li class="${has(o.profondeur_max)?"ok":""}">Profondeur (conseillé)</li><li class="${o.reference?"ok":""}">Référence (conseillé)</li>`;
+}
+function showErrors(e){ $$(".field[data-f]",entry).forEach(f=>{ const k=f.dataset.f, m=e[k]; f.classList.toggle("err",!!m); let s=$(".msg",f); if(m){ if(!s){ s=document.createElement("span"); s.className="msg"; f.append(s); } s.textContent=m; } else if(s) s.remove(); }); }
+function initForm(){
+  $("#f_statut_uicn").innerHTML=IUCN_ORDER.map(k=>`<option value="${k}" ${k==="NE"?"selected":""}>${k} · ${IUCN[k]}</option>`).join("");
+  entry.addEventListener("input",()=>{ paintPreview(); if(entry.dataset.tried) showErrors(fieldErrors(formObj())); });
+  entry.addEventListener("reset",()=>setTimeout(()=>{ delete entry.dataset.tried; showErrors({}); paintPreview(); $("#formMsg").textContent=""; }));
+  entry.addEventListener("submit",async e=>{ e.preventDefault(); entry.dataset.tried=1;
+    const o=formObj(), errs=fieldErrors(o); if(!o.contributeur) errs.contributeur="Contributeur manquant"; showErrors(errs);
+    if(Object.keys(errs).length){ $("#formMsg").textContent=`${Object.keys(errs).length} champ${Object.keys(errs).length>1?"s":""} à corriger`; $(".field.err .input,.field.err .select",entry)?.focus();
+      anim($("#saveBtn"),[{transform:"none"},{transform:"translateX(-7px)"},{transform:"translateX(6px)"},{transform:"translateX(-3px)"},{transform:"none"}],{duration:360}); return; }
+    const b=$("#saveBtn"); b.disabled=true; $("#formMsg").textContent="Enregistrement…";
+    try{ await save(o); const c=o.contributeur; entry.reset(); setTimeout(()=>{ $("#f_contributeur").value=c; paintPreview(); });
+      $("#formMsg").textContent=""; toast(`« ${esc(o.nom_scientifique)} » ajoutée à la base.`); }
+    catch(err){ $("#formMsg").textContent=""; toast(err?.code==="quota_exceeded"?"Capacité de la base atteinte.":"Enregistrement refusé : droits d'écriture insuffisants.",true); }
+    finally{ b.disabled=!S.canWrite; } });
+  paintPreview();
+}
+
+/* ================= IMPORT ================= */
+function parseDelimited(text){
+  const first=text.split(/\r?\n/)[0]||"", cnt=c=>first.split(c).length;
+  const sep=cnt("\t")>cnt(";")&&cnt("\t")>cnt(",")?"\t":cnt(";")>=cnt(",")?";":",";
+  const rows=[]; let row=[],f="",q=false;
+  for(let i=0;i<text.length;i++){const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){f+='"';i++;} else q=false; } else f+=c; }
+    else if(c==='"') q=true; else if(c===sep){row.push(f);f="";}
+    else if(c==="\n"||c==="\r"){ if(c==="\r"&&text[i+1]==="\n") i++; row.push(f); f=""; if(row.some(x=>x.trim()!=="")) rows.push(row); row=[]; }
+    else f+=c;}
+  row.push(f); if(row.some(x=>x.trim()!=="")) rows.push(row);
+  const head=rows.shift()||[]; return rows.map(r=>Object.fromEntries(head.map((h,i)=>[h.replace(/^﻿/,""),r[i]??""])));
+}
+let pending=[];
+function setStep(n){ $$("#steps li").forEach((li,i)=>{ li.toggleAttribute("aria-current",i===n); if(i===n) li.setAttribute("aria-current","step"); li.classList.toggle("done",i<n); }); }
+function handleFile(file){ const rd=new FileReader();
+  rd.onload=()=>{ let raw=[]; const json=/\.json$/i.test(file.name);
+    try{ if(json){const j=JSON.parse(rd.result);raw=Array.isArray(j)?j:(j.species||j.especes||j.data||[]);} else raw=parseDelimited(rd.result); }
+    catch(err){ $("#impHost").innerHTML=`<div class="notice"><b>Lecture impossible.</b> Le fichier n'est pas un ${json?"JSON":"CSV"} valide (${esc(err.message)}).</div>`; return; }
+    const seen=new Set(); pending=raw.map(r=>{const o=clean(r),e=validate(o),k=String(o.nom_scientifique||"").toLowerCase(); if(k&&seen.has(k)) e.push("doublon dans le fichier"); seen.add(k); return {o,e};});
+    setStep(1); renderPreview(file.name); };
+  rd.readAsText(file); }
+function renderPreview(name){
+  const ok=pending.filter(p=>!p.e.length).length, ko=pending.length-ok, host=$("#impHost");
+  if(!pending.length){ host.innerHTML=`<div class="notice"><b>Aucune ligne lue dans « ${esc(name)} ».</b> Vérifiez que la première ligne contient les en-têtes.</div>`; return; }
+  host.innerHTML=`<section class="panel"><header><h2>${esc(name)}</h2><span class="count">${pending.length} lignes · <span style="color:var(--iucn-lc)">${ok} valides</span> · <span style="color:var(--iucn-cr)">${ko} à corriger</span></span></header>
+    <div class="tablewrap" style="max-height:420px"><table class="t"><thead><tr><th>#</th><th>Contrôle</th><th>Espèce</th><th>Règne</th><th>Habitat</th><th>Profondeur</th><th>UICN</th></tr></thead><tbody>
+    ${pending.slice(0,300).map((p,i)=>`<tr style="cursor:default"><td class="num">${i+1}</td>${p.e.length?`<td class="st-err">${esc(p.e.join(" · "))}</td>`:`<td class="st-ok">Valide</td>`}<td><em class="sci">${esc(p.o.nom_scientifique||"—")}</em></td><td>${esc(p.o.regne||"—")}</td><td>${esc(p.o.habitat||"—")}</td><td class="num">${range(p.o.profondeur_min,p.o.profondeur_max,"m")}</td><td class="num">${esc(p.o.statut_uicn||"NE")}</td></tr>`).join("")}
+    </tbody></table></div>
+    <div class="formbar"><button class="btn primary" type="button" id="doImport" ${ok&&S.canWrite?"":"disabled"}>Importer ${ok} fiche${ok>1?"s":""} valide${ok>1?"s":""}</button><button class="btn ghost" type="button" id="impCancel">Annuler</button><span class="count" id="impMsg" role="status"></span></div>
+    <progress id="impProg" max="${ok}" value="0" hidden></progress></section>`;
+  $("#doImport").onclick=runImport; $("#impCancel").onclick=()=>{ pending=[]; host.innerHTML=""; setStep(0); }; }
+async function runImport(){
+  const rows=pending.filter(p=>!p.e.length).map(p=>p.o), b=$("#doImport"), pr=$("#impProg"), m=$("#impMsg");
+  b.disabled=true; pr.hidden=false; setStep(2); let done=0,fail=0;
+  for(const o of rows){ try{await save({...o});done++;}catch(err){fail++; if(err?.code==="quota_exceeded"){ m.textContent="Capacité de la base atteinte : import interrompu.";break;}} pr.value=done+fail; m.textContent=`${done} / ${rows.length} importées…`; }
+  m.textContent=fail?`${done} fiches importées, ${fail} refusées.`:`${done} fiches importées.`; toast(m.textContent,!!fail); pending=[]; $$("#steps li").forEach(li=>li.classList.add("done")); }
+function initImport(){
+  $("#tplPre").textContent=FIELDS.join(";");
+  $("#copyTpl").onclick=async()=>{ try{ await navigator.clipboard.writeText(FIELDS.join(";")); toast("En-tête copié."); }catch{ toast("Copie impossible : sélectionnez le texte et copiez-le.",true); } };
+  const drop=$("#drop");
+  ["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+  ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+  drop.addEventListener("drop",e=>{const f=e.dataTransfer.files[0]; if(f) handleFile(f);});
+  $("#fileIn").addEventListener("change",e=>{const f=e.target.files[0]; if(f) handleFile(f); e.target.value="";});
+}
+
+/* ================= À VÉRIFIER ================= */
+function renderVer(){
+  const L=S.species.map(s=>({s,i:issues(s)})).filter(x=>x.i.length).sort((a,b)=>b.i.length-a.i.length);
+  $("#verHost").innerHTML=L.length?`<div class="tablewrap"><table class="t"><thead><tr><th>Espèce</th><th>Points à reprendre</th><th class="hide-s">Contributeur</th><th></th></tr></thead><tbody>
+    ${L.map(({s,i})=>`<tr data-id="${esc(s._id)}"><td><span class="nm"><em class="sci">${esc(s.nom_scientifique)}</em><span>${esc(s.nom_commun||"—")}</span></span></td><td style="white-space:normal"><span style="display:flex;gap:6px;flex-wrap:wrap">${i.map(x=>`<span class="flag">${esc(x)}</span>`).join("")}</span></td><td class="hide-s">${esc(s.contributeur||"—")}</td><td style="text-align:right"><span class="btn ghost s">Ouvrir ${ico("arrow")}</span></td></tr>`).join("")}
+    </tbody></table></div>`:`<div class="panel empty"><h3>Rien à reprendre</h3><p>Toutes les fiches sont complètes et sourcées.</p></div>`;
+}
+$("#verHost").addEventListener("click",e=>{ const tr=e.target.closest("tr[data-id]"); if(tr){ S.tab="src"; go("#/especes/"+encodeURIComponent(tr.dataset.id)); } });
+
+
+/* ================= ANALYSES ================= */
+let aRegne="";
+const lg10=v=>Math.log10(1+Math.max(0,+v||0));
+function chartTip(host,html,e){ let t=$(".tip",host); if(!t){ t=document.createElement("div"); t.className="tip"; host.append(t); }
+  if(!html){ t.style.opacity=0; return; } const b=host.getBoundingClientRect(); t.innerHTML=html; let x=e.clientX-b.left+14; if(x+240>b.width) x-=264; t.style.left=x+"px"; t.style.top=(e.clientY-b.top+14)+"px"; t.style.opacity=1; }
+const tipHTML=s=>`<em class="sci">${esc(s.nom_scientifique)}</em><span>${esc(s.habitat||"—")} · ${range(s.profondeur_min,s.profondeur_max,"m")}${has(s.taille_max_cm)?` · ${fmt(s.taille_max_cm)} cm`:""} · UICN ${esc(s.statut_uicn||"NE")}</span>`;
+const kcol=s=>s.regne==="Animal"?"var(--fa)":"var(--fl)";
+function renderAnalyses(){
+  const L=S.species.filter(s=>!aRegne||s.regne===aRegne);
+  /* 1. taille × profondeur (log-log) */
+  const host=$("#chScatter"), W=Math.max(320,host.clientWidth), H=320, m={l:52,r:12,t:26,b:38}, P=L.filter(s=>has(s.taille_max_cm)&&has(s.profondeur_max));
+  const dmax=Math.max(10,...P.map(s=>+s.profondeur_max)), tmax=Math.max(10,...P.map(s=>+s.taille_max_cm));
+  const X=v=>m.l+lg10(v)/lg10(dmax)*(W-m.l-m.r), Y=v=>H-m.b-lg10(v)/lg10(tmax)*(H-m.t-m.b);
+  const xt=[0,1,10,100,1000].filter(v=>v<=dmax*1.1), yt=[1,10,100,1000].filter(v=>v<=tmax*1.1);
+  /* étiquettes directes sélectives : les plus grandes espèces, sans chevauchement */
+  const big=new Set(), placed=[]; P.slice().sort((a,b)=>b.taille_max_cm-a.taille_max_cm).forEach(s=>{ if(big.size>=4) return; const x=X(s.profondeur_max), y=Y(s.taille_max_cm), w=(s.nom_commun||s.nom_scientifique).length*6.4;
+    if(x+9+w>W-m.r) return; if(placed.every(q=>Math.abs(q.y-y)>15||x+9+w<q.x||q.x+q.w<x+9)){ big.add(s._id); placed.push({x:x+9,y,w}); } });
+  host.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Taille maximale selon la profondeur maximale">
+    ${xt.map(v=>`<line class="gl" x1="${X(v)}" x2="${X(v)}" y1="${m.t}" y2="${H-m.b}" stroke-dasharray="2 4"/><text class="ax" x="${X(v)}" y="${H-m.b+16}" text-anchor="middle">${v}</text>`).join("")}
+    ${yt.map(v=>`<line class="gl" x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke-dasharray="2 4"/><text class="ax" x="${m.l-8}" y="${Y(v)+4}" text-anchor="end">${v}</text>`).join("")}
+    <text class="ax" x="${W-m.r}" y="${H-4}" text-anchor="end">profondeur max. (m)</text><text class="ax" x="${m.l-8}" y="${m.t+4}" text-anchor="end" transform="translate(0,-2)">cm</text>
+    ${P.map(s=>`<g class="hit" data-id="${esc(s._id)}"><circle cx="${X(s.profondeur_max)}" cy="${Y(s.taille_max_cm)}" r="14" fill="transparent"/><circle class="mk" cx="${X(s.profondeur_max)}" cy="${Y(s.taille_max_cm)}" r="5" fill="${kcol(s)}" stroke="var(--surface)" stroke-width="2"/>${big.has(s._id)?`<text class="nm" x="${X(s.profondeur_max)+9}" y="${Y(s.taille_max_cm)+4}">${esc(s.nom_commun||s.nom_scientifique)}</text>`:""}</g>`).join("")}</svg>`;
+  $("#chScatterN").textContent=`${P.length} espèces avec taille et profondeur · ${L.length-P.length} sans taille renseignée, non tracées.`;
+  /* 2. matrice UICN × habitat (séquentiel : une teinte, du clair au foncé) */
+  const mh=$("#chMatrix"), habs=[...new Set(L.map(s=>s.habitat||"Non renseigné"))].sort((a,b)=>a.localeCompare(b,"fr")), rows=IUCN_ORDER;
+  const cnt=(k,h)=>L.filter(s=>(s.statut_uicn||"NE")===k&&(s.habitat||"Non renseigné")===h).length, cmax=Math.max(1,...rows.flatMap(k=>habs.map(h=>cnt(k,h))));
+  mh.innerHTML=`<div style="overflow:auto"><table class="mx"><thead><tr><th></th>${habs.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>
+    ${rows.map(k=>`<tr><th><span class="iucn" data-s="${k}">${k}</span></th>${habs.map(h=>{ const n=cnt(k,h), pc=n?Math.round(14+86*n/cmax):0;
+      return `<td title="${esc(IUCN[k])} · ${esc(h)} : ${n}" style="background:${n?`color-mix(in srgb,var(--cobalt) ${pc}%,var(--surface-2))`:"var(--surface-2)"};color:${pc>55?"#fff":"var(--ink)"}">${n||""}</td>`; }).join("")}</tr>`).join("")}</tbody></table></div>`;
+  /* 3. gamme de profondeur par espèce (haltères, échelle log) */
+  const dh=$("#chDepth"), D=L.filter(s=>has(s.profondeur_max)).sort((a,b)=>b.profondeur_max-a.profondeur_max), DW=Math.max(360,dh.clientWidth), rh=20, dm={l:190,r:20,t:24,b:10}, DH=dm.t+D.length*rh+dm.b;
+  const dmx=Math.max(10,...D.map(s=>+s.profondeur_max)), DX=v=>dm.l+lg10(v)/lg10(dmx)*(DW-dm.l-dm.r), dt=[0,1,10,100,1000].filter(v=>v<=dmx*1.1);
+  dh.innerHTML=`<svg viewBox="0 0 ${DW} ${DH}" role="img" aria-label="Gamme de profondeur de chaque espèce">
+    ${dt.map(v=>`<line class="gl" x1="${DX(v)}" x2="${DX(v)}" y1="${dm.t-6}" y2="${DH-dm.b}" stroke-dasharray="2 4"/><text class="ax" x="${DX(v)}" y="${dm.t-10}" text-anchor="middle">${v} m</text>`).join("")}
+    ${D.map((s,i)=>{ const y=dm.t+i*rh+rh/2, a=has(s.profondeur_min)?+s.profondeur_min:+s.profondeur_max, b=+s.profondeur_max;
+      return `<g class="hit" data-id="${esc(s._id)}"><rect x="0" y="${y-rh/2}" width="${DW}" height="${rh}" fill="transparent"/><text class="nm" x="${dm.l-12}" y="${y+4}" text-anchor="end">${esc(s.nom_scientifique)}</text>
+      <line x1="${DX(a)}" x2="${DX(b)}" y1="${y}" y2="${y}" stroke="${kcol(s)}" stroke-width="2"/><circle class="mk" cx="${DX(a)}" cy="${y}" r="4" fill="var(--surface)" stroke="${kcol(s)}" stroke-width="2"/><circle class="mk" cx="${DX(b)}" cy="${y}" r="4" fill="${kcol(s)}"/></g>`; }).join("")}</svg>`;
+}
+function initAnalyses(){
+  $("#segA").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; aRegne=b.dataset.v; $$("#segA button").forEach(x=>x.setAttribute("aria-pressed",x===b)); renderAnalyses(); });
+  ["#chScatter","#chDepth"].forEach(sel=>{ const host=$(sel);
+    host.addEventListener("pointermove",e=>{ const g=e.target.closest(".hit"); const s=g&&S.species.find(x=>x._id===g.dataset.id); chartTip(host,s?tipHTML(s):"",e); });
+    host.addEventListener("pointerleave",()=>chartTip(host,""));
+    host.addEventListener("click",e=>{ const g=e.target.closest(".hit"); if(g) go("#/especes/"+encodeURIComponent(g.dataset.id)); }); });
+  new ResizeObserver(()=>{ if(curView==="analyses") renderAnalyses(); }).observe($("#chDepth"));
+}
+
+/* ================= ÉTUDES DE CAS : carte de densité méditerranéenne ================= */
+/* contour simplifié de la Méditerranée (lon, lat) et principales îles ; précision de maquette */
+const MED=[[-5.6,36.0],[-4.4,36.7],[-2.4,36.8],[-1.0,37.6],[-0.5,38.3],[-0.3,39.5],[0.0,40.0],[0.9,40.7],[2.2,41.4],[3.3,42.3],[3.1,42.8],[3.9,43.5],[5.4,43.3],[6.0,43.1],[7.3,43.7],[8.9,44.4],[9.8,44.1],[10.3,43.5],[10.5,42.9],[11.8,42.1],[12.3,41.7],[13.5,41.2],[14.2,40.8],[14.8,40.6],[15.6,40.0],[16.0,39.0],[15.6,38.1],[16.5,38.4],[17.1,39.0],[17.2,40.4],[18.0,40.0],[18.4,39.8],[18.5,40.1],[17.9,40.6],[16.9,41.1],[16.2,41.9],[14.2,42.5],[13.5,43.6],[12.6,44.1],[12.3,45.4],[13.7,45.6],[13.6,45.0],[14.4,45.3],[15.2,44.1],[16.4,43.5],[18.1,42.6],[19.1,42.1],[19.4,41.3],[19.4,40.4],[19.9,39.6],[20.7,38.9],[21.4,38.3],[21.6,37.6],[22.1,36.9],[22.5,36.4],[23.2,36.4],[22.9,37.5],[23.7,37.9],[24.0,38.5],[22.9,39.3],[22.9,40.6],[23.9,40.2],[24.4,40.9],[25.9,40.8],[26.4,40.2],[26.9,38.4],[27.4,37.0],[28.2,36.8],[29.1,36.6],[30.7,36.9],[32.0,36.5],[34.6,36.8],[36.2,36.6],[35.8,35.5],[35.8,34.4],[35.5,33.9],[35.0,32.8],[34.8,32.1],[34.4,31.5],[32.3,31.3],[29.9,31.2],[27.2,31.4],[24.0,32.1],[22.6,32.8],[20.1,32.1],[19.0,30.5],[17.0,31.2],[15.1,32.4],[13.2,32.9],[12.1,32.9],[10.9,33.8],[10.1,33.9],[10.8,34.7],[10.8,35.8],[10.6,36.4],[11.1,37.1],[10.2,36.9],[9.9,37.3],[8.8,36.95],[7.8,36.9],[6.9,36.9],[5.8,36.8],[5.1,36.75],[3.06,36.78],[2.4,36.6],[1.3,36.5],[0.1,35.95],[-0.6,35.7],[-1.9,35.1],[-2.9,35.2],[-3.9,35.25],[-5.3,35.6],[-5.3,35.9]];
+const ISLES=[[[8.4,39.0],[8.6,38.9],[9.1,39.2],[9.6,39.2],[9.8,40.0],[9.6,40.9],[9.2,41.25],[8.6,40.9],[8.2,40.6],[8.5,40.0],[8.4,39.6]],[[8.6,41.9],[9.3,41.4],[9.6,42.2],[9.5,43.0],[9.3,42.7],[8.6,42.6]],
+  [[12.4,37.8],[13.4,38.2],[15.1,38.3],[15.6,38.2],[15.1,37.3],[15.1,36.7],[14.3,36.8],[12.6,37.6]],[[23.5,35.3],[24.3,35.6],[26.3,35.3],[26.2,35.0],[24.7,34.9],[23.6,35.2]],
+  [[32.3,35.0],[33.0,35.4],[34.6,35.7],[34.0,35.0],[33.0,34.6],[32.4,34.7]],[[2.35,39.6],[3.0,39.95],[3.5,39.7],[3.2,39.3],[2.7,39.5]]];
+const BASINS={alboran:[-3,36],algerie:[4,37.3],baleares:[3,39.6],lion:[4.5,42.5],ligure:[8.6,43.6],tyrrhenienne:[12,40],sicile:[12.5,36],adriatique:[15.5,43],ionienne:[19,37],syrte:[18,33],egee:[25,38.5],levantin:[31,33.8]};
+const EAST=["ionienne","egee","levantin","syrte","adriatique"], WEST=["alboran","algerie","baleares","lion","ligure","tyrrhenienne","sicile"];
+/* bassins occupés, d'après le texte de répartition */
+function basinsOf(s){ const r=(s.repartition||"").toLowerCase();
+  if(/orientale/.test(r)) return EAST;
+  if(/sud-occidentale/.test(r)) return ["alboran","algerie","baleares","sicile"];
+  if(/occidentale|maghreb/.test(r)) return WEST;
+  if(/suez/.test(r)) return ["levantin","egee","ionienne","sicile","syrte"];
+  return Object.keys(BASINS); }
+const PELAGIC=h=>/pélagique/i.test(h||"");
+const CASES=[
+  {k:"Vue d'ensemble",t:"Toute la Méditerranée",f:()=>true},
+  {k:"Étude de cas · Herbiers",t:"Les herbiers, nurseries du littoral",f:s=>s.habitat==="Herbier"||/zostera|posidonia|cymodocea|halophila/i.test(s.nom_scientifique)},
+  {k:"Étude de cas · Menaces",t:"Les espèces menacées",f:s=>["CR","EN","VU"].includes(s.statut_uicn)},
+  {k:"Étude de cas · Introductions",t:"Les espèces introduites",f:s=>/invasive/i.test(s.protection||"")||/introduite/i.test(s.repartition||"")},
+  {k:"Étude de cas · Fonds rocheux",t:"Roche et coralligène",f:s=>/roche|coralligène|médiolittoral/i.test(s.habitat||"")},
+  {k:"Étude de cas · Grand large",t:"Les grands pélagiques",f:s=>PELAGIC(s.habitat)}
+];
+let csI=0, csFocus=null, CSG=null, csTimer=0;
+function csGeom(W,H){
+  /* projection équirectangulaire ajustée à la planche (sous le titre) */
+  const lo0=-6.2, lo1=36.8, la0=30.0, la1=46.2, k=Math.cos(38*Math.PI/180), top=H*.26, bot=H*.07, side=W>900?W*.17:W*.03;
+  const sc=Math.min((W-2*side)/((lo1-lo0)*k),(H-top-bot)/(la1-la0)), ox=(W-(lo1-lo0)*k*sc)/2, oy=top+((H-top-bot)-(la1-la0)*sc)/2;
+  const P=(lo,la)=>[ox+(lo-lo0)*k*sc, oy+(la1-la)*sc], inv=(x,y)=>[(x-ox)/(k*sc)+lo0, la1-(y-oy)/sc];
+  /* masque de la mer en basse résolution, puis distance à la côte par parcours en largeur */
+  const g=4, gw=Math.ceil(W/g), gh=Math.ceil(H/g), cv=document.createElement("canvas"); cv.width=gw; cv.height=gh; const c=cv.getContext("2d");
+  const path=pts=>{ c.beginPath(); pts.forEach(([lo,la],i)=>{ const [x,y]=P(lo,la); i?c.lineTo(x/g,y/g):c.moveTo(x/g,y/g); }); c.closePath(); };
+  c.fillStyle="#fff"; path(MED); c.fill(); c.fillStyle="#000"; ISLES.forEach(i=>{ path(i); c.fill(); });
+  const im=c.getImageData(0,0,gw,gh).data, sea=new Uint8Array(gw*gh); for(let i=0;i<gw*gh;i++) sea[i]=im[i*4]>128?1:0;
+  const dist=new Float32Array(gw*gh).fill(1e9), q=[]; for(let i=0;i<gw*gh;i++) if(!sea[i]){ dist[i]=0; q.push(i); }
+  for(let h=0;h<q.length;h++){ const i=q[h], x=i%gw, y=(i-x)/gw; [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{ const X=x+dx, Y=y+dy; if(X<0||Y<0||X>=gw||Y>=gh) return; const j=Y*gw+X; if(dist[j]>dist[i]+1){ dist[j]=dist[i]+1; q.push(j); } }); }
+  /* points de la mer, légèrement décalés */
+  const r=B._rng(B._hash("med-dots")), dots=[], step=Math.max(5,Math.min(W,H)/150);
+  for(let y=0;y<H;y+=step) for(let x=0;x<W;x+=step){ const X=x+(r()-.5)*step*.9, Y=y+(r()-.5)*step*.9, gi=Math.floor(Y/g)*gw+Math.floor(X/g); if(gi<0||gi>=gw*gh||!sea[gi]) continue;
+    const [lo,la]=inv(X,Y); let bb=null,bd=1e9; for(const [n,[blo,bla]] of Object.entries(BASINS)){ const d=(lo-blo)**2+(la-bla)**2; if(d<bd){bd=d;bb=n;} }
+    dots.push({x:X,y:Y,coast:dist[gi]*g,basin:bb,tw:r()}); }
+  return {W,H,dots,P};
+}
+function csSpecies(){ return S.species.filter(CASES[csI].f); }
+function drawCase(full){
+  const el=$("#case"); if(!el||!el.clientWidth) return; const W=el.clientWidth, H=el.clientHeight, dpr=Math.min(2,devicePixelRatio||1);
+  if(!CSG||CSG.W!==W||CSG.H!==H) CSG=csGeom(W,H);
+  const L=csSpecies(), C=CASES[csI];
+  if(full){
+    $("#csKicker").textContent=C.k; $("#csName").textContent=C.t; $("#csCount").textContent=`${String(csI+1).padStart(2,"0")} / ${String(CASES.length).padStart(2,"0")}`;
+    const feat=L.slice().sort((a,b)=>IUCN_ORDER.indexOf(a.statut_uicn||"NE")-IUCN_ORDER.indexOf(b.statut_uicn||"NE")).slice(0,6);
+    $("#csList").innerHTML=feat.map(s=>`<li data-id="${esc(s._id)}" class="${csFocus===s._id?"on":""}"><b>${esc(s.nom_scientifique)}<span class="iucn" data-s="${esc(s.statut_uicn||"NE")}">${esc(s.statut_uicn||"NE")}</span></b><span>(${esc(s.nom_commun||s.famille||"")})</span></li>`).join("");
+    const thr=L.filter(s=>["CR","EN","VU"].includes(s.statut_uicn)).length, dm=L.map(s=>+s.profondeur_max).filter(v=>!isNaN(v)).sort((a,b)=>a-b), med=dm.length?dm[Math.floor(dm.length/2)]:null;
+    $("#csFigs").innerHTML=`<div><b>${L.length}</b><span>espèces</span></div><div><b>${L.filter(s=>s.regne==="Animal").length} / ${L.filter(s=>s.regne==="Végétal").length}</b><span>faune / flore</span></div><div><b>${thr}</b><span>menacées (CR, EN, VU)</span></div><div><b>${med!=null?fmt(med)+" m":"—"}</b><span>profondeur max. médiane</span></div>`;
+    /* points */
+    const dc=$("#csDots"); dc.width=W*dpr; dc.height=H*dpr; const d=dc.getContext("2d"); d.scale(dpr,dpr); d.clearRect(0,0,W,H);
+    CSG.dots.forEach(p=>{ d.fillStyle=`rgba(232,238,245,${.12+p.tw*.32})`; d.fillRect(p.x,p.y,1.3,1.3); });
+  }
+  /* densité : chaque espèce dépose des points dans ses bassins, près des côtes ou au large selon son habitat */
+  const hc=$("#csHeat"); hc.width=W; hc.height=H; const h=hc.getContext("2d"); h.globalCompositeOperation="lighter";
+  const Rr=Math.max(26,Math.min(W,H)/17), set=csFocus?L.filter(s=>s._id===csFocus):L;
+  set.forEach(s=>{ const bs=new Set(basinsOf(s)), pel=PELAGIC(s.habitat), r=B._rng(B._hash("heat-"+s.nom_scientifique));
+    const cand=CSG.dots.filter(p=>bs.has(p.basin)&&(pel?p.coast>Rr*1.2:p.coast<Rr*.9)); if(!cand.length) return;
+    /* une seule teinte, bleu électrique : la densité se lit à l'intensité */
+    const col=[28,58,255], n=csFocus?110:34, a=csFocus?.26:Math.min(.24,Math.max(.06,.42/Math.sqrt(set.length)));
+    for(let i=0;i<n;i++){ const p=cand[Math.floor(r()*cand.length)], gr=h.createRadialGradient(p.x,p.y,0,p.x,p.y,Rr);
+      gr.addColorStop(0,`rgba(${col},${a})`); gr.addColorStop(1,`rgba(${col},0)`); h.fillStyle=gr; h.fillRect(p.x-Rr,p.y-Rr,Rr*2,Rr*2); } });
+  if(full) anim(hc,[{opacity:0},{opacity:1}],{duration:900,easing:OUT});
+}
+function csGo(d){ csI=(csI+d+CASES.length)%CASES.length; csFocus=null; drawCase(true);
+  anim($(".cs-title"),[{opacity:0,transform:"translateY(14px)"},{opacity:1,transform:"none"}],{duration:600,easing:OUT}); }
+function initCases(){
+  $("#csPrev").onclick=()=>csGo(-1); $("#csNext").onclick=()=>csGo(1);
+  $("#case").addEventListener("keydown",e=>{ if(e.key==="ArrowRight"){ csGo(1); e.preventDefault(); } if(e.key==="ArrowLeft"){ csGo(-1); e.preventDefault(); } });
+  $("#csList").addEventListener("pointerover",e=>{ const li=e.target.closest("li"); if(!li||csFocus===li.dataset.id) return; csFocus=li.dataset.id; $$("#csList li").forEach(x=>x.classList.toggle("on",x===li)); drawCase(false); });
+  $("#csList").addEventListener("pointerleave",()=>{ csFocus=null; $$("#csList li").forEach(x=>x.classList.remove("on")); drawCase(false); });
+  $("#csList").addEventListener("click",e=>{ const li=e.target.closest("li"); if(li&&!document.fullscreenElement) go("#/especes/"+encodeURIComponent(li.dataset.id)); });
+  $("#csPresent").onclick=()=>{ const el=$("#case"); if(el.requestFullscreen) el.requestFullscreen().then(()=>{ el.focus(); setTimeout(()=>drawCase(true),80); }).catch(()=>toast("Plein écran indisponible dans ce navigateur.",true)); };
+  document.addEventListener("fullscreenchange",()=>setTimeout(()=>drawCase(true),80));
+  new ResizeObserver(()=>{ if(curView==="etudes"){ clearTimeout(csTimer); csTimer=setTimeout(()=>drawCase(true),120); } }).observe($("#case"));
+}
+
+/* ================= RENDU GLOBAL ================= */
+function renderAll(){
+  $("#nEsp").textContent=S.species.length; const nv=S.species.filter(s=>issues(s).length).length; $("#nVer").textContent=nv; $("#nVer").hidden=!nv;
+  fillSelects(); renderDash(); renderList(); renderVer(); if(curView==="carte") drawMap(); if(curView==="analyses") renderAnalyses(); if(curView==="etudes") drawCase(true);
+  if(S.open){ const s=S.species.find(x=>x._id===S.open); if(s&&!S.editing) renderInsp(s); }
+}
+
+/* ================= BASE ================= */
+function setSource(live,txt){ const el=$("#src"); el.classList.toggle("live",live); el.querySelector("span").textContent=txt; }
+function setWritable(ok){ S.canWrite=ok; $$("#entry input,#entry select,#entry textarea,#saveBtn,#fileIn").forEach(el=>el.disabled=!ok);
+  if(!ok) notice(`<b>Consultation seule.</b> Pour ajouter des fiches, demandez un accès contributeur au propriétaire de la base.`); }
+async function demoMode(){
+  try{ const r=await fetch("data/especes.json",{cache:"no-store"}); if(r.ok){ const j=await r.json(); if(Array.isArray(j)&&j.length){ S.ready=true; S.species=j.map((d,i)=>({...d,_id:d._id||d.id||"f-"+i})); renderAll(); route();
+    setSource(false,"Fichier statique · ajouts locaux");
+    notice(`<b>Version statique.</b> Les fiches viennent de <span class="mono">data/especes.json</span> ; les ajouts et modifications restent dans cet onglet.`); return; } } }catch(e){}
+  S.ready=true; S.species=[]; renderAll(); route(); setSource(false,"Aucune donnée"); notice(`<b>Base indisponible.</b> Aucune fiche n'a pu être chargée.`); }
+async function connect(){
+  const c=window.claude; if(!c||!c.use){ demoMode(); return; }
+  const db=await c.use("db").catch(()=>null); if(!db){ demoMode(); return; }
+  S.col=db.collection("species");
+  S.col.onSnapshot(snap=>{ S.ready=true; S.species=snap.docs.map(d=>({...d.data(),_id:d.id})); setSource(true,"Base partagée · en direct"); renderAll(); route(); },()=>{ if(!S.species.length) demoMode(); });
+  const user=await c.use("user").catch(()=>null);
+  if(user){ const w=await user.can("data.write"); if(w===false) setWritable(false); }
+}
+
+paintIcons(); logo($("#logo"),3); paintTheme();
+initList(); initMap(); initForm(); initImport(); initAnalyses(); initCases();
+renderAll(); route(); connect();
+})();
+</script>
