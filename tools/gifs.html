@@ -5,7 +5,7 @@
 </head><body>
 <!-- Générateur des GIF explicatifs (voronoï, mouvement, grille). Ouvrir via un serveur à la racine du dépôt ; tools/make-gifs.js capture les images, tools/make_gifs.py assemble les GIF. -->
 <canvas id="c" width="960" height="600"></canvas>
-<nav><button data-s="voronoi">Voronoï</button><button data-s="motion">Mouvement</button><button data-s="grid">Grille</button></nav>
+<nav><button data-s="voronoi">Voronoï</button><button data-s="motion">Mouvement</button><button data-s="grid">Grille</button><button data-s="etude">Étude de cas</button></nav>
 <script src="../src/voronoi.js"></script>
 <script>
 "use strict";
@@ -159,7 +159,96 @@ const G=(()=>{ const ax=60, ay=106, aw=840, ah=400, mg=24, gut=10, cols=12, cw=(
     fadeOut(t,this.dur);
   }}; })();
 
-window.SCENES={voronoi:V,motion:M,grid:G};
+/* ================= 4. ÉTUDE DE CAS : la démarche, les problèmes, les solutions ================= */
+const ST=(()=>{ const CH=4.8;
+  const chapters=[
+    {k:"BANBIOM",t:"Étude de cas",c:"Une banque de données des écosystèmes marins d'Algérie, conçue par le studio POST_."},
+    {k:"Le point de départ",t:"Des données dispersées",c:"Rapports de campagne, tableurs, publications : chaque équipe garde ses fiches, rien ne se compare."},
+    {k:"Le parti pris",t:"Le voronoï comme système",c:"Une espèce est une cellule, une donnée une graine, une relation une veine. Le motif devient la structure."},
+    {k:"Problème 1 · résolu",t:"Un hero chargé, illisible",c:"Avant : 300 petites cellules numérotées. Après : une trentaine de grandes cellules, le nom de chaque espèce lisible."},
+    {k:"Problème 2 · résolu",t:"Le titre noyé dans le motif",c:"Une cellule dominante, fixe, porte le titre : les autres cellules bougent autour sans jamais le recouvrir."},
+    {k:"Problème 3 · résolu",t:"Trop de vide, puis trop d'angles",c:"Un galet laissait un vide autour du titre. Un pentagone aux angles ouverts garde le même écart que toutes les veines."},
+    {k:"Problème 4 · résolu",t:"Un site vitrine, pas un outil",c:"La base devient une console : tableau de bord, fiches, import contrôlé, analyses, études de cas."},
+    {k:"Problème 5 · résolu",t:"Des couleurs trop vives",c:"Une palette désaturée commune ; toutes les photos reçoivent le même traitement."},
+    {k:"Le mouvement",t:"Des ressorts, pas des transitions",c:"Élan, dépassement, retour amorti. Les graines ne se croisent jamais ; tout s'arrête si l'utilisateur le demande."},
+    {k:"Résultat",t:"La mer, cellule par cellule.",c:""}];
+  const dur=CH*chapters.length;
+  const docs=(()=>{ const r=B._rng(B._hash("docs")); return Array.from({length:34},()=>({x:r()*400,y:r()*330,a:r()*6.28,s:.6+r()*.7,k:["PDF","XLS","CSV","DOC","JPG"][Math.floor(r()*5)],rot:(r()-.5)*.6})); })();
+  const seedsIn=(n,seed,w,h,minD)=>{ const r=B._rng(B._hash(seed)), out=[]; let g=0; while(out.length<n&&g++<5000){ const x=r()*w, y=r()*h; if(out.every(p=>Math.hypot(p.x-x,p.y-y)>minD)) out.push({x,y,w:0,k:r()}); } return out; };
+  const S3=seedsIn(14,"st3",420,330,70), S4a=seedsIn(200,"st4a",205,210,10), S4b=seedsIn(18,"st4b",205,210,38), S5=seedsIn(18,"st5",420,330,62), S6=seedsIn(12,"st6",230,240,52);
+  const pal=[C.cobalt,C.lagoon,C.deep,C.cobalt2,C.mist,C.foam];
+  function wrap(text,x,y,maxW,lh){ const w=text.split(" "); let line=""; for(const word of w){ const t2=line?line+" "+word:word; if(ctx.measureText(t2).width>maxW&&line){ ctx.fillText(line,x,y); y+=lh; line=word; } else line=t2; } if(line) ctx.fillText(line,x,y); return y; }
+  function cells(P,w,h,gap,R,colf){ B._cells(P,w,h,()=>gap,0).forEach((poly,i)=>{ const pa=path(poly,R); if(pa){ ctx.fillStyle=colf(i,P[i]); ctx.fill(pa); } }); }
+  const VX=480, VY=120, VW=430, VH=340;
+  const visual=[
+    /* 0 titre */ (t)=>{ ctx.save(); ctx.translate(VX+VW/2-90,VY+VH/2-90); const s=back(seg(t,.2,1.1)); ctx.translate(90,90); ctx.scale(1.8*s,1.8*s); ctx.translate(-50,-50); logo(C.foam); ctx.restore();
+      ctx.globalAlpha=seg(t,.8,1.5); ctx.fillStyle=C.ink; ctx.font="500 22px Outfit"; ctx.textAlign="center"; ctx.fillText("B A N B I O M",VX+VW/2,VY+VH-20); ctx.textAlign="left"; ctx.globalAlpha=1; },
+    /* 1 dispersion */ (t)=>{ ctx.save(); ctx.translate(VX,VY); docs.forEach((d,i)=>{ const x=d.x+Math.cos(t*.8*d.s+d.a)*14, y=d.y+Math.sin(t*.6*d.s+d.a)*12, a=seg(t,i*.03,.4+i*.03);
+        ctx.globalAlpha=a; ctx.save(); ctx.translate(x,y); ctx.rotate(d.rot+Math.sin(t+d.a)*.05); const p=new Path2D(); p.roundRect(-18,-23,36,46,4); ctx.fillStyle="#26333a"; ctx.fill(p); ctx.fillStyle="rgba(238,243,244,.25)"; for(let l=0;l<3;l++) ctx.fillRect(-11,-8+l*7,22-(l%2)*8,2);
+        ctx.fillStyle=C.mute; ctx.font="500 8px 'IBM Plex Mono'"; ctx.fillText(d.k,-11,-13); ctx.restore(); }); ctx.globalAlpha=1; ctx.restore(); },
+    /* 2 voronoï */ (t)=>{ ctx.save(); ctx.translate(VX,VY); const a=seg(t,.9,2), g=12*eio(seg(t,1.8,2.8)), R=26*eio(seg(t,2.4,3.2));
+        if(a>0){ ctx.globalAlpha=a; cells(S3,VW-10,VH-10,g,R,(i)=>pal[i%pal.length]); ctx.globalAlpha=1; }
+        S3.forEach((p,i)=>{ const s=back(seg(t,i*.05,.4+i*.05)); if(s>0){ ctx.fillStyle=C.ink; ctx.beginPath(); ctx.arc(p.x,p.y,3.5*s,0,6.28); ctx.fill(); } });
+        const lab=seg(t,3.1,3.7); if(lab>0){ ctx.globalAlpha=lab; ctx.fillStyle=C.ink; ctx.font="500 11px 'IBM Plex Mono'"; const p=S3[3], q=S3[5];
+          [[p.x,p.y,"GRAINE = DONNÉE"],[(p.x+q.x)/2,(p.y+q.y)/2,"VEINE = RELATION"],[S3[8].x,S3[8].y+20,"CELLULE = ESPÈCE"]].forEach(([x,y,l])=>{ ctx.fillStyle="rgba(22,27,31,.75)"; const w=ctx.measureText(l).width+12; ctx.fillRect(x+8,y-12,w,18); ctx.fillStyle=C.ink; ctx.fillText(l,x+14,y+1); }); ctx.globalAlpha=1; }
+        ctx.restore(); },
+    /* 3 avant / après */ (t)=>{ const lw=205, lh=210, y=VY+40;
+        [["AVANT",VX-10,S4a,0,0,.2],["APRÈS",VX+lw+14,S4b,8,16,1.4]].forEach(([l,x,P,gap,R,t0])=>{ const a=seg(t,t0,t0+.8); if(a<=0) return; ctx.save(); ctx.translate(x,y); ctx.globalAlpha=a;
+          ctx.fillStyle=C.mute; ctx.font="500 11px 'IBM Plex Mono'"; ctx.fillText(l,0,-12); const clip=new Path2D(); clip.roundRect(0,0,lw,lh,10); ctx.save(); ctx.clip(clip); ctx.fillStyle="#0c1a1f"; ctx.fillRect(0,0,lw,lh);
+          if(gap){ ctx.fillStyle="#2e5f78"; ctx.fillRect(0,0,lw,lh); cells(P,lw,lh,gap,R,(i,p)=>p.k>.78?"rgba(62,155,146,.55)":"rgba(232,241,238,.12)"); B._cells(P,lw,lh,()=>gap,0).forEach((poly,i)=>{ const pa=path(poly,R); if(pa){ ctx.strokeStyle="rgba(232,241,238,.45)"; ctx.stroke(pa); } });
+            [[2,"P. oceanica"],[7,"C. caretta"],[12,"T. thynnus"]].forEach(([i,n])=>{ ctx.fillStyle=C.ink; ctx.font="italic 300 13px Outfit"; ctx.textAlign="center"; ctx.fillText(n,P[i].x,P[i].y+4); ctx.textAlign="left"; }); }
+          else { cells(P,lw,lh,1,0,(i,p)=>p.k>.9?"#123c63":p.k>.8?"#0e4a4a":"#082a33"); ctx.fillStyle="rgba(232,241,238,.45)"; ctx.font="7px 'IBM Plex Mono'"; P.forEach((p,i)=>{ if(i%3===0) ctx.fillText(String(i).padStart(2,"0"),p.x-4,p.y+2); }); }
+          ctx.restore(); ctx.globalAlpha=1; ctx.restore(); });
+        const ok=seg(t,2.3,2.8); if(ok>0){ ctx.globalAlpha=ok; ctx.fillStyle=C.mute; ctx.font="500 11px 'IBM Plex Mono'"; ctx.fillText("≈ 300 CELLULES",VX-10,y+lh+22); ctx.fillText("TEXTE 10 PX",VX-10,y+lh+38); ctx.fillStyle=C.foam; ctx.fillText("30 CELLULES",VX+lw+14,y+lh+22); ctx.fillText("NOMS EN ITALIQUE 15 PX",VX+lw+14,y+lh+38); ctx.globalAlpha=1; } },
+    /* 4 cellule dominante */ (t)=>{ ctx.save(); ctx.translate(VX,VY); const dom=eio(seg(t,1.6,2.8)), w=VW-10, h=VH-10, P=S5.map((p,i)=>({x:i?p.x:w*.42,y:i?p.y:h*.4,w:i?0:Math.pow(140*dom,2)}));
+        const wob=seg(t,0,1.6)*(1-dom); P.forEach((p,i)=>{ if(i){ p.x+=Math.sin(t*2+i)*8*wob; p.y+=Math.cos(t*1.7+i)*8*wob; } });
+        cells(P,w,h,8,16,(i)=>i===0&&dom>.05?mix(C.lagoon,C.abyss,dom):pal[i%pal.length]);
+        ctx.fillStyle=C.ink; ctx.font="200 34px Outfit"; ctx.fillText("La base,",w*.42-90,h*.4-6); ctx.fillText("cellule par cellule.",w*.42-90,h*.4+30);
+        if(dom<.2){ ctx.globalAlpha=1-dom*5; ctx.strokeStyle="#c38a8a"; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(w*.42+40,h*.4+10,92,0,6.28); ctx.stroke(); ctx.lineWidth=1; ctx.globalAlpha=1; }
+        ctx.restore(); },
+    /* 5 galet vs pentagone */ (t)=>{ const pw=220, ph=240, y=VY+30;
+        [["GALET : VIDE AUTOUR DU TITRE",VX-6,false,.1],["PENTAGONE : ÉCART CONSTANT",VX+pw+18,true,1.4]].forEach(([l,x,good,t0])=>{ const a=seg(t,t0,t0+.8); if(a<=0) return; ctx.save(); ctx.translate(x,y); ctx.globalAlpha=a;
+          ctx.fillStyle=good?C.foam:C.mute; ctx.font="500 10px 'IBM Plex Mono'"; ctx.fillText(l,0,-12); const clip=new Path2D(); clip.roundRect(0,0,pw,ph,10); ctx.save(); ctx.clip(clip); ctx.fillStyle="#10181c"; ctx.fillRect(0,0,pw,ph);
+          const P=S6.map((p,i)=>({x:i?p.x:pw*.45,y:i?p.y:ph*.42,w:i?0:(good?Math.pow(70,2):0)}));
+          if(good){ cells(P,pw,ph,8,10,(i)=>i?pal[i%pal.length]:C.abyss2); }
+          else { cells(P.slice(1),pw,ph,8,14,(i)=>pal[(i+1)%pal.length]); ctx.fillStyle="#10181c"; ctx.beginPath(); ctx.ellipse(pw*.45,ph*.42,96,78,0,0,6.28); ctx.fill(); ctx.fillStyle=C.abyss2; ctx.beginPath(); ctx.ellipse(pw*.45,ph*.42,62,48,.1,0,6.28); ctx.fill();
+            ctx.strokeStyle="#c38a8a"; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(pw*.45+62,ph*.42); ctx.lineTo(pw*.45+96,ph*.42); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle="#c38a8a"; ctx.font="500 9px 'IBM Plex Mono'"; ctx.fillText("VIDE",pw*.45+66,ph*.42-6); }
+          ctx.restore(); ctx.globalAlpha=1; ctx.restore(); }); },
+    /* 6 console */ (t)=>{ ctx.save(); ctx.translate(VX,VY+10); const w=VW-10, h=VH-40, P=(x,y,ww,hh,c,l,i)=>{ const k=back(seg(t,.2+i*.18,.7+i*.18)); if(k<=0) return; ctx.save(); ctx.globalAlpha=clamp(k); ctx.translate(x+ww/2,y+hh/2); ctx.scale(.9+.1*k,.9+.1*k); const p=new Path2D(); p.roundRect(-ww/2,-hh/2,ww,hh,7); ctx.fillStyle=c; ctx.fill(p); if(l){ ctx.fillStyle=C.mute; ctx.font="500 9px 'IBM Plex Mono'"; ctx.fillText(l,-ww/2+8,-hh/2+15); } ctx.restore(); };
+        P(0,0,70,h,C.abyss,"NAV",0); P(80,0,w-80,26,"#222a2f","RECHERCHE · CTRL K",1);
+        ["ESPÈCES","FAUNE","FLORE","MENACÉES"].forEach((l,i)=>P(80+i*((w-80)/4),34,(w-80)/4-8,56,"#26333a",l,2+i*.5));
+        P(80,98,(w-80)*.55,h-98,"#26333a","TABLEAU DES FICHES",4.5); P(80+(w-80)*.55+8,98,(w-80)*.45-8,(h-98)/2-4,"#26333a","IMPORT CONTRÔLÉ",5.3); P(80+(w-80)*.55+8,98+(h-98)/2+4,(w-80)*.45-8,(h-98)/2-4,"#26333a","ANALYSES",6);
+        const bars=seg(t,2.2,3.2); if(bars>0){ for(let i=0;i<6;i++){ ctx.fillStyle=i%2?C.lagoon:C.cobalt; ctx.fillRect(80+(w-80)*.55+24+i*22,h-14-(18+((i*37)%40))*bars,12,(18+((i*37)%40))*bars); }
+          for(let r2=0;r2<7;r2++){ ctx.fillStyle="rgba(238,243,244,.12)"; ctx.fillRect(92,124+r2*24,((w-80)*.55-24)*bars,1); ctx.fillStyle=r2%3?C.cobalt:C.lagoon; ctx.fillRect(92,112+r2*24,40*bars,8); } }
+        ctx.restore(); },
+    /* 7 désaturation */ (t)=>{ const sat=["#2f5bd8","#17b3a3","#0b6b66","#1c3c9e","#b4c8f8","#a3e8de","#0a2f3b","#cdece6"], mut=["#4a65b0","#3e9b92","#225e5a","#2e4282","#bcc7e2","#b3dad3","#10303a","#d4e4df"], k=eio(seg(t,1.2,2.8));
+        ctx.save(); ctx.translate(VX,VY+20); const P=seedsIn(8,"st8",VW-10,250,70); cells(P,VW-10,250,10,22,(i)=>mix(sat[i],mut[i],k)); ctx.restore();
+        ctx.fillStyle=C.mute; ctx.font="500 11px 'IBM Plex Mono'"; ctx.fillText(k<.5?"PALETTE D'ORIGINE":"PALETTE DÉSATURÉE · PHOTOS À 55 %",VX,VY+300); },
+    /* 8 ressort */ (t)=>{ const x0=VX+10, y0=VY+40, gw=VW-30, gh=170, f=u=>u<0?0:1-Math.exp(-4.2*u)*Math.cos(9*u), T=t-.4;
+        ctx.strokeStyle=C.faint; ctx.strokeRect(x0,y0,gw,gh); ctx.setLineDash([2,4]); ctx.beginPath(); ctx.moveTo(x0,y0+40); ctx.lineTo(x0+gw,y0+40); ctx.stroke(); ctx.setLineDash([]);
+        ctx.strokeStyle=C.foam; ctx.lineWidth=2; ctx.beginPath(); const U=clamp(T/3,0,1); for(let i=0;i<=200*U;i++){ const u=i/200*3, x=x0+i/200*gw, y=y0+gh-10-(gh-50)*f(u)*1; i?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke(); ctx.lineWidth=1;
+        ctx.fillStyle=C.mute; ctx.font="500 10px 'IBM Plex Mono'"; ctx.fillText("REPOS",x0+gw-44,y0+34); [["ÉLAN",.12],["DÉPASSEMENT",.36],["RETOUR AMORTI",.7]].forEach(([l,u])=>{ if(U>u){ ctx.fillStyle=C.ink; ctx.fillText(l,x0+u*gw,y0+gh+18); } });
+        /* carte qui s'enfonce puis rebondit */ const cx=VX+VW/2, cy=VY+300, press=t%2.4, s=press<.25?1-.045*eo(press/.25):1-.045*(1-f((press-.25)*1.1)); const p=new Path2D(); ctx.save(); ctx.translate(cx,cy); ctx.scale(s,s); p.roundRect(-70,-34,140,68,12); ctx.fillStyle="#26333a"; ctx.fill(p); ctx.fillStyle=C.lagoon; ctx.fillRect(-58,-22,40,44); ctx.fillStyle=C.ink; ctx.font="italic 300 13px Outfit"; ctx.fillText("Fiche",-8,4); ctx.restore(); },
+    /* 9 résultat */ (t)=>{ const items=[["33","espèces documentées"],["9","vues dans la console"],["25","planches de charte"],["4","animations GIF"]];
+        items.forEach(([n,l],i)=>{ const a=back(seg(t,.2+i*.25,.8+i*.25)); if(a<=0) return; const x=VX+(i%2)*215, y=VY+20+Math.floor(i/2)*150; ctx.globalAlpha=clamp(a); ctx.fillStyle=C.ink; ctx.font="200 64px Outfit"; ctx.fillText(n,x,y+64); ctx.fillStyle=C.mute; ctx.font="300 15px Outfit"; ctx.fillText(l,x,y+92); ctx.globalAlpha=1; });
+        ctx.save(); ctx.translate(VX+VW-70,VY+VH-60); ctx.scale(.6,.6); logo(C.foam); ctx.restore(); }];
+  return {dur,fps:10,draw(t){
+    const ci=Math.min(chapters.length-1,Math.floor(t/CH)), lt=t-ci*CH, ch=chapters[ci];
+    ctx.fillStyle=C.night; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=C.mute; ctx.font="500 11px 'IBM Plex Mono'"; ctx.fillText(("BANBIOM · étude de cas · "+String(ci+1).padStart(2,"0")+" / "+chapters.length).toUpperCase(),40,44);
+    ctx.save(); ctx.translate(W-64,36); ctx.scale(.26,.26); logo(C.foam); ctx.restore();
+    const a=eo(seg(lt,.1,.7)), out=1-seg(lt,CH-.35,CH);
+    ctx.globalAlpha=a*out; ctx.fillStyle=ch.k.startsWith("Problème")?C.foam:C.mute; ctx.font="500 12px 'IBM Plex Mono'"; ctx.fillText(ch.k.toUpperCase(),40,150-14*(1-a));
+    ctx.fillStyle=C.ink; ctx.font=(ci===chapters.length-1?"200 46px":"300 38px")+" Outfit"; const yEnd=wrap(ch.t,40,198-14*(1-a),400,44);
+    ctx.fillStyle="rgba(238,243,244,.62)"; ctx.font="300 17px Outfit"; if(ch.c) wrap(ch.c,40,yEnd+44,380,26);
+    if(ci===chapters.length-1){ ctx.fillStyle=C.mute; ctx.font="300 16px Outfit"; wrap("Une base ouverte aux chercheurs, des fiches vérifiables, un système visuel tiré des données elles-mêmes.",40,yEnd+44,380,25); ctx.font="500 11px 'IBM Plex Mono'"; ctx.fillText("STUDIO POST_ · ALGER · 2026",40,yEnd+130); }
+    visual[ci](lt); ctx.globalAlpha=1;
+    /* progression */ for(let i=0;i<chapters.length;i++){ const x=40+i*((W-80)/chapters.length); ctx.fillStyle="rgba(238,243,244,.12)"; ctx.fillRect(x,H-40,(W-80)/chapters.length-8,2); if(i<=ci){ ctx.fillStyle=i<ci?"rgba(179,218,211,.5)":C.foam; ctx.fillRect(x,H-40,((W-80)/chapters.length-8)*(i<ci?1:lt/CH),2); } }
+    ctx.globalAlpha=1-out; ctx.fillStyle=C.night; ctx.fillRect(0,0,W,H-50); ctx.globalAlpha=1;
+    fadeOut(t,dur);
+  }}; })();
+
+window.SCENES={voronoi:V,motion:M,grid:G,etude:ST};
 window.render=(name,t)=>SCENES[name].draw(t);
 window.ready=document.fonts.load("300 30px Outfit").then(()=>Promise.all(["200 20px Outfit","400 14px Outfit","italic 300 20px Outfit","500 11px 'IBM Plex Mono'"].map(f=>document.fonts.load(f)))).then(()=>document.fonts.ready);
 /* aperçu en boucle */

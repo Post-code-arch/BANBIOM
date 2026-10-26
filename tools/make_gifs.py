@@ -6,6 +6,7 @@ root=pathlib.Path(__file__).resolve().parent; out=root.parent/"assets"/"gifs"; o
 for d in sorted((root/".frames").iterdir()):
     files=sorted(d.glob("*.png"))
     if not files: continue
+    f_fps=d/"fps.txt"; sfps=float(f_fps.read_text()) if f_fps.exists() else fps
     frames=[Image.open(f).convert("RGB") for f in files]
     # palette commune tirée de quelques images réparties
     sample=Image.new("RGB",(frames[0].width,frames[0].height*4))
@@ -13,5 +14,5 @@ for d in sorted((root/".frames").iterdir()):
     pal=sample.quantize(colors=128,method=Image.Quantize.MEDIANCUT)
     q=[f.quantize(palette=pal,dither=Image.Dither.NONE) for f in frames]
     dst=out/(d.name+".gif")
-    q[0].save(dst,save_all=True,append_images=q[1:],duration=round(1000/fps),loop=0,optimize=True,disposal=1)
+    q[0].save(dst,save_all=True,append_images=q[1:],duration=round(1000/sfps),loop=0,optimize=True,disposal=1)
     print(dst.relative_to(root.parent), len(q), "images", round(dst.stat().st_size/1e6,2), "Mo")
