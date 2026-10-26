@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>BANBIOM · Planches</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* BANBIOM · Planches : branding, typographie, système voronoï animé, mockups. Chaque planche est un format 16:10 autonome. */
+:root{
+  --night:#0d1114;--night-2:#161b1f;--paper:#e8f1ee;--surface:#f7fbf9;--ink:#0a2a32;--muted:#48676d;--line:#c3d8d3;
+  --abyss:#0a2f3b;--abyss-2:#124858;--cobalt:#2f5bd8;--cobalt-2:#1c3c9e;--mist:#b4c8f8;--lagoon:#17b3a3;--foam:#a3e8de;--deep:#0b6b66;--ground:#cdece6;
+  --font-display:"Outfit",system-ui,sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{background:var(--night);color:#e8eef0}
+body{margin:0;font:400 15px/1.5 var(--font-display);-webkit-font-smoothing:antialiased}
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:16px;padding:14px clamp(16px,3vw,40px);background:rgba(13,17,20,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(232,238,240,.08)}
+.top .lg{width:24px;height:24px;color:var(--foam)}
+.top b{font-weight:500;letter-spacing:.14em;font-size:14px}
+.top nav{margin-left:auto;display:flex;gap:4px;overflow:auto;scrollbar-width:none}
+.top nav a{font:500 11px var(--font-mono);color:rgba(232,238,240,.5);text-decoration:none;padding:6px 8px;border-radius:999px;white-space:nowrap}
+.top nav a:hover{color:#fff;background:rgba(232,238,240,.08)}
+.top .app{font:500 13px var(--font-display);color:var(--night);background:var(--foam);padding:8px 14px;border-radius:999px;text-decoration:none;white-space:nowrap}
+main{padding:clamp(16px,3vw,40px);display:grid;gap:clamp(40px,6vw,88px);max-width:1680px;margin:0 auto}
+.slot{display:grid;gap:12px;scroll-margin-top:80px}
+.cap{display:flex;justify-content:space-between;gap:12px;font:500 11px/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(232,238,240,.45)}
+.cap b{color:#e8eef0;font-weight:500}
+.pl{position:relative;aspect-ratio:16/10;border-radius:18px;overflow:hidden;container-type:inline-size;isolation:isolate}
+.pl canvas.f{position:absolute;inset:0;width:100%;height:100%;display:block}
+.dark{background:var(--night-2);color:#eef3f4}.abyss{background:var(--abyss);color:var(--paper)}.light{background:var(--paper);color:var(--ink)}.white{background:#fff;color:var(--ink)}
+.mono{font-family:var(--font-mono)}
+.lbl{font:500 max(10px,.85cqw)/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;opacity:.6}
+.ab{position:absolute}
+.note{font:400 max(11px,1cqw)/1.45 var(--font-display);opacity:.7;max-width:34ch}
+.word{font:500 1cqw/1 var(--font-display);letter-spacing:.16em}
+svg.logo{display:block}
+@media (max-width:760px){.pl{aspect-ratio:3/4}.pl.keep{aspect-ratio:16/10}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* 01 couverture */
+#p1 .t{left:6cqw;bottom:7cqw;display:grid;gap:1.6cqw}
+#p1 h1{margin:0;font:200 11cqw/.86 var(--font-display);letter-spacing:-.05em}
+#p1 h1 span{color:var(--foam)}
+#p1 .meta{right:6cqw;bottom:7cqw;text-align:right;display:grid;gap:.6cqw}
+#p1 .brand{left:6cqw;top:5cqw;display:flex;align-items:center;gap:1.2cqw}
+#p1 .brand svg{width:3.2cqw;height:3.2cqw;color:var(--foam)}
+#p1 .brand .word{font-size:1.5cqw}
+/* 02 logo construction */
+#p2 .g{position:absolute;inset:0;display:grid;grid-template-columns:1.1fr 1fr}
+#p2 .l{position:relative;border-right:1px solid var(--line)}
+#p2 .l svg{position:absolute;inset:8%;width:84%;height:84%}
+#p2 .r{padding:6cqw 5cqw;display:grid;align-content:space-between;gap:3cqw}
+#p2 h2{margin:0;font:300 4.4cqw/1 var(--font-display);letter-spacing:-.03em}
+#p2 ol{margin:0;padding:0;list-style:none;display:grid;gap:1.4cqw;counter-reset:s}
+#p2 li{display:grid;grid-template-columns:3cqw 1fr;gap:1cqw;font-size:max(12px,1.25cqw);line-height:1.4;counter-increment:s}
+#p2 li::before{content:"0" counter(s);font:500 max(10px,.9cqw) var(--font-mono);color:var(--cobalt);padding-top:.3cqw}
+/* 03 déclinaisons */
+#p3 .g{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr auto}
+#p3 .c{display:grid;place-items:center;gap:1.4cqw;align-content:center}
+#p3 .c svg{width:8cqw;height:8cqw}
+#p3 .c .word{font-size:1.6cqw}
+#p3 .icons{grid-column:1/-1;display:flex;align-items:flex-end;justify-content:center;gap:3cqw;padding:3cqw;background:#fff}
+#p3 .ic{display:grid;justify-items:center;gap:.8cqw}
+#p3 .ic i{display:grid;place-items:center;background:var(--abyss);color:var(--foam)}
+#p3 .ic span{font:500 max(10px,.8cqw) var(--font-mono);color:var(--muted)}
+/* 04 typo outfit */
+#p4 .aa{left:5cqw;top:2cqw;font:200 34cqw/1 var(--font-display);letter-spacing:-.06em}
+#p4 .side{right:5cqw;top:6cqw;width:38cqw;display:grid;gap:2.2cqw}
+#p4 .w{display:grid;gap:.4cqw;border-top:1px solid rgba(10,42,50,.15);padding-top:1cqw}
+#p4 .w b{font-size:3.2cqw;line-height:1;letter-spacing:-.02em}
+#p4 .abc{left:5cqw;right:5cqw;bottom:5cqw;font:300 2.2cqw/1.3 var(--font-display);letter-spacing:.02em;color:var(--muted);display:flex;justify-content:space-between;align-items:end;gap:3cqw}
+/* 05 hiérarchie, grille éditoriale */
+#p5 .grid{position:absolute;inset:4cqw;pointer-events:none}
+#p5 .grid svg{width:100%;height:100%}
+#p5 .h{left:6cqw;top:6cqw;width:58cqw;display:grid;gap:1.8cqw}
+#p5 .h h2{margin:0;font:300 6.2cqw/.98 var(--font-display);letter-spacing:-.035em}
+#p5 .h h2 span{color:rgba(238,243,244,.4)}
+#p5 .spec{right:6cqw;top:6cqw;width:26cqw;display:grid;gap:2.4cqw}
+#p5 .spec div{display:grid;gap:.5cqw;border-top:1px solid rgba(238,243,244,.18);padding-top:1cqw}
+#p5 .spec em{font:300 2.6cqw/1.1 var(--font-display);font-style:italic}
+#p5 .data{left:6cqw;bottom:6cqw;display:flex;gap:4cqw}
+#p5 .data div{display:grid;gap:.4cqw}
+#p5 .data b{font:200 5cqw/1 var(--font-display)}
+/* 06 couleurs */
+#p6 svg.sw{position:absolute;inset:0;width:100%;height:100%}
+#p6 .sw text{font-family:var(--font-mono);font-weight:500}
+/* 07 système */
+#p7 .g{position:absolute;inset:4cqw;display:grid;grid-template-columns:repeat(4,1fr);gap:1.6cqw}
+#p7 .c{background:rgba(232,241,238,.05);border-radius:1.4cqw;display:grid;grid-template-rows:1fr auto;overflow:hidden}
+#p7 .c svg{width:100%;height:100%}
+#p7 .c div{padding:1.6cqw;display:grid;gap:.5cqw}
+#p7 .c b{font:300 2.2cqw/1 var(--font-display)}
+#p7 .c span{font-size:max(11px,1.05cqw);opacity:.65;line-height:1.35}
+/* 08 échelles */
+#p8 .g{position:absolute;inset:0;display:grid;grid-template-columns:2fr 1.2fr .8fr .5fr}
+#p8 .c{position:relative;border-right:1px solid rgba(10,42,50,.12)}
+#p8 .c canvas{position:absolute;inset:0;width:100%;height:100%}
+#p8 .c .k{position:absolute;left:1.6cqw;bottom:1.6cqw;right:1.6cqw;display:grid;gap:.4cqw;background:var(--paper);padding:1.2cqw;border-radius:1cqw}
+#p8 .c .k b{font:300 2cqw/1 var(--font-display)}
+/* animations : légendes */
+.anim .leg{left:4cqw;bottom:4cqw;display:grid;gap:.8cqw;max-width:40cqw}
+.anim .leg h3{margin:0;font:300 4.4cqw/1 var(--font-display);letter-spacing:-.03em}
+.anim .tag{right:4cqw;top:4cqw;font:500 max(10px,.85cqw)/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;padding:.8cqw 1.2cqw;border-radius:999px;background:rgba(232,238,240,.1)}
+.light.anim .tag{background:rgba(10,42,50,.08)}
+/* 13 signatures */
+#p13 .g{position:absolute;inset:4cqw 4cqw 4cqw 4cqw;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:auto 1fr 1fr;gap:1.2cqw}
+#p13 .hd{grid-column:1/-1;display:flex;justify-content:space-between;align-items:end;padding-bottom:1cqw}
+#p13 .hd h2{margin:0;font:300 4cqw/1 var(--font-display);letter-spacing:-.03em}
+#p13 .s{display:grid;grid-template-rows:1fr auto;gap:.8cqw;min-height:0}
+#p13 .s svg{width:100%;height:100%;border-radius:1cqw;display:block;min-height:0}
+#p13 .s em{font:300 max(11px,1.15cqw)/1.2 var(--font-display);font-style:italic}
+#p13 .s span{font:500 max(9px,.75cqw) var(--font-mono);color:var(--muted)}
+/* 14 pastilles */
+#p14 canvas.f{filter:blur(1.6cqw) saturate(1.2);transform:scale(1.1)}
+#p14 .grain{position:absolute;inset:0;opacity:.2;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+#p14 .pills{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:1cqw}
+#p14 .pill{display:inline-flex;align-items:center;gap:1.3cqw;padding:1.5cqw 3cqw;border-radius:999px;background:#fff;color:#111;font:500 2.3cqw/1 var(--font-display);letter-spacing:-.01em;transform:translateY(20px);opacity:0;animation:pin .9s cubic-bezier(.34,1.56,.64,1) forwards}
+#p14 .pill svg{width:2.4cqw;height:2.4cqw;fill:none;stroke:#555;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#p14.on .pill{animation-play-state:running}
+@keyframes pin{to{transform:none;opacity:1}}
+/* 15 dock */
+#p15 .sky{position:absolute;left:0;right:0;top:0;height:58%;background:linear-gradient(115deg,#5f8fc4 0%,#2f5bd8 55%,#17b3a3 120%)}
+#p15 .sky canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.35;mix-blend-mode:soft-light}
+#p15 .dock{position:absolute;left:50%;top:42%;transform:translateX(-50%);display:flex;gap:1.3cqw;padding:1.3cqw;border-radius:2.2cqw;background:rgba(255,255,255,.22);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.3)}
+#p15 .ap{width:6.4cqw;height:6.4cqw;border-radius:1.5cqw;background:#e3e6e8;position:relative;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+#p15 .ap::after{content:"";position:absolute;left:50%;bottom:-.9cqw;width:.35cqw;height:.35cqw;border-radius:50%;background:rgba(255,255,255,.8);transform:translateX(-50%)}
+#p15 .ap.me{background:var(--abyss);display:grid;place-items:center;transform:translateY(-1.2cqw) scale(1.12)}
+#p15 .ap.me svg{width:62%;height:62%;color:var(--foam)}
+#p15 .tip{position:absolute;left:50%;bottom:calc(100% + 1.8cqw);transform:translateX(-50%);background:#fff;color:#111;font:400 1.3cqw/1 var(--font-display);padding:.8cqw 1.2cqw;border-radius:.8cqw;white-space:nowrap}
+#p15 .tip::after{content:"";position:absolute;left:50%;top:100%;border:.6cqw solid transparent;border-top-color:#fff;transform:translateX(-50%)}
+#p15 .stand{position:absolute;left:31%;right:31%;top:66%;bottom:0;background:linear-gradient(180deg,#3a3d40,#8c8f92 30%,#9fa2a5)}
+#p15 .stand::before{content:"";position:absolute;left:50%;top:-7cqw;width:13cqw;height:13cqw;border-radius:50%;background:#000;transform:translateX(-50%)}
+#p15 .bezel{position:absolute;left:0;right:0;top:58%;height:8%;background:#000}
+/* 16 bento */
+#p16 .g{position:absolute;inset:3cqw;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:1.2cqw}
+#p16 .t{border-radius:1.4cqw;background:#1b1b1b;position:relative;overflow:hidden;display:grid;place-items:center}
+#p16 .t .lbl{position:absolute;left:1.4cqw;top:1.4cqw;color:#eee}
+#p16 .t svg{width:78%;height:78%}
+#p16 .wide{grid-column:span 2}
+#p16 .lite{background:linear-gradient(135deg,#ece6ff,#b9c8f5 60%,#a3e8de);color:var(--ink)}
+#p16 .lite .lbl{color:var(--ink)}
+#p16 .wht{background:#fff;border:1px solid #ddd}
+#p16 .orb ellipse{animation:spin 18s linear infinite;transform-origin:50% 50%;transform-box:view-box}
+#p16 .orb ellipse:nth-child(2n){animation-duration:26s;animation-direction:reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+#p16 .tog{display:inline-flex;align-items:center;gap:1cqw;padding:1cqw 1.6cqw 1cqw 1cqw;border-radius:999px;background:#e9e9e9;color:#999;font:500 1.4cqw var(--font-display)}
+#p16 .tog i{width:1.6cqw;height:1.6cqw;border-radius:50%;background:linear-gradient(135deg,var(--cobalt),var(--foam))}
+#p16 .node{fill:#3e4a63;stroke:none}
+#p16 .ntxt{font:500 11px var(--font-display);fill:#eee}
+/* 17 affiche */
+#p17 .gl{position:absolute;inset:3cqw;pointer-events:none}
+#p17 .gl svg{width:100%;height:100%}
+#p17 .num{left:3cqw;top:2cqw;font:300 12cqw/1 var(--font-display);letter-spacing:-.05em}
+#p17 .sub{left:3.2cqw;top:15cqw;font:300 1.8cqw/1.15 var(--font-display);color:rgba(238,243,244,.45)}
+#p17 .img{left:30cqw;top:3cqw;right:3cqw;height:30cqw;overflow:hidden}
+#p17 .img canvas{position:absolute;inset:0;width:100%;height:100%}
+#p17 .ttl{left:3cqw;bottom:9cqw;width:62cqw}
+#p17 .ttl b{display:block;font:400 3.4cqw/1.1 var(--font-display);letter-spacing:-.02em}
+#p17 .ttl span{display:block;font:300 3.4cqw/1.1 var(--font-display);letter-spacing:-.02em;color:rgba(238,243,244,.4)}
+#p17 .cta{left:3cqw;bottom:3cqw;display:inline-flex;align-items:center;gap:1.2cqw;padding:.6cqw .6cqw .6cqw 1.8cqw;border-radius:999px;background:var(--cobalt);color:#fff;font:400 1.4cqw var(--font-display)}
+#p17 .cta i{width:3cqw;height:3cqw;border-radius:50%;background:rgba(255,255,255,.25);display:grid;place-items:center;font-style:normal}
+/* 18 écrans */
+#p18 .laptop{position:absolute;left:5%;top:9%;width:66%}
+#p18 .scr{position:relative;aspect-ratio:16/10;background:#000;border-radius:1.4cqw 1.4cqw 0 0;padding:1cqw;border:1px solid #333}
+#p18 .scr .vp{position:relative;width:100%;height:100%;overflow:hidden;border-radius:.4cqw;background:#e8f1ee}
+#p18 iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;pointer-events:none}
+#p18 .base{height:1.6cqw;margin:0 -6%;background:linear-gradient(#cfd2d4,#8b8f92);border-radius:0 0 1.6cqw 1.6cqw}
+#p18 .phone{position:absolute;right:7%;top:8%;width:21%;aspect-ratio:390/844;border-radius:3.4cqw;background:#000;padding:.8cqw;border:1px solid #333}
+#p18 .phone .vp{position:relative;width:100%;height:100%;overflow:hidden;border-radius:2.6cqw;background:#e8f1ee}
+#p18 .leg{left:5%;bottom:5%}
+</style>
+
+<header class="top"><svg class="lg logo" id="topLogo" aria-hidden="true"></svg><b>BANBIOM</b><span class="mono" style="font-size:11px;opacity:.5">Planches · charte 2026</span>
+  <nav id="toc"></nav><a class="app" href="index.html">Ouvrir la console</a></header>
+
+<main id="main">
+  <!-- 01 -->
+  <section class="slot" id="s1"><div class="cap"><b>01 · Couverture</b><span>Branding</span></div>
+    <div class="pl abyss keep" id="p1"><canvas class="f" data-field="cover"></canvas>
+      <div class="ab brand"><svg class="logo" data-logo></svg><span class="word">BANBIOM</span></div>
+      <div class="ab t"><span class="lbl">Banque de biodiversité marine · Alger</span><h1>La mer,<br><span>cellule</span> par cellule.</h1></div>
+      <div class="ab meta mono"><span class="lbl">Charte graphique</span><span class="lbl">Studio POST_ · 2026</span></div></div></section>
+
+  <!-- 02 -->
+  <section class="slot" id="s2"><div class="cap"><b>02 · Logo · construction</b><span>Branding</span></div>
+    <div class="pl light" id="p2"><div class="g"><div class="l"><svg id="logoBuild" viewBox="0 0 100 100" aria-label="Construction du logo"></svg></div>
+      <div class="r"><div style="display:grid;gap:1.4cqw"><span class="lbl">Le signe</span><h2>Un disque, trois cellules.</h2></div>
+        <ol><li>Un cercle : l'unité, la mer comme ensemble.</li><li>Trois graines placées une fois pour toutes, jamais redessinées.</li><li>Les médiatrices entre graines deviennent des veines de 9 % du diamètre.</li><li>Chaque cellule est arrondie à 12 % : jamais de pointe, jamais de cercle.</li></ol>
+        <span class="lbl">Zone de protection : 1/4 du diamètre · taille minimale 16 px</span></div></div></div></section>
+
+  <!-- 03 -->
+  <section class="slot" id="s3"><div class="cap"><b>03 · Logo · déclinaisons</b><span>Branding</span></div>
+    <div class="pl" id="p3"><div class="g">
+      <div class="c" style="background:var(--abyss);color:var(--foam)"><svg data-logo></svg><span class="word" style="color:var(--paper)">BANBIOM</span></div>
+      <div class="c" style="background:var(--paper);color:var(--abyss)"><svg data-logo></svg><span class="word">BANBIOM</span></div>
+      <div class="c" style="background:var(--cobalt);color:#fff"><svg data-logo></svg><span class="word">BANBIOM</span></div>
+      <div class="c" style="background:var(--lagoon);color:var(--abyss)"><svg data-logo></svg><span class="word">BANBIOM</span></div>
+      <div class="icons" id="icons"></div></div></div></section>
+
+  <!-- 04 -->
+  <section class="slot" id="s4"><div class="cap"><b>04 · Typographie · Outfit</b><span>Typo</span></div>
+    <div class="pl light" id="p4"><div class="ab aa">Aa</div>
+      <div class="ab side"><span class="lbl">Outfit · titres et texte</span>
+        <div class="w"><b style="font-weight:200">Abysse 200</b><span class="lbl">Grands titres, chiffres</span></div>
+        <div class="w"><b style="font-weight:300">Lagon 300</b><span class="lbl">Titres de section</span></div>
+        <div class="w"><b style="font-weight:400">Herbier 400</b><span class="lbl">Texte courant</span></div>
+        <div class="w"><b style="font-weight:500">Récif 500</b><span class="lbl">Boutons, marque</span></div></div>
+      <div class="ab abc"><span>ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz · àéèêç<br>0123456789 · –·«»%/m °C</span><span class="mono" style="font-size:1.1cqw">Outfit, Rodrigo Fuenzalida<br>Google Fonts · OFL</span></div></div></section>
+
+  <!-- 05 -->
+  <section class="slot" id="s5"><div class="cap"><b>05 · Typographie · hiérarchie</b><span>Typo</span></div>
+    <div class="pl dark" id="p5"><div class="grid"><svg id="grid5" preserveAspectRatio="none"></svg></div>
+      <div class="ab h"><span class="lbl">Titre · Outfit 300 · interlignage 0,98</span><h2>Documenter le vivant <span>pour mieux le protéger, fiche après fiche.</span></h2></div>
+      <div class="ab spec"><div><span class="lbl">Nom scientifique · italique</span><em>Posidonia oceanica</em></div>
+        <div><span class="lbl">Libellé · IBM Plex Mono 500</span><span class="mono" style="font-size:1.3cqw;letter-spacing:.1em">HERBIER · 0,5–40 M</span></div>
+        <div><span class="lbl">Texte · Outfit 400</span><span style="font-size:1.3cqw;opacity:.8">Phanérogame marine formant de vastes herbiers, endémique de Méditerranée.</span></div></div>
+      <div class="ab data"><div><b>40 m</b><span class="lbl">Profondeur max.</span></div><div><b>28 °C</b><span class="lbl">Température max.</span></div><div><b>LC</b><span class="lbl">Statut UICN</span></div></div></div></section>
+
+  <!-- 06 -->
+  <section class="slot" id="s6"><div class="cap"><b>06 · Couleurs</b><span>Branding</span></div>
+    <div class="pl light" id="p6"><svg class="sw" id="swatches" preserveAspectRatio="none"></svg></div></section>
+
+  <!-- 07 -->
+  <section class="slot" id="s7"><div class="cap"><b>07 · Le système · quatre éléments</b><span>Voronoï</span></div>
+    <div class="pl abyss" id="p7"><div class="g" id="elements"></div></div></section>
+
+  <!-- 08 -->
+  <section class="slot" id="s8"><div class="cap"><b>08 · Échelles de densité</b><span>Voronoï</span></div>
+    <div class="pl light" id="p8"><div class="g">
+      <div class="c"><canvas data-field="macro"></canvas><div class="k"><b>Macro</b><span class="lbl">40–120 cellules · la base entière</span></div></div>
+      <div class="c"><canvas data-field="meso"></canvas><div class="k"><b>Méso</b><span class="lbl">8–20 · en-têtes</span></div></div>
+      <div class="c"><canvas data-field="micro"></canvas><div class="k"><b>Micro</b><span class="lbl">3–12 · signature</span></div></div>
+      <div class="c"><canvas data-field="nano"></canvas><div class="k"><b>Nano</b><span class="lbl">1–3 · composant</span></div></div></div></div></section>
+
+  <!-- 09 -->
+  <section class="slot" id="s9"><div class="cap"><b>09 · Animation · respiration</b><span>Texture voronoï</span></div>
+    <div class="pl light anim" id="p9"><canvas class="f" data-field="breathe"></canvas><span class="ab tag">En boucle · 12 s</span>
+      <div class="ab leg"><h3>Respiration</h3><span class="note">Les graines dérivent lentement sur des orbites propres ; les cellules se dilatent et se contractent sans jamais se croiser.</span></div></div></section>
+
+  <!-- 10 -->
+  <section class="slot" id="s10"><div class="cap"><b>10 · Animation · veines</b><span>Texture voronoï · interactive</span></div>
+    <div class="pl dark anim" id="p10"><canvas class="f" data-field="veins"></canvas><span class="ab tag">Survolez</span>
+      <div class="ab leg"><h3>Le vide s'ouvre</h3><span class="note">Seules les veines sont tracées. Sous le curseur, les graines s'écartent et les veines s'élargissent ; retour amorti.</span></div></div></section>
+
+  <!-- 11 -->
+  <section class="slot" id="s11"><div class="cap"><b>11 · Animation · croissance</b><span>Texture voronoï</span></div>
+    <div class="pl abyss anim" id="p11"><canvas class="f" data-field="grow"></canvas><span class="ab tag" id="growN">0 fiche</span>
+      <div class="ab leg"><h3>Une fiche, une cellule</h3><span class="note">Chaque ajout à la base fait naître une graine : la cellule voisine se partage, la carte se densifie.</span></div></div></section>
+
+  <!-- 12 -->
+  <section class="slot" id="s12"><div class="cap"><b>12 · Animation · verre</b><span>Texture voronoï · interactive</span></div>
+    <div class="pl anim" id="p12" style="background:#06222c"><canvas class="f" data-field="glass"></canvas><span class="ab tag" style="color:#fff">Survolez</span>
+      <div class="ab leg" style="color:#fff"><h3>Verre dépoli</h3><span class="note">Réservé au hero : un dégradé lent vu à travers des cellules de verre, bord clair d'un pixel.</span></div></div></section>
+
+  <!-- 13 -->
+  <section class="slot" id="s13"><div class="cap"><b>13 · Signatures d'espèces</b><span>Voronoï · données</span></div>
+    <div class="pl light" id="p13"><div class="g" id="sigs"><div class="hd"><h2>Chaque espèce a sa signature</h2><span class="lbl" style="max-width:40ch;text-align:right">Les graines sont placées par la température et la profondeur ; leur nombre suit la taille. Faune : angles vifs, cobalt. Flore : galets, lagon.</span></div></div></div></section>
+
+  <!-- 14 -->
+  <section class="slot" id="s14"><div class="cap"><b>14 · Mockup · actions</b><span>Interface</span></div>
+    <div class="pl" id="p14" style="background:var(--deep)"><canvas class="f" data-field="blur"></canvas><div class="grain"></div>
+      <div class="pills" id="pills"></div></div></section>
+
+  <!-- 15 -->
+  <section class="slot" id="s15"><div class="cap"><b>15 · Mockup · application</b><span>Interface</span></div>
+    <div class="pl keep" id="p15" style="background:#000"><div class="sky"><canvas data-field="sky"></canvas></div><div class="bezel"></div><div class="stand"></div>
+      <div class="dock" id="dock"></div></div></section>
+
+  <!-- 16 -->
+  <section class="slot" id="s16"><div class="cap"><b>16 · Mockup · composants</b><span>Interface</span></div>
+    <div class="pl" id="p16" style="background:#0f0f0f"><div class="g" id="bento"></div></div></section>
+
+  <!-- 17 -->
+  <section class="slot" id="s17"><div class="cap"><b>17 · Mockup · affiche</b><span>Édition</span></div>
+    <div class="pl dark" id="p17"><div class="gl"><svg id="grid17" preserveAspectRatio="none"></svg></div>
+      <div class="ab num" id="bigN">33</div><div class="ab sub">Espèces<br>documentées</div>
+      <div class="ab img"><canvas data-field="poster"></canvas></div>
+      <div class="ab ttl"><b>Cartographier le vivant</b><span>Une base ouverte aux chercheurs, des fiches vérifiables, une Méditerranée lisible cellule par cellule.</span></div>
+      <div class="ab cta">Ouvrir la console <i>→</i></div></div></section>
+
+  <!-- 18 -->
+  <section class="slot" id="s18"><div class="cap"><b>18 · Mockup · écrans</b><span>Interface</span></div>
+    <div class="pl keep" id="p18" style="background:linear-gradient(160deg,#e8f1ee,#cdece6)">
+      <div class="laptop"><div class="scr"><div class="vp"><iframe data-src="index.html#/tableau" data-w="1440" data-h="900" title="Console, bureau" tabindex="-1" loading="lazy"></iframe></div></div><div class="base"></div></div>
+      <div class="phone"><div class="vp"><iframe data-src="index.html#/especes" data-w="390" data-h="844" title="Console, mobile" tabindex="-1" loading="lazy"></iframe></div></div>
+      <div class="ab leg" style="color:var(--ink)"><span class="lbl">Console BANBIOM · bureau et mobile · interface réelle</span></div></div></section>
+</main>
+
+<script>
+/* @ds-bundle: {"format":4,"namespace":"Banbiom","components":[]} */
+/* BANBIOM — moteur voronoï partagé.
+   Banbiom.field(canvas, opts)        champ animé ou statique (macro, méso, micro)
+   Banbiom.division(svg, opts)        division d'un cadre en 2, 3, 6, 12… cellules, avec cellule dominante
+   Banbiom.cellPath(seed, w, h, opts) une cellule seule (nano), chemin SVG
+   Banbiom.seedsFromSpecies(sp)       graines placées par les données d'une espèce */
+(function () {
+  "use strict";
+  function rng(seed) { var s = seed >>> 0 || 1; return function () { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; }; }
+  function hash(str) { var h = 2166136261; str = String(str); for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+
+  /* ---------- géométrie ---------- */
+  /* demi-plan de puissance entre p et q (poids wp, wq), recul de g/2 vers p */
+  function clipPower(poly, p, q, g, wp, wq) {
+    var nx = q[0] - p[0], ny = q[1] - p[1], len = Math.hypot(nx, ny) || 1, mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
+    var shift = (wp - wq) / 2, off = g / 2 * len, out = [];
+    function side(v) { return (v[0] - mx) * nx + (v[1] - my) * ny - shift + off; }
+    return cutBy(poly, side);
+  }
+  function cutBy(poly, side) {
+    var out = [];
+    for (var i = 0; i < poly.length; i++) {
+      var a = poly[i], b = poly[(i + 1) % poly.length], sa = side(a), sb = side(b);
+      if (sa <= 0) out.push(a);
+      if ((sa <= 0) !== (sb <= 0)) { var t = sa / (sa - sb); out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]); }
+    }
+    return out;
+  }
+  function frame(w, h, m) { return [[-m, -m], [w + m, -m], [w + m, h + m], [-m, h + m]]; }
+  /* diagramme de puissance : chaque graine {x, y, w (poids, px²)} */
+  function cells(pts, w, h, gapOf, margin) {
+    return pts.map(function (p, i) {
+      var poly = frame(w, h, margin == null ? 60 : margin), g = gapOf(p);
+      for (var j = 0; j < pts.length && poly.length > 2; j++) if (j !== i) poly = clipPower(poly, [p.x, p.y], [pts[j].x, pts[j].y], g, p.w || 0, pts[j].w || 0);
+      return poly;
+    });
+  }
+  function dedupe(poly) {
+    var pts = [];
+    poly.forEach(function (v) { var l = pts[pts.length - 1]; if (!l || Math.hypot(v[0] - l[0], v[1] - l[1]) > 0.05) pts.push(v); });
+    if (pts.length > 1 && Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) <= 0.05) pts.pop();
+    return pts;
+  }
+  function centroid(pts) { var cx = 0, cy = 0; pts.forEach(function (v) { cx += v[0]; cy += v[1]; }); return [cx / pts.length, cy / pts.length]; }
+  function inwardNormal(a, b, c) {
+    var dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
+    if (nx * (c[0] - a[0]) + ny * (c[1] - a[1]) < 0) { nx = -nx; ny = -ny; }
+    return [nx, ny];
+  }
+  /* arrondi adaptatif : rayon = min(R, moitié de la distance du centre au bord le plus proche).
+     La cellule est réduite de ce rayon puis regonflée : coins en arcs exacts, bords inchangés,
+     et une petite cellule garde sa forme au lieu de disparaître. */
+  function rounded(poly, R) {
+    var pts = dedupe(poly); if (pts.length < 3) return null;
+    var c = centroid(pts), n = pts.length, dmin = 1e9;
+    for (var i = 0; i < n; i++) {
+      var a = pts[i], b = pts[(i + 1) % n], nr = inwardNormal(a, b, c);
+      dmin = Math.min(dmin, (c[0] - a[0]) * nr[0] + (c[1] - a[1]) * nr[1]);
+    }
+    if (dmin < 0.8) return null;
+    var r = Math.max(0, Math.min(R, dmin * 0.35));
+    if (r < 0.6) return { pts: pts, r: 0 };
+    var inner = pts;
+    for (var k = 0; k < n; k++) {
+      (function (a, b) { var nr = inwardNormal(a, b, c); inner = cutBy(inner, function (v) { return r - ((v[0] - a[0]) * nr[0] + (v[1] - a[1]) * nr[1]); }); })(pts[k], pts[(k + 1) % n]);
+      if (inner.length < 3) return { pts: pts, r: 0 };
+    }
+    inner = dedupe(inner); if (inner.length < 3) return { pts: pts, r: 0 };
+    return { pts: inner, r: r };
+  }
+  function arcs(shape) {
+    var pts = shape.pts, n = pts.length, c = centroid(pts), out = [];
+    for (var i = 0; i < n; i++) {
+      var a = pts[(i - 1 + n) % n], b = pts[i], d = pts[(i + 1) % n];
+      var n1 = inwardNormal(a, b, c), n2 = inwardNormal(b, d, c);
+      n1 = [-n1[0], -n1[1]]; n2 = [-n2[0], -n2[1]];
+      out.push({ b: b, a1: Math.atan2(n1[1], n1[0]), a2: Math.atan2(n2[1], n2[0]), n1: n1, n2: n2, ccw: (n1[0] * n2[1] - n1[1] * n2[0]) < 0 });
+    }
+    return out;
+  }
+  function traceCanvas(ctx, poly, R) {
+    var s = rounded(poly, R); if (!s) return false;
+    ctx.beginPath();
+    if (!s.r) { s.pts.forEach(function (v, j) { j ? ctx.lineTo(v[0], v[1]) : ctx.moveTo(v[0], v[1]); }); ctx.closePath(); return true; }
+    arcs(s).forEach(function (k) { ctx.arc(k.b[0], k.b[1], s.r, k.a1, k.a2, k.ccw); });
+    ctx.closePath(); return true;
+  }
+  function traceSVG(poly, R) {
+    var s = rounded(poly, R); if (!s) return "";
+    var f = function (v) { return v.toFixed(2); };
+    if (!s.r) return "M" + s.pts.map(function (v) { return f(v[0]) + " " + f(v[1]); }).join("L") + "Z";
+    var d = "", r = s.r;
+    arcs(s).forEach(function (k, i) {
+      var p1 = [k.b[0] + k.n1[0] * r, k.b[1] + k.n1[1] * r], p2 = [k.b[0] + k.n2[0] * r, k.b[1] + k.n2[1] * r];
+      d += (i ? "L" : "M") + f(p1[0]) + " " + f(p1[1]) + "A" + f(r) + " " + f(r) + " 0 0 " + (k.ccw ? 0 : 1) + " " + f(p2[0]) + " " + f(p2[1]);
+    });
+    return d + "Z";
+  }
+  /* plus grand rectangle (rapport donné) centré dans une cellule convexe : zone de texte */
+  function innerRect(poly, aspect) {
+    var pts = dedupe(poly); if (pts.length < 3) return null;
+    var c = centroid(pts), n = pts.length;
+    function inside(x, y) { for (var i = 0; i < n; i++) { var a = pts[i], b = pts[(i + 1) % n], nr = inwardNormal(a, b, c); if ((x - a[0]) * nr[0] + (y - a[1]) * nr[1] < 0) return false; } return true; }
+    var lo = 0, hi = 4000;
+    for (var it = 0; it < 30; it++) { var m = (lo + hi) / 2, hw = m * aspect / 2, hh = m / 2;
+      if (inside(c[0] - hw, c[1] - hh) && inside(c[0] + hw, c[1] - hh) && inside(c[0] + hw, c[1] + hh) && inside(c[0] - hw, c[1] + hh)) lo = m; else hi = m; }
+    return { x: c[0] - lo * aspect / 2, y: c[1] - lo / 2, w: lo * aspect, h: lo };
+  }
+
+  /* ---------- couleurs (tokens du thème courant) ---------- */
+  function hex(h) { h = (h || "#088").trim(); if (h.indexOf("rgb") === 0) return h.replace(/[^\d,.]/g, "").split(",").slice(0, 3).map(Number); h = h.replace("#", ""); if (h.length === 3) h = h.split("").map(function (c) { return c + c; }).join(""); var n = parseInt(h.slice(0, 6), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+  function rgb(a) { return "rgb(" + a.map(Math.round).join(",") + ")"; }
+  function pal(el) {
+    var cs = getComputedStyle(el || document.documentElement), g = function (n) { return hex(cs.getPropertyValue("--" + n)); };
+    return { abyss: g("abyss"), abyss2: g("abyss-2"), cobalt: g("cobalt"), cobalt2: g("cobalt-2"), mist: g("mist"), lagoon: g("lagoon"), foam: g("foam"), deep: g("deep"), ground: g("ground"), vein: g("hero-vein"), paper: g("paper") };
+  }
+
+  /* ---------- styles de champ (aplats) ---------- */
+  var KINDS = {
+    faune: { gap: 1.5, r: 0, bg: function (p) { return p.mist; }, fill: function (s, p) { return s.n < .7 ? p.cobalt : p.cobalt2; } },
+    flore: { gap: 10, r: 26, bg: function (p) { return p.ground; }, fill: function (s, p) { var f = [p.lagoon, p.deep, p.foam, p.lagoon, p.abyss]; return f[Math.floor(s.n * f.length) % f.length]; } },
+    branche: { gap: 18, r: 40, bg: function (p) { return p.lagoon; }, fill: function (s, p) { return p.abyss; } },
+    reseau: { gap: 2, r: 12, bg: function (p) { return p.vein; }, fill: function (s, p) { return s.n < .8 ? p.abyss : p.abyss2; } }
+  };
+
+  function makeSeeds(o, w, h) {
+    var list;
+    if (o.seeds) list = o.seeds(w, h);
+    else {
+      var r = rng(hash(o.seed || "banbiom")), n = o.cells || Math.max(3, Math.round(w * h / 5200 * (o.density || 1)));
+      list = Array.from({ length: Math.min(160, n) }, function () { return { x: r() * w, y: r() * h, n: r() }; });
+    }
+    if (o.focus) { /* cellule dominante : graine fixée + poids */
+      list.push({ x: o.focus.x * w, y: o.focus.y * h, n: .5, w: Math.pow(o.focus.size * Math.min(w, h), 2), pinned: true, focus: true });
+    }
+    var r2 = rng(hash((o.seed || "b") + "m"));
+    return list.map(function (s) { return { hx: s.x, hy: s.y, x: s.x, y: s.y, vx: 0, vy: 0, n: s.n != null ? s.n : .5, w: s.w || 0, pinned: !!s.pinned, focus: !!s.focus, a: r2() * 6.283, s: .08 + r2() * .14, g: 0 }; });
+  }
+
+  function field(cv, opts) {
+    var o = Object.assign({ kind: "faune", seed: "x", live: false, interactive: false }, opts || {});
+    var K = KINDS[o.kind], st = { pts: null, mouse: null, raf: 0, last: 0, t0: performance.now(), energy: 0, vis: true };
+    var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var R = o.radius != null ? o.radius : K.r, GAP = o.gap != null ? o.gap : K.gap;
+    function setup() {
+      var w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
+      var dpr = Math.min(2, window.devicePixelRatio || 1); st.w = w; st.h = h; st.dpr = dpr; cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+      st.pts = makeSeeds(o, w, h); render(); kick();
+    }
+    function render() {
+      if (!st.pts) return;
+      var p = pal(cv), c = cv.getContext("2d"), w = st.w, h = st.h;
+      c.setTransform(st.dpr, 0, 0, st.dpr, 0, 0); c.clearRect(0, 0, w, h);
+      c.fillStyle = rgb(K.bg(p)); c.fillRect(0, 0, w, h);
+      var cs = cells(st.pts, w, h, function (s) { return GAP + s.g; });
+      cs.forEach(function (poly, i) {
+        var s = st.pts[i]; if (poly.length < 3) return;
+        if (!traceCanvas(c, poly, R)) return;
+        c.fillStyle = rgb(s.focus && o.focusColor ? p[o.focusColor] : K.fill(s, p)); c.fill();
+      });
+      if (o.nuclei) st.pts.forEach(function (s, i) { c.fillStyle = o.nucleusColor ? o.nucleusColor(s, i) : rgb(p.mist); c.beginPath(); c.arc(s.x, s.y, o.nucleusSize || 2, 0, 6.283); c.fill(); });
+    }
+    /* ressorts amortis, mouvement retenu : pas de croisement de graines, pas de saut */
+    function step(now) {
+      var t = (now - st.t0) / 1000, amp = o.live && !reduce ? Math.min(st.w, st.h) * .025 : 0, reach = Math.max(90, Math.min(st.w, st.h) * .4), e = 0;
+      st.pts.forEach(function (p) {
+        var tg = 0;
+        if (!p.pinned) {
+          var tx = p.hx + Math.sin(t * p.s + p.a) * amp, ty = p.hy + Math.cos(t * p.s * .8 + p.n * 9) * amp * .8, ax = (tx - p.x) * .03, ay = (ty - p.y) * .03;
+          if (st.mouse) { var dx = p.x - st.mouse.x, dy = p.y - st.mouse.y, d = Math.hypot(dx, dy) || 1; if (d < reach) { var f = Math.pow(1 - d / reach, 2) * 2.4; ax += dx / d * f; ay += dy / d * f; tg = (o.open != null ? o.open : 10) * Math.pow(1 - d / reach, 2); } }
+          p.vx = (p.vx + ax) * .8; p.vy = (p.vy + ay) * .8; p.x += p.vx; p.y += p.vy; e += Math.abs(p.vx) + Math.abs(p.vy);
+        }
+        p.g += (tg - p.g) * .12; e += Math.abs(tg - p.g) * .2;
+      });
+      st.energy = e / st.pts.length;
+    }
+    function kick() {
+      if (st.raf || !st.pts) return;
+      var loop = function (now) {
+        var active = (o.live && st.vis && !reduce) || st.mouse || st.energy > .01;
+        if (!active || !cv.isConnected) { st.raf = 0; render(); return; }
+        if (now - st.last > 16) { step(now); render(); st.last = now; }
+        st.raf = requestAnimationFrame(loop);
+      };
+      st.raf = requestAnimationFrame(loop);
+    }
+    new ResizeObserver(setup).observe(cv);
+    new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "class"] });
+    if (o.live && "IntersectionObserver" in window) new IntersectionObserver(function (es) { st.vis = es[0].isIntersecting; kick(); }).observe(cv);
+    if (o.interactive && !reduce) {
+      var host = o.host || cv.parentElement;
+      host.addEventListener("pointermove", function (e) { if (e.pointerType === "touch") return; var b = cv.getBoundingClientRect(); st.mouse = { x: e.clientX - b.left, y: e.clientY - b.top }; kick(); });
+      host.addEventListener("pointerleave", function () { st.mouse = null; kick(); });
+    }
+    return { redraw: render, setup: setup };
+  }
+
+  /* ---------- divisions d'un cadre ----------
+     n = 2 ou 3 : coupes droites parallèles, inclinées de `angle` degrés ; `sizes` = proportions.
+     n ≥ 4 : diagramme de puissance ; `focus` {x, y, size} réserve une cellule dominante (espace typographique).
+     Rend des <path> dans le <svg> et renvoie les cellules avec leur zone de texte. */
+  function division(svg, opts) {
+    var o = Object.assign({ n: 2, gap: 10, radius: 18, angle: 12, colors: ["var(--abyss)", "var(--cobalt)", "var(--lagoon)"], seed: "division", aspect: 1.6 }, opts || {});
+    var vb = svg.viewBox.baseVal, w = vb && vb.width ? vb.width : svg.clientWidth, h = vb && vb.height ? vb.height : svg.clientHeight;
+    var polys = [], focusIndex = -1;
+    if (o.n <= 3) {
+      var th = o.angle * Math.PI / 180, ux = Math.cos(th), uy = Math.sin(th), cx = w / 2, cy = h / 2;
+      var proj = function (v) { return (v[0] - cx) * ux + (v[1] - cy) * uy; };
+      var F = frame(w, h, 0), lo = Math.min.apply(null, F.map(proj)), hi = Math.max.apply(null, F.map(proj));
+      var sizes = o.sizes || Array.from({ length: o.n }, function () { return 1; }), tot = sizes.reduce(function (a, b) { return a + b; }, 0), acc = 0;
+      var cuts = sizes.map(function (s) { acc += s; return lo + (hi - lo) * acc / tot; });
+      for (var i = 0; i < o.n; i++) {
+        var a = i ? cuts[i - 1] + o.gap / 2 : -1e9, b = i < o.n - 1 ? cuts[i] - o.gap / 2 : 1e9, poly = F;
+        poly = cutBy(poly, function (v) { return a - proj(v); });
+        poly = cutBy(poly, function (v) { return proj(v) - b; });
+        polys.push(poly);
+      }
+      if (o.focusCell != null) focusIndex = o.focusCell; else { var mx = Math.max.apply(null, sizes); focusIndex = sizes.indexOf(mx); }
+    } else {
+      var r = rng(hash(o.seed)), pts = [];
+      var fx = o.focus ? o.focus.x * w : -1, fy = o.focus ? o.focus.y * h : -1, fr = o.focus ? o.focus.size * Math.min(w, h) : 0;
+      var tries = 0;
+      while (pts.length < o.n - (o.focus ? 1 : 0) && tries++ < 2000) {
+        var x = r() * w, y = r() * h;
+        if (o.focus && Math.hypot(x - fx, y - fy) < fr * 1.15) continue;
+        pts.push({ x: x, y: y, w: 0 });
+      }
+      if (o.focus) { pts.unshift({ x: fx, y: fy, w: fr * fr * 0.9 }); focusIndex = 0; }
+      polys = cells(pts, w, h, function () { return o.gap; }, 0);
+    }
+    var ns = "http://www.w3.org/2000/svg", out = [];
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    polys.forEach(function (poly, i) {
+      var d = traceSVG(poly, o.radius); if (!d) return;
+      var el = document.createElementNS(ns, "path"); el.setAttribute("d", d);
+      var col = i === focusIndex && o.focusColor ? o.focusColor : o.colors[i % o.colors.length];
+      el.setAttribute("fill", col); el.setAttribute("data-cell", i); if (i === focusIndex) el.setAttribute("data-focus", "");
+      svg.appendChild(el);
+      out.push({ index: i, focus: i === focusIndex, text: innerRect(poly, o.aspect) });
+    });
+    return out;
+  }
+
+  /* une cellule seule (nano) */
+  function cellPath(seed, w, h, opts) {
+    opts = opts || {}; var r = rng(hash(seed)), cx = w / 2, cy = h / 2, k = opts.sides || 6, pts = [{ x: cx, y: cy }];
+    for (var i = 0; i < k; i++) { var a = i / k * 6.283 + (r() - .5) * .8, d = 1.0 + r() * .45; pts.push({ x: cx + Math.cos(a) * w * d, y: cy + Math.sin(a) * h * d }); }
+    var poly = cells(pts, w, h, function () { return 0; }, -(opts.inset || 0))[0];
+    return traceSVG(poly, opts.radius || 0);
+  }
+
+  /* graines placées par les données : x = température, y = profondeur, nombre = taille */
+  function seedsFromSpecies(sp) {
+    return function (w, h) {
+      var r = rng(hash(sp.nom_scientifique || "x")), tmin = sp.temperature_min || 10, tmax = sp.temperature_max || 25, dmin = sp.profondeur_min || 0, dmax = sp.profondeur_max || 50;
+      var count = Math.max(5, Math.min(22, Math.round(Math.log2((sp.taille_max_cm || 20) + 2) * 2.6)));
+      var x0 = (tmin - 5) / 30 * w, x1 = (tmax - 5) / 30 * w, y0 = Math.sqrt(dmin / 1000) * h, y1 = Math.sqrt(Math.max(dmax, dmin + 1) / 1000) * h, out = [];
+      for (var i = 0; i < count; i++) { var band = i < count * .65; out.push({ x: band ? x0 + r() * Math.max(14, x1 - x0) : r() * w, y: band ? y0 + r() * Math.max(14, y1 - y0) : r() * h, n: r() }); }
+      return out;
+    };
+  }
+
+  window.Banbiom = { field: field, division: division, cellPath: cellPath, seedsFromSpecies: seedsFromSpecies, kinds: Object.keys(KINDS), _cells: cells, _traceSVG: traceSVG, _rounded: rounded, _arcs: arcs, _innerRect: innerRect, _hash: hash, _rng: rng };
+})();
+
+</script>
+<script>
+(function(){
+"use strict";
+const B=window.Banbiom, $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const C={abyss:"#0a2f3b",abyss2:"#124858",cobalt:"#2f5bd8",cobalt2:"#1c3c9e",mist:"#b4c8f8",lagoon:"#17b3a3",foam:"#a3e8de",deep:"#0b6b66",ground:"#cdece6",paper:"#e8f1ee",ink:"#0a2a32"};
+let SP=[];
+
+/* ---------- logo : disque coupé en 3 cellules ---------- */
+function logoPaths(){ const r=B._rng(B._hash("logo-sphere")), pts=[]; while(pts.length<3){ const x=r()*100,y=r()*100; if(Math.hypot(x-50,y-50)<46) pts.push({x,y,w:0}); }
+  return {pts,cells:B._cells(pts,100,100,()=>9,8)}; }
+function logo(svg){ const id="lg"+Math.random().toString(36).slice(2,7), {cells}=logoPaths();
+  svg.setAttribute("viewBox","0 0 100 100"); svg.innerHTML=`<defs><clipPath id="${id}"><circle cx="50" cy="50" r="49"/></clipPath></defs><g clip-path="url(#${id})" fill="currentColor">${cells.map(p=>`<path d="${B._traceSVG(p,12)}"/>`).join("")}</g>`; }
+$$("[data-logo]").forEach(logo); logo($("#topLogo"));
+
+/* construction */
+(function(){ const svg=$("#logoBuild"), {pts,cells}=logoPaths(), raw=B._cells(pts,100,100,()=>0,8);
+  const bis=[]; for(let i=0;i<3;i++) for(let j=i+1;j<3;j++){ const a=pts[i],b=pts[j],mx=(a.x+b.x)/2,my=(a.y+b.y)/2,dx=-(b.y-a.y),dy=b.x-a.x,l=Math.hypot(dx,dy); bis.push(`<line x1="${mx-dx/l*70}" y1="${my-dy/l*70}" x2="${mx+dx/l*70}" y2="${my+dy/l*70}"/>`); }
+  svg.innerHTML=`<defs><clipPath id="cb"><circle cx="50" cy="50" r="49"/></clipPath></defs>
+  <g stroke="${C.cobalt}" stroke-width=".25" fill="none" stroke-dasharray="1 1"><circle cx="50" cy="50" r="49"/><circle cx="50" cy="50" r="61.25"/><line x1="0" y1="50" x2="100" y2="50"/><line x1="50" y1="0" x2="50" y2="100"/>${bis.join("")}</g>
+  <g clip-path="url(#cb)" fill="${C.abyss}" opacity=".92">${cells.map(p=>`<path d="${B._traceSVG(p,12)}"/>`).join("")}</g>
+  <g fill="${C.foam}" stroke="${C.cobalt}" stroke-width=".4">${pts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="1.4"/>`).join("")}</g>
+  <g font-family="IBM Plex Mono" font-size="2.4" fill="${C.cobalt}"><text x="51" y="3.5">Ø 1</text><text x="88" y="49">r = 0,49</text><text x="2" y="98">zone de protection 0,25</text></g>`; })();
+
+/* icônes d'application */
+$("#icons").innerHTML=[[64,"64 px"],[40,"40"],[28,"28"],[18,"18"]].map(([s,l])=>`<div class="ic"><i style="width:${s/14.4}cqw;height:${s/14.4}cqw;border-radius:${s/14.4*.24}cqw"><svg data-logo style="width:62%;height:62%"></svg></i><span>${l}</span></div>`).join("")
+  +`<div class="ic" style="margin-left:2cqw"><span class="word" style="font-size:2.6cqw;color:var(--ink)">BANBIOM</span><span>Logotype · Outfit 500 · approche 16 %</span></div>`;
+$$("#icons [data-logo]").forEach(logo);
+
+/* grilles éditoriales */
+function gridLines(svg,cols,rows,col){ const W=1000,H=1000; svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  let d=""; cols.forEach(x=>d+=`<line x1="${x*W}" x2="${x*W}" y1="0" y2="${H}"/>`); rows.forEach(y=>d+=`<line x1="0" x2="${W}" y1="${y*H}" y2="${y*H}"/>`);
+  svg.innerHTML=`<g stroke="${col}" stroke-width="1" vector-effect="non-scaling-stroke"><rect x="0" y="0" width="${W}" height="${H}" fill="none" vector-effect="non-scaling-stroke"/>${d}</g>`; }
+gridLines($("#grid5"),[.62,.66],[.08,.6,.66,.86],"rgba(238,243,244,.1)");
+gridLines($("#grid17"),[.29,.31,.66,.68],[.06,.1,.36,.4,.6,.64,.7,.74,.8,.84,.9,.94],"rgba(238,243,244,.18)");
+
+/* couleurs : chaque teinte est une cellule */
+(function(){ const svg=$("#swatches"), W=1600, H=1000; svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const sw=[["Abysse",C.abyss,"#0A2F3B","Fond, texte fort",1.9],["Cobalt",C.cobalt,"#2F5BD8","Faune",1.6],["Lagon",C.lagoon,"#17B3A3","Flore",1.6],["Profond",C.deep,"#0B6B66","Flore, ombre",1.1],
+    ["Cobalt foncé",C.cobalt2,"#1C3C9E","Faune, ombre",1],["Brume",C.mist,"#B4C8F8","Faune, clair",.9],["Écume",C.foam,"#A3E8DE","Flore, clair",.9],["Fond",C.paper,"#E8F1EE","Papier",1.2],["Sol",C.ground,"#CDECE6","Surface",.8]];
+  const r=B._rng(B._hash("palette")), pts=sw.map((s,i)=>({x:120+r()*(W-240),y:120+r()*(H-240),w:(s[4]*170)**2}));
+  for(let k=0;k<60;k++) pts.forEach((p,i)=>pts.forEach((q,j)=>{ if(i===j) return; const d=Math.hypot(p.x-q.x,p.y-q.y)||1; if(d<380){ p.x+=(p.x-q.x)/d*6; p.y+=(p.y-q.y)/d*6; } p.x=Math.max(100,Math.min(W-100,p.x)); p.y=Math.max(100,Math.min(H-100,p.y)); }));
+  const cs=B._cells(pts,W,H,()=>14,0); svg.innerHTML=cs.map((poly,i)=>{ const s=sw[i], ir=B._innerRect(poly,1.6), dark=[C.abyss,C.cobalt,C.deep,C.cobalt2,C.lagoon].includes(s[1]), tc=dark?"#fff":C.ink;
+    return `<path d="${B._traceSVG(poly,26)}" fill="${s[1]}"/>${ir?`<g fill="${tc}" transform="translate(${ir.x+22},${ir.y+30})"><text font-family="Outfit" font-size="30" font-weight="300">${s[0]}</text><text y="34" font-size="15" opacity=".75" font-family="IBM Plex Mono">${s[2]}</text><text y="56" font-size="15" opacity=".6" font-family="Outfit">${s[3]}</text></g>`:""}`; }).join(""); })();
+
+/* quatre éléments */
+(function(){ const E=[["Cellule","Une espèce. Un aplat, des coins arrondis, jamais de pointe."],["Veine","Une relation. L'espace entre les cellules devient la forme."],["Graine","Une donnée. Elle place la cellule : profondeur, température."],["Jonction","Une connexion. Là où trois cellules se rencontrent."]];
+  $("#elements").innerHTML=E.map(([n,d],k)=>{ const W=300,H=260, r=B._rng(B._hash("el"+k)), pts=Array.from({length:7},()=>({x:20+r()*260,y:20+r()*220,w:0})), cs=B._cells(pts,W,H,()=>10,0);
+    let g=cs.map((p,i)=>`<path d="${B._traceSVG(p,14)}" fill="${k===0&&i===2?C.lagoon:"rgba(163,232,222,.12)"}"/>`).join("");
+    if(k===1){ const raw=B._cells(pts,W,H,()=>0,0); g=raw.map(p=>`<path d="M${p.map(v=>v.join(" ")).join("L")}Z" fill="none" stroke="${C.foam}" stroke-width="2"/>`).join(""); }
+    if(k===2) g+=pts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="5" fill="${C.foam}"/>`).join("");
+    if(k===3){ const raw=B._cells(pts,W,H,()=>0,0), V=[]; raw.forEach(p=>p.forEach(v=>{ const n=raw.filter(q=>q.some(u=>Math.hypot(u[0]-v[0],u[1]-v[1])<.5)).length; if(n>=3&&v[0]>2&&v[0]<W-2&&v[1]>2&&v[1]<H-2&&!V.some(u=>Math.hypot(u[0]-v[0],u[1]-v[1])<1)) V.push(v); }));
+      g+=V.map(v=>`<circle cx="${v[0]}" cy="${v[1]}" r="7" fill="none" stroke="${C.foam}" stroke-width="2"/><circle cx="${v[0]}" cy="${v[1]}" r="2.5" fill="${C.foam}"/>`).join(""); }
+    return `<div class="c"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice">${g}</svg><div><span class="lbl">0${k+1}</span><b>${n}</b><span>${d}</span></div></div>`; }).join(""); })();
+
+/* ---------- champs animés ---------- */
+/* opts : n, seed, gap, R, bg(ctx,W,H,t), paint(ctx,path,i,s,t), move(s,i,t), mouse, grow */
+function Field(cv,o){
+  const ctx=cv.getContext("2d"); let W=0,H=0,pts=[],m=null,vis=false,raf=0,t0=performance.now();
+  function seed(){ const r=B._rng(B._hash(o.seed)); pts=Array.from({length:o.n},(_,i)=>({hx:r()*W,hy:r()*H,x:0,y:0,vx:0,vy:0,a:r()*6.283,b:r()*6.283,sp:.4+r()*.8,g:0,k:r(),born:i})); pts.forEach(p=>{p.x=p.hx;p.y=p.hy;}); }
+  function size(){ const d=Math.min(2,devicePixelRatio||1), b=cv.getBoundingClientRect(); if(!b.width) return; const nw=b.width,nh=b.height; if(nw===W&&nh===H) return;
+    W=nw; H=nh; cv.width=W*d; cv.height=H*d; ctx.setTransform(d,0,0,d,0,0); seed(); frame(performance.now()); }
+  function frame(now){
+    const t=(now-t0)/1000, amp=Math.min(W,H)*(o.amp||.03);
+    pts.forEach((p,i)=>{ let tx=p.hx, ty=p.hy;
+      if(!reduce&&o.drift!==false){ tx+=Math.cos(t*p.sp*.5+p.a)*amp; ty+=Math.sin(t*p.sp*.4+p.b)*amp; }
+      let tg=0; if(m){ const dx=p.x-m.x, dy=p.y-m.y, d=Math.hypot(dx,dy)||1, R=Math.min(W,H)*.35; if(d<R){ const k=(1-d/R)**2; tx+=dx/d*k*R*.35; ty+=dy/d*k*R*.35; tg=(o.open||14)*k; } }
+      p.vx=(p.vx+(tx-p.x)*.08)*.78; p.vy=(p.vy+(ty-p.y)*.08)*.78; p.x+=p.vx; p.y+=p.vy; p.g+=(tg-p.g)*.15; });
+    const live=o.grow?pts.slice(0,o.grow(t,pts.length)):pts;
+    ctx.clearRect(0,0,W,H); if(o.bg) o.bg(ctx,W,H,t);
+    const cs=B._cells(live.map(p=>({x:p.x,y:p.y,w:0,g:p.g})),W,H,s=>(o.gap||0)+s.g,o.margin==null?0:o.margin);
+    cs.forEach((poly,i)=>{ const d=B._traceSVG(poly,o.R||0); if(d) o.paint(ctx,new Path2D(d),i,live[i],t,poly); });
+    if(o.after) o.after(ctx,W,H,t,live,cs);
+  }
+  function loop(now){ frame(now); raf=vis&&!reduce?requestAnimationFrame(loop):0; }
+  new IntersectionObserver(es=>{ vis=es[0].isIntersecting; if(vis&&!raf&&!reduce) raf=requestAnimationFrame(loop); },{rootMargin:"100px"}).observe(cv);
+  new ResizeObserver(size).observe(cv);
+  if(o.mouse){ const host=o.host||cv.parentElement; host.addEventListener("pointermove",e=>{ const b=cv.getBoundingClientRect(); m={x:e.clientX-b.left,y:e.clientY-b.top}; if(reduce) frame(performance.now()); }); host.addEventListener("pointerleave",()=>{ m=null; }); }
+  size();
+}
+const pick=(arr,k)=>arr[Math.floor(k*arr.length)%arr.length];
+const blobs=(ctx,W,H,t,list)=>{ list.forEach(([x,y,r,c],i)=>{ const X=W*(x+.05*Math.sin(t*.3+i)), Y=H*(y+.05*Math.cos(t*.25+i*1.3)), R=Math.max(W,H)*r, g=ctx.createRadialGradient(X,Y,0,X,Y,R); g.addColorStop(0,c); g.addColorStop(1,"rgba(0,0,0,0)"); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); }); };
+const FIELDS={
+  cover:cv=>Field(cv,{n:46,seed:"cover",gap:3,R:0,mouse:true,host:$("#p1"),margin:0,
+    paint(c,p,i,s){ c.strokeStyle="rgba(163,232,222,.28)"; c.lineWidth=1; c.stroke(p); if(s.k>.86){ c.fillStyle=s.k>.95?C.lagoon:"rgba(23,179,163,.22)"; c.fill(p); } },
+    after(c,W,H,t,pts){ c.fillStyle=C.foam; pts.forEach(s=>{ if(s.k>.7){ c.beginPath(); c.arc(s.x,s.y,1.6,0,6.3); c.fill(); } }); }}),
+  macro:cv=>Field(cv,{n:90,seed:"macro",gap:2,R:3,amp:.015,paint(c,p,i,s){ c.fillStyle=pick([C.cobalt,C.cobalt,C.cobalt2,C.mist],s.k); c.fill(p); }}),
+  meso:cv=>Field(cv,{n:14,seed:"meso",gap:6,R:14,amp:.03,paint(c,p,i,s){ c.fillStyle=pick([C.lagoon,C.deep,C.foam,C.lagoon],s.k); c.fill(p); }}),
+  micro:cv=>Field(cv,{n:7,seed:"micro",gap:6,R:16,amp:.04,paint(c,p,i,s){ c.fillStyle=pick([C.abyss,C.abyss2,C.lagoon],s.k); c.fill(p); }}),
+  nano:cv=>Field(cv,{n:2,seed:"nano2",gap:8,R:18,amp:.05,paint(c,p,i){ c.fillStyle=[C.cobalt,C.mist][i%2]; c.fill(p); }}),
+  breathe:cv=>Field(cv,{n:24,seed:"breathe",gap:10,R:28,amp:.07,mouse:true,paint(c,p,i,s){ c.fillStyle=pick([C.lagoon,C.deep,C.foam,C.ground,C.lagoon,C.abyss],s.k); c.fill(p); }}),
+  veins:cv=>Field(cv,{n:60,seed:"veins",gap:2,R:6,amp:.02,mouse:true,open:40,
+    paint(c,p,i,s){ c.fillStyle="#161b1f"; c.fill(p); c.strokeStyle=s.g>1?`rgba(77,124,255,${Math.min(1,.25+s.g/30)})`:"rgba(232,238,240,.16)"; c.lineWidth=1; c.stroke(p); },
+    bg(c,W,H){ c.fillStyle="#2a3238"; c.fillRect(0,0,W,H); }}),
+  grow:cv=>Field(cv,{n:70,seed:"grow",gap:3,R:10,amp:.01,drift:true,
+    grow(t,n){ const k=Math.floor((t*4)%(n+16)); const v=Math.max(1,Math.min(n,k)); const el=$("#growN"); if(el) el.textContent=`${v} fiche${v>1?"s":""}`; return v; },
+    paint(c,p,i,s,t){ const age=(t*4)%(70+16)-s.born; c.fillStyle=age<2.5?C.foam:pick([C.lagoon,C.deep,C.abyss2,C.cobalt],s.k); c.fill(p); }}),
+  glass:cv=>Field(cv,{n:16,seed:"glass",gap:14,R:24,amp:.05,mouse:true,open:16,
+    bg(c,W,H,t){ c.fillStyle="#06222c"; c.fillRect(0,0,W,H); blobs(c,W,H,t,[[.8,.25,.45,"rgba(77,124,255,.9)"],[.62,.75,.4,"rgba(46,224,201,.75)"],[.95,.55,.25,"rgba(180,200,248,.7)"],[.2,.85,.4,"rgba(11,128,120,.8)"],[.4,.45,.3,"rgba(42,79,192,.7)"]]); },
+    paint(c,p){ c.fillStyle="rgba(232,241,238,.10)"; c.fill(p); c.strokeStyle="rgba(232,241,238,.5)"; c.lineWidth=1; c.stroke(p); }}),
+  blur:cv=>Field(cv,{n:18,seed:"blur",gap:0,R:0,amp:.08,paint(c,p,i,s){ c.fillStyle=pick(["#6f7f3a","#a5a94d","#3d5a3a","#c9b75a","#7d9a8f","#8fb0c4","#556b2f"],s.k); c.fill(p); }}),
+  sky:cv=>Field(cv,{n:20,seed:"sky",gap:6,R:24,amp:.05,paint(c,p,i,s){ c.fillStyle=s.k>.5?"#fff":"#000"; c.fill(p); }}),
+  poster:cv=>Field(cv,{n:26,seed:"poster",gap:4,R:8,amp:.04,mouse:true,
+    bg(c,W,H,t){ const g=c.createLinearGradient(0,0,0,H); g.addColorStop(0,"#7fa3c8"); g.addColorStop(.55,"#e3b48f"); g.addColorStop(1,"#3a2a24"); c.fillStyle=g; c.fillRect(0,0,W,H); },
+    paint(c,p,i,s){ if(s.k>.55){ c.fillStyle=s.k>.85?"rgba(10,47,59,.85)":"rgba(47,91,216,.55)"; c.fill(p); } c.strokeStyle="rgba(255,255,255,.35)"; c.lineWidth=1; c.stroke(p); }})
+};
+$$("canvas[data-field]").forEach(cv=>FIELDS[cv.dataset.field]&&FIELDS[cv.dataset.field](cv));
+
+/* ---------- pastilles (mockup 14) ---------- */
+const IC={book:'<path d="M3 5.5C5.5 4 8.5 4 12 6c3.5-2 6.5-2 9-.5V19c-2.5-1.5-5.5-1.5-9 .5-3.5-2-6.5-2-9-.5z"/><path d="M12 6v13.5"/>',scan:'<path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',chat:'<path d="M4 18.5V7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H8z"/>',plus:'<circle cx="12" cy="12" r="8.5" stroke-dasharray="3 2"/><path d="M12 8v8M8 12h8"/>'};
+$("#pills").innerHTML=[["book","Ajouter une fiche"],["scan","Contrôler les données"],["gear","Comparer les espèces"],["chat","Annoter avec l'équipe"],["plus","Publier"]].map(([i,l],k)=>`<span class="pill" style="animation-delay:${.15+k*.12}s"><svg viewBox="0 0 24 24">${IC[i]}</svg>${l}</span>`).join("");
+new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) $$("#pills .pill").forEach(p=>{ p.style.animation="none"; p.offsetHeight; p.style.animation=""; }); }),{threshold:.4}).observe($("#p14"));
+
+/* ---------- dock (mockup 15) ---------- */
+$("#dock").innerHTML=Array.from({length:9},(_,i)=>i===4?`<div class="ap me"><span class="tip">BANBIOM</span><svg data-logo></svg></div>`:`<div class="ap"></div>`).join("");
+$$("#dock [data-logo]").forEach(logo);
+
+/* ---------- données (signatures, bento, affiche) ---------- */
+function sigSVG(sp,w,h){ const A=sp.regne==="Animal", gap=A?2:8, R=A?0:18, cols=A?[C.cobalt,C.cobalt,C.cobalt2]:[C.lagoon,C.deep,C.foam,C.lagoon,C.abyss], bg=A?C.mist:C.ground;
+  const pts=B.seedsFromSpecies(sp)(w,h), cs=B._cells(pts.map(p=>({x:p.x,y:p.y,w:0})),w,h,()=>gap,0);
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice"><rect width="${w}" height="${h}" fill="${bg}"/>${cs.map((poly,i)=>{ const d=B._traceSVG(poly,R); return d?`<path d="${d}" fill="${cols[Math.floor(pts[i].n*cols.length)%cols.length]}"/>`:""; }).join("")}</svg>`; }
+function useData(){
+  const g=$("#sigs"), pick12=SP.filter(s=>s.regne==="Animal").slice(0,6).concat(SP.filter(s=>s.regne==="Végétal").slice(0,6));
+  g.insertAdjacentHTML("beforeend",pick12.map(s=>`<div class="s">${sigSVG(s,240,180)}<div><em>${s.nom_scientifique}</em><br><span>${(s.habitat||"").toUpperCase()} · ${s.profondeur_min??"?"}–${s.profondeur_max??"?"} M</span></div></div>`).join(""));
+  $("#bigN").textContent=SP.length||33;
+  /* bento */
+  const order=["CR","EN","VU","NT","LC","DD","NE"], col={CR:"#f2667a",EN:"#f08a4f",VU:"#e5b042",NT:"#b8c94e",LC:"#5ccb8f",DD:"#8fa6ab",NE:"#4d5a60"}, n=SP.length||1;
+  let a0=-90, arcs=""; order.forEach(k=>{ const v=SP.filter(s=>(s.statut_uicn||"NE")===k).length; if(!v) return; const a1=a0+v/n*360-4, r=38, p=a=>[50+r*Math.cos(a*Math.PI/180),50+r*Math.sin(a*Math.PI/180)], [x0,y0]=p(a0), [x1,y1]=p(a1);
+    arcs+=`<path d="M${x0} ${y0}A${r} ${r} 0 ${a1-a0>180?1:0} 1 ${x1} ${y1}" fill="none" stroke="${col[k]}" stroke-width="7"/>`; a0=a1+4; });
+  const hab={}; SP.forEach(s=>hab[s.habitat]=(hab[s.habitat]||0)+1); const he=Object.entries(hab).sort((a,b)=>b[1]-a[1]).slice(0,5), hm=Math.max(1,...he.map(e=>e[1])), bc=["#1f6f6a","#8fd16a","#2c5a2a","#5bd0e0","#a3e8de"];
+  const bars=he.map(([h,v],i)=>`<rect x="${12+i*16}" y="${88-v/hm*70}" width="9" height="${v/hm*70}" fill="${bc[i]}"/>`).join("");
+  const orb=Array.from({length:6},(_,i)=>`<ellipse cx="50" cy="50" rx="${44-i*6}" ry="${22-i*1.2}" fill="none" stroke="rgba(255,255,255,${i?.3:.6})" stroke-width=".3" stroke-dasharray="${i?"1 1":"0"}" style="transform:rotate(${i*30}deg)"/>`).join("");
+  $("#bento").innerHTML=`<div class="t orb"><span class="lbl">Réseau d'espèces</span><svg viewBox="0 0 100 100">${orb}<defs><radialGradient id="cg"><stop offset="0" stop-color="#4d7cff"/><stop offset="1" stop-color="#0a2f3b"/></radialGradient></defs><circle cx="50" cy="50" r="6" fill="url(#cg)"/>${[[8,50],[92,50],[30,30],[72,70],[60,38]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.6" fill="#b4c8f8"/>`).join("")}</svg></div>
+    <div class="t lite wide"><span class="lbl">Flux d'import</span><svg viewBox="0 0 200 100"><g stroke="#0a2a32" stroke-dasharray="2 2" fill="none" stroke-width=".5"><path d="M100 26v8M100 34C100 40 60 38 60 46M100 34c0 6 40 4 40 12M60 58v12M140 58v12"/></g>
+      ${[[100,18,"Fichier CSV",1],[60,52,"Contrôle"],[140,52,"Doublons"],[60,78,"Validées"],[140,78,"À corriger"]].map(([x,y,t,d])=>`<rect x="${x-24}" y="${y-7}" width="48" height="14" rx="${d?2:7}" fill="${d?"#0a2a32":"rgba(10,42,50,.55)"}"/><text class="ntxt" x="${x-19}" y="${y+2.5}" style="font-size:5px">${t}</text>`).join("")}</svg></div>
+    <div class="t wide"><span class="lbl">Statuts UICN · habitats</span><svg viewBox="0 0 200 100"><g transform="translate(10,0)">${arcs}</g><g transform="translate(110,0)">${bars}</g></svg></div>
+    <div class="t" style="display:grid;grid-template-rows:1fr 1fr;gap:1.2cqw;background:none;place-items:stretch"><div class="t" style="place-items:center"><svg viewBox="0 0 100 100" style="width:60%;height:60%"><circle cx="50" cy="50" r="34" fill="none" stroke="#fff" stroke-width="7" stroke-dasharray="190 24" transform="rotate(-30 50 50)"/><path d="M42 58l12-14 12 10" fill="none" stroke="#fff" stroke-width="7" stroke-linejoin="round"/></svg></div><div class="t wht"><span class="tog"><i></i>Nouvelle fiche</span></div></div>`;
+}
+fetch("data/especes.json").then(r=>r.json()).then(j=>{ SP=j; useData(); }).catch(()=>useData());
+
+/* ---------- écrans réels (mockup 18) ---------- */
+function fitFrames(){ $$("#p18 iframe").forEach(f=>{ const vp=f.parentElement, w=+f.dataset.w, h=+f.dataset.h, s=vp.clientWidth/w; f.style.width=w+"px"; f.style.height=h+"px"; f.style.transform=`scale(${s})`; vp.style.height=Math.min(vp.parentElement.clientHeight||1e9,h*s)+"px"; }); }
+new IntersectionObserver(es=>{ if(es[0].isIntersecting) $$("#p18 iframe").forEach(f=>{ if(!f.src) f.src=f.dataset.src; }); },{rootMargin:"400px"}).observe($("#p18"));
+new ResizeObserver(fitFrames).observe($("#p18")); fitFrames();
+
+/* sommaire */
+$("#toc").innerHTML=$$(".slot").map((s,i)=>`<a href="#${s.id}">${String(i+1).padStart(2,"0")}</a>`).join("");
+})();
+</script>
+
+</body>
+</html>
