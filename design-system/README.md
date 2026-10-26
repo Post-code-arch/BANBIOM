@@ -123,6 +123,10 @@ Pleine hauteur d'écran : Faune et Flore côte à côte à 50/50 (empilées sur 
 
 Entre Faune / Flore et le catalogue. Une grande cellule claire porte le texte (libellé, titre, paragraphe, bouton principal et bouton flèche), coupée en diagonale. À droite, une seule image vue à travers trois cellules (deux empilées le long de la diagonale, une haute colonne à droite), en coupes droites et parallèles, coins arrondis 28 px, veines de 12 px. L'image glisse légèrement sous le curseur (parallaxe). En attendant une photo, l'image est une scène sous-marine en dégradé avec grain ; une photo se branche via la variable CSS `--mosaic-img` (`.mosaic{--mosaic-img:url(...)}`).
 
+## Photos d'espèces
+
+La photo ne remplace pas la signature voronoï : elle se voit à travers ses cellules (vignettes, fiche, aperçu de la carte), et une cellule sur quatre environ garde l'aplat du règne. Les veines restent claires. Le crédit (« Photo : … », lien vers la source) s'affiche en pastille en bas à droite de l'en-tête de la fiche. Sans photo, la signature reste en aplats.
+
 ## À faire, à éviter
 
 - Faire : un seul style de cellule par zone ; le règne lisible sans légende ; des valeurs mesurées en `data`.

@@ -16,6 +16,7 @@ Aperçu local : `python3 build.py && python3 -m http.server` puis http://localho
 
 - Sur claude.ai, le site utilise la base partagée de l'artifact (`window.claude.use("db")`, collection `species`).
 - En autonome (GitHub Pages), `connect()` ne trouve pas `window.claude` et `demoMode()` charge `data/especes.json`. Les ajouts restent locaux. Pour une vraie base, brancher `connect()` sur un service (Supabase, Firebase…).
+- Photos : `loadPhotos()` demande au navigateur la photo principale de la page Wikipédia (fr, puis en) du nom scientifique, avec un cache de 7 jours dans `localStorage`. Une fiche peut imposer sa photo avec les champs facultatifs `image`, `image_source` et `image_credit`. Sans photo trouvée, la signature reste en aplats.
 - Champs d'une fiche : liste `FIELDS` du gabarit. Obligatoires : `nom_scientifique`, `regne` (`Animal` | `Végétal`), `habitat`. Validation dans `validate()`.
 
 ## Charte (résumé, détail dans design-system/README.md)

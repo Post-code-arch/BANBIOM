@@ -236,6 +236,7 @@ dialog.fiche{border:0;padding:0;margin:0 0 0 auto;height:100%;max-height:100%;wi
 dialog.fiche::backdrop{background:rgba(5,25,32,.55)}
 .fiche .hd{position:relative;aspect-ratio:16/8.5;max-width:100%;background:var(--surface-2)}
 .fiche .hd svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.fiche .hd .credit{position:absolute;right:clamp(16px,4vw,32px);bottom:12px;font:500 11px/1 var(--font-mono);letter-spacing:.04em;color:var(--on-dark);background:rgba(10,42,50,.55);padding:6px 9px;border-radius:999px;text-decoration:none}
 .fiche .hd .king{position:absolute;left:clamp(16px,4vw,32px);top:calc(18px + env(safe-area-inset-top,0px))}
 .fiche .close{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;border:0;background:var(--paper);color:var(--ink);border-radius:999px;width:42px;height:42px;cursor:pointer;font-size:22px;line-height:1;transition:transform .35s var(--back)}
 .fiche .close:hover{transform:rotate(90deg)}
@@ -556,10 +557,34 @@ const tok=n=>getComputedStyle(document.documentElement).getPropertyValue("--"+n)
 /* ================= SIGNATURES (SVG, aplats) ================= */
 function sigStyle(sp,big){ const A=sp.regne==="Animal"; return {A,gap:A?(big?2:1.5):(big?12:8),R:A?0:(big?30:22),
   cols:A?["var(--cobalt)","var(--cobalt)","var(--cobalt-2)"]:["var(--lagoon)","var(--deep)","var(--foam)","var(--lagoon)","var(--abyss)"],bg:A?"var(--mist)":"var(--ground)"}; }
+/* photos : champ « image » de la fiche, sinon la photo principale de la page Wikipédia du nom scientifique (chargée par le navigateur) */
+const PHOTO=new Map(), photoWait=new Set(); let photoSeq=0;
+function photoOf(sp){ if(sp.image) return {src:sp.image,page:sp.image_source||"",credit:sp.image_credit||""}; return PHOTO.get(sp.nom_scientifique)||null; }
+async function loadPhotos(list){
+  let cache={}; try{ cache=JSON.parse(localStorage.getItem("banbiom-photos")||"{}"); }catch(e){}
+  const todo=list.filter(sp=>!sp.image&&!PHOTO.has(sp.nom_scientifique)&&!photoWait.has(sp.nom_scientifique)); todo.forEach(sp=>photoWait.add(sp.nom_scientifique));
+  await Promise.all(todo.map(async sp=>{ const n=sp.nom_scientifique, c=cache[n];
+    if(c&&Date.now()-c.t<7*864e5){ PHOTO.set(n,c.v); return; }
+    let v=null;
+    for(const lang of ["fr","en"]){ try{ const r=await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(n.replace(/ /g,"_"))}`); if(!r.ok) continue;
+      const j=await r.json(), t=j.thumbnail&&j.thumbnail.source; if(!t) continue;
+      v={src:t.replace(/\/(\d+)px-/,"/960px-"),small:t.replace(/\/(\d+)px-/,"/480px-"),page:(j.content_urls&&j.content_urls.desktop&&j.content_urls.desktop.page)||"",credit:"Wikipédia / Wikimedia Commons"}; break; }catch(e){} }
+    PHOTO.set(n,v); cache[n]={t:Date.now(),v}; }));
+  try{ localStorage.setItem("banbiom-photos",JSON.stringify(cache)); }catch(e){}
+  if(todo.length){ sigCache.clear(); render(); }
+}
+function sigParts(sp,w,h,big,pts){
+  const st=sigStyle(sp,big), cs=B._cells(pts.map(p=>({x:p.x,y:p.y,w:0})),w,h,()=>st.gap+0,0), ph=photoOf(sp); let d="", clip="";
+  cs.forEach((poly,i)=>{ const p=B._traceSVG(poly,st.R); if(!p) return; const ci=Math.floor(pts[i].n*st.cols.length)%st.cols.length;
+    /* avec photo : la photo se voit à travers les cellules, une cellule sur quatre garde l'aplat du règne */
+    if(ph&&ci!==st.cols.length-1) clip+=p; else d+=`<path d="${p}" fill="${st.cols[ci]}"/>`; });
+  return {st,ph,d,clip};
+}
 function sigPaths(sp,w,h,big,pts){
-  const st=sigStyle(sp,big), cs=B._cells(pts.map(p=>({x:p.x,y:p.y,w:0})),w,h,()=>st.gap+0,0); let d="";
-  cs.forEach((poly,i)=>{const p=B._traceSVG(poly,st.R); if(p) d+=`<path d="${p}" fill="${st.cols[Math.floor(pts[i].n*st.cols.length)%st.cols.length]}"/>`;});
-  return `<rect width="${w}" height="${h}" fill="${st.bg}"/>`+d;
+  const {st,ph,d,clip}=sigParts(sp,w,h,big,pts);
+  if(!ph) return `<rect width="${w}" height="${h}" fill="${st.bg}"/>`+d;
+  const id="ph"+(++photoSeq), src=esc(w>400&&ph.src?ph.src:(ph.small||ph.src));
+  return `<rect width="${w}" height="${h}" fill="${st.bg}"/><clipPath id="${id}"><path class="cp" d="${clip}"/></clipPath><image href="${src}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id})"/><g class="solid">${d}</g>`;
 }
 function signatureSVG(sp,w,h,big){
   const pts=B.seedsFromSpecies(sp)(w,h);
@@ -579,7 +604,9 @@ function stepThumb(st){
   st.pts.forEach(p=>{ let ax=(p.hx-p.x)*.06, ay=(p.hy-p.y)*.06;
     if(st.m){ const dx=p.x-st.m.x, dy=p.y-st.m.y, d=Math.hypot(dx,dy)||1; if(d<R){ const f=Math.pow(1-d/R,2)*7.5; ax+=dx/d*f; ay+=dy/d*f; } }
     p.vx=(p.vx+ax)*.8; p.vy=(p.vy+ay)*.8; p.x+=p.vx; p.y+=p.vy; e+=Math.abs(p.vx)+Math.abs(p.vy); });
-  st.svg.innerHTML=sigPaths(st.sp,320,240,false,st.pts);
+  /* avec photo, on ne touche pas à l'image : seules la découpe et les aplats bougent */
+  const cp=st.svg.querySelector(".cp"), so=st.svg.querySelector(".solid");
+  if(cp&&so){ const q=sigParts(st.sp,320,240,false,st.pts); cp.setAttribute("d",q.clip); so.innerHTML=q.d; } else st.svg.innerHTML=sigPaths(st.sp,320,240,false,st.pts);
   return e>.05||st.m;
 }
 function runThumb(st){ if(st.raf||reduce.matches) return; const loop=()=>{ st.raf=stepThumb(st)?requestAnimationFrame(loop):0; }; st.raf=requestAnimationFrame(loop); }
@@ -879,7 +906,7 @@ function renderMeta(){
     sel.innerHTML=`<option value="">Tous habitats</option>`+hs.map(h=>`<option ${h===cur?"selected":""}>${esc(h)}</option>`).join(""); }
   $("#habList").innerHTML=[...hab].sort().map(h=>`<option value="${esc(h)}">`).join("");
 }
-function render(){ renderMeta(); Object.keys(S.views).forEach(v=>renderGrid(v)); updateRelief(); }
+function render(){ renderMeta(); Object.keys(S.views).forEach(v=>renderGrid(v)); updateRelief(); if(S.species.length) loadPhotos(S.species); }
 
 document.addEventListener("pointerdown",e=>{ const c=e.target.closest(".card"); if(!c) return; c._press=anim(c,[{transform:"none"},{transform:"scale(.955)"}],{duration:140,easing:"ease-out",fill:"forwards"}); });
 const release=()=>{ $$(".card").forEach(c=>{ if(c._press){ c._press.cancel(); c._press=null; anim(c,[{transform:"scale(.955)"},{transform:"scale(1.02)",offset:.5},{transform:"none"}],{duration:420,easing:BACK}); } }); };
@@ -906,7 +933,8 @@ function openFiche(id){
   const st=s.statut_uicn||"NE", A=s.regne==="Animal";
   const kv=rows=>`<dl class="kv">${rows.map(([k,v])=>`<dt>${k}</dt><dd>${v||"—"}</dd>`).join("")}</dl>`;
   fiche.dataset.regne=A?"Animal":"Végétal";
-  fiche.innerHTML=`<div class="hd">${sig(s,700,372,true)}<span class="king ${A?"fa":"fl"}"><i>Fiche technique · ${A?"Faune":"Flore"}</i></span><button class="close" type="button" aria-label="Fermer la fiche">×</button></div>
+  const ph=photoOf(s);
+  fiche.innerHTML=`<div class="hd">${sig(s,700,372,true)}${ph?`<a class="credit" href="${esc(ph.page||ph.src)}" target="_blank" rel="noopener">Photo : ${esc(ph.credit||"source")}</a>`:""}<span class="king ${A?"fa":"fl"}"><i>Fiche technique · ${A?"Faune":"Flore"}</i></span><button class="close" type="button" aria-label="Fermer la fiche">×</button></div>
     <div class="content">
       <div class="st"><h2 id="ficheTitle">${esc(s.nom_scientifique)}</h2><div class="sub"><span>${esc(s.auteur||"")}</span>${s.nom_commun?`<span>· ${esc(s.nom_commun)}</span>`:""}<span class="iucn" data-s="${esc(st)}">${esc(st)} · ${esc(IUCN[st]||"")}</span></div></div>
       ${s.description?`<p class="desc st">${esc(s.description)}</p>`:""}
