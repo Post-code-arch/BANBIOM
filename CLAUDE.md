@@ -26,7 +26,7 @@ Aperçu local : `python3 build.py && python3 -m http.server` puis http://localho
 
 ## Charte (résumé, détail dans design-system/README.md)
 
-- **Aplats** de couleur partout. Pas de dégradés ni d'ombres dans l'interface (exception : le hero de l'accueil, cellules en verre dépoli sur un fond en dégradé, avec grain).
+- **Verre (glassmorphism)** dans la console : fond vivant (dégradés désaturés + veines voronoï, `.bgfx`), surfaces en verre dépoli (fond translucide `--g-bg`, flou `--g-blur`, liseré `--g-line`, reflet `--g-hi`) pour barre latérale, barre du haut, panneaux, tableaux, inspecteur, champs, palette de commandes, notifications. Les données (barres, cellules, badges) restent en aplats.
 - **Typographie** : Outfit (titres en 200–300, texte en 400), IBM Plex Mono pour libellés et données. Noms scientifiques toujours en italique.
 - **Le voronoï est le système** : cellule = espèce, veine = relation, graine = donnée, jonction = connexion.
 - **Échelles par densité** : macro (40–120 cellules), méso (8–20), micro (3–12, signature d'espèce), nano (1–3, composant).

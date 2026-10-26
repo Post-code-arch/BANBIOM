@@ -140,6 +140,10 @@ Visualisations (vue Analyses) : une couleur par règne (Faune cobalt, Flore lago
 
 Planches présentables (bouton « Présenter » en plein écran, flèches clavier) : fond nuit #030a14, carte de la Méditerranée en points blancs, halos de densité bleu électrique là où vivent les espèces du thème, titre centré en deux lignes (thème en gris, accroche en blanc), liste d'espèces à gauche (nom en italique, badge UICN translucide ; le survol isole la répartition de l'espèce), chiffres clés à droite, boutons ronds précédent / suivant en bas à gauche (suivant en cobalt). Seule autre exception aux aplats avec le hero vitrine. La répartition est indicative et le dit sur la planche.
 
+## Verre (glassmorphism)
+
+Décision : l'interface de la console passe en verre dépoli. Un fond vivant (trois halos désaturés qui dérivent lentement, veines voronoï d'un pixel) se voit à travers toutes les surfaces : fond translucide (42 % en clair, 48 % en sombre), flou d'arrière-plan 20 px avec saturation 135 %, liseré clair d'un pixel, reflet d'un pixel en haut, ombre très douce. Barre latérale en verre abysse teinté. Les voiles (inspecteur, palette de commandes) floutent légèrement la page. Les contenus de données (barres, cellules, signatures, badges UICN) restent en aplats pour rester lisibles. Repli en aplat si le navigateur ne gère pas `backdrop-filter`.
+
 ## Planches et supports
 
 Les planches (`planches.html`) et les supports de communication utilisent une **palette désaturée** commune : abysse #10303A, cobalt #4A65B0, cobalt foncé #2E4282, brume #BCC7E2, lagon #3E9B92, écume #B3DAD3, profond #225E5A, sol #D4E4DF. Les photos (`assets/photos/`) reçoivent toutes le même traitement : saturation 55 %, contraste 103 %, luminosité 95 %, voile abysse 16 %. Trois usages de la photo : pleine, avec veines voronoï (tracé blanc 26 %), ou vue à travers les cellules.

@@ -340,6 +340,56 @@ table.mx{border-collapse:separate;border-spacing:3px;width:100%;font-size:12.5px
 .cs-note{position:absolute;right:clamp(16px,2.4vw,32px);bottom:30px;font:400 11.5px var(--font-mono);color:rgba(232,238,245,.4);max-width:44ch;text-align:right}
 @media (max-width:900px){.cs-list{top:auto;bottom:90px;max-width:none;right:16px;grid-template-columns:1fr 1fr;gap:10px}.cs-list li:nth-child(n+5){display:none}.cs-figs{top:auto;bottom:auto;display:none}.cs-note{display:none}}
 
+
+/* ================= VERRE (glassmorphism) =================
+   Un fond vivant (dégradés désaturés + veines voronoï) et, par-dessus, des surfaces en verre dépoli :
+   fond translucide, flou d'arrière-plan, liseré clair d'un pixel, reflet en haut. */
+:root{--g-bg:rgba(247,251,249,.42);--g-bg-2:rgba(247,251,249,.7);--g-line:rgba(255,255,255,.62);--g-edge:rgba(10,42,50,.08);--g-blur:blur(20px) saturate(1.35);--g-hi:inset 0 1px 0 rgba(255,255,255,.7);--g-side:rgba(16,48,58,.62);
+  --bg-a:#b3d3cc;--bg-b:#a9b8dc;--bg-c:#86c2b7;--bg-base:#dce7e4;--vein:rgba(255,255,255,.55)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--g-bg:rgba(14,40,48,.48);--g-bg-2:rgba(14,40,48,.66);--g-line:rgba(255,255,255,.1);--g-edge:rgba(0,0,0,.2);--g-hi:inset 0 1px 0 rgba(255,255,255,.06);--g-side:rgba(4,19,26,.55);--bg-a:#164854;--bg-b:#2b3d7a;--bg-c:#246b64;--bg-base:#071a20;--vein:rgba(179,218,211,.09)}}
+:root[data-theme="dark"]{--g-bg:rgba(14,40,48,.48);--g-bg-2:rgba(14,40,48,.66);--g-line:rgba(255,255,255,.1);--g-edge:rgba(0,0,0,.2);--g-hi:inset 0 1px 0 rgba(255,255,255,.06);--g-side:rgba(4,19,26,.55);--bg-a:#164854;--bg-b:#2b3d7a;--bg-c:#246b64;--bg-base:#071a20;--vein:rgba(179,218,211,.09)}
+html{background:var(--bg-base)}
+body{background:transparent}
+.bgfx{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:
+  radial-gradient(ellipse 45% 50% at 85% 10%,var(--bg-b) 0%,transparent 70%),radial-gradient(ellipse 50% 55% at 10% 90%,var(--bg-c) 0%,transparent 72%),
+  radial-gradient(ellipse 40% 45% at 55% 55%,var(--bg-a) 0%,transparent 70%),var(--bg-base)}
+.bgfx svg{position:absolute;inset:0;width:100%;height:100%}
+.bgfx path{fill:none;stroke:var(--vein);stroke-width:1}
+.bgfx i{position:absolute;width:48vmax;height:48vmax;border-radius:50%;filter:blur(60px);opacity:.8;animation:bgdrift 30s ease-in-out infinite alternate}
+.bgfx i:nth-child(1){left:-10vmax;top:-12vmax;background:var(--bg-c)}.bgfx i:nth-child(2){right:-14vmax;bottom:-16vmax;background:var(--bg-b);animation-duration:38s}
+@keyframes bgdrift{to{transform:translate(6vmax,4vmax) scale(1.1)}}
+.glass,.top,.panel,.kpi,.tablewrap,.card,.mapwrap,.fs,.preview,.drop,.notice,dl.kv,.steps li,.cmdk .box,.chip,.btn.secondary,.search,.input,.select,.textarea,.seg,.insp,.ws{
+  background:var(--g-bg);-webkit-backdrop-filter:var(--g-blur);backdrop-filter:var(--g-blur);border:1px solid var(--g-line);box-shadow:var(--g-hi),0 8px 30px var(--g-edge)}
+.top{border-width:0 0 1px;background:var(--g-bg);box-shadow:none}
+.side{background:var(--g-side);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);border-right:1px solid rgba(255,255,255,.1)}
+.ws{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);box-shadow:none}
+.nav a[aria-current="page"]{background:rgba(255,255,255,.88)}
+.input,.select,.textarea,.chip,.btn.secondary,.seg,.search{box-shadow:var(--g-hi)}
+.input:focus,.select:focus,.textarea:focus{background:var(--g-bg-2)}
+.seg button[aria-pressed="true"]{background:var(--g-bg-2);box-shadow:var(--g-hi),0 2px 8px var(--g-edge)}
+.t th{background:var(--g-bg-2);-webkit-backdrop-filter:var(--g-blur);backdrop-filter:var(--g-blur)}
+.t td{border-bottom-color:var(--g-line)}
+.t tbody tr:hover{background:rgba(255,255,255,.22)}
+.insp{background:var(--g-bg-2);border-width:0 0 0 1px;box-shadow:-20px 0 60px var(--g-edge)}
+.insp .ft{background:transparent;border-top-color:var(--g-line)}
+.tabs{border-bottom-color:var(--g-line)}
+.scrim{background:rgba(4,19,26,.14);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.cmdk{background:rgba(4,19,26,.2);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.cmdk .box{background:var(--g-bg-2)}
+.cmdk li.o[aria-selected="true"]{background:rgba(255,255,255,.4)}
+.toast,.selbar{background:rgba(10,42,50,.72);-webkit-backdrop-filter:var(--g-blur);backdrop-filter:var(--g-blur);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 10px 30px rgba(0,0,0,.18)}
+.drop{border-style:dashed}
+.notice{border-style:dashed}
+.kpi,.card,.panel{transition:transform .4s var(--back),background .25s}
+a.kpi:hover,.card:hover{background:var(--g-bg-2)}
+.bars .track,.depth .tr{background:rgba(255,255,255,.35)}
+.mx td{-webkit-backdrop-filter:none;backdrop-filter:none}
+.preview .sig,.card .sig{box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+.btn.ghost:hover{background:rgba(255,255,255,.3)}
+.btn.primary{box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+@media (prefers-reduced-motion:reduce){.bgfx i{animation:none}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.glass,.top,.panel,.kpi,.tablewrap,.card,.mapwrap,.fs,.preview,.insp,.cmdk .box{background:var(--surface)}}
+
 /* ---------- petits écrans ---------- */
 @media (max-width:1180px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.formgrid{grid-template-columns:1fr}.preview{position:static}}
 @media (max-width:900px){
@@ -356,6 +406,7 @@ table.mx{border-collapse:separate;border-spacing:3px;width:100%;font-size:12.5px
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
+<div class="bgfx" aria-hidden="true"><i></i><i></i><svg id="bgVeins" preserveAspectRatio="xMidYMid slice"></svg></div>
 <div class="app" id="app">
   <aside class="side" id="side" aria-label="Navigation principale">
     <a class="brand" href="#/tableau"><svg id="logo" aria-hidden="true"></svg>BANBIOM</a>
@@ -1123,6 +1174,9 @@ async function connect(){
 }
 
 paintIcons(); logo($("#logo"),3); paintTheme();
+/* veines voronoï du fond : un grand champ fixe, tracé une fois */
+(function(){ const W=1600,H=1000, r=B._rng(B._hash("console-bg")), pts=[]; while(pts.length<38){ const x=r()*W,y=r()*H; if(pts.every(p=>Math.hypot(p.x-x,p.y-y)>130)) pts.push({x,y,w:0}); }
+  const svg=$("#bgVeins"); svg.setAttribute("viewBox",`0 0 ${W} ${H}`); svg.innerHTML=B._cells(pts,W,H,()=>18,40).map(p=>{ const d=B._traceSVG(p,40); return d?`<path d="${d}"/>`:""; }).join(""); })();
 initList(); initMap(); initForm(); initImport(); initAnalyses(); initCases();
 renderAll(); route(); connect();
 })();
